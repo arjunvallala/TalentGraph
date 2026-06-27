@@ -155,6 +155,24 @@ class FeatureRanker:
             "stability_score": 0.07,
             "availability_score": 0.10,
         }
+
+        # Pseudo-Relevance Feedback: Self-calibrate default fallback weights if JD is double-vague
+        is_fallback = job_genome.weights is None or (
+            abs(job_genome.weights.get("experience_score", 0.0) - 0.15) < 0.01 and
+            abs(job_genome.weights.get("skill_coverage", 0.0) - 0.20) < 0.01
+        )
+        if is_fallback and candidate_ids:
+            feedback_sample = candidate_ids[:30]
+            sample_feats = [features_map[cid] for cid in feedback_sample if cid in features_map]
+            if sample_feats:
+                avg_exp = float(np.mean([f.get("experience_score", 0.0) for f in sample_feats]))
+                avg_lead = float(np.mean([f.get("leadership_score", 0.0) for f in sample_feats]))
+                avg_stab = float(np.mean([f.get("stability_score", 0.0) for f in sample_feats]))
+                weights_dict["experience_score"] = 0.15 * (1.0 + avg_exp)
+                weights_dict["skill_coverage"] = 0.20 * (1.0 - avg_lead) # Inverse manager check
+                weights_dict["leadership_score"] = 0.08 * (1.0 + avg_lead)
+                weights_dict["stability_score"] = 0.08 * (1.0 + avg_stab)
+
         keys = list(weights_dict.keys())
         w_vals = np.array([weights_dict.get(k, 0.01) for k in keys])
         w_normalized = w_vals / np.sum(w_vals)
