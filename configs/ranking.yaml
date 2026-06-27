@@ -1,0 +1,114 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TalentGraph AI — Ranking Pipeline Configuration
+#
+# Controls weights and behavior of the 3-stage ranking pipeline.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Stage 1: Hybrid Retrieval ─────────────────────────────────────────────────
+stage1:
+  name: "Hybrid Semantic + BM25 Retrieval"
+  description: >
+    Combines dense semantic search (FAISS) with sparse keyword search (BM25)
+    via Reciprocal Rank Fusion for maximum recall.
+  semantic_top_k: 1500
+  bm25_top_k: 1500
+  output_top_k: 2000
+  # RRF Parameters
+  rrf_k: 60             # RRF constant (60 is standard)
+  semantic_weight: 0.60 # contribution of FAISS in RRF fusion
+  bm25_weight: 0.40     # contribution of BM25 in RRF fusion
+
+# ── Stage 2: Feature Ranking ──────────────────────────────────────────────────
+stage2:
+  name: "Feature-Based Ranking"
+  description: >
+    Applies the engineered feature vector against the Job Genome
+    to produce a fine-grained relevance score. Uses precomputed
+    features from the DuckDB feature store.
+  output_top_k: 200
+  # Feature weights for Stage 2 composite score
+  # These are the Stage 2 weights — separate from per-feature weights in features.yaml
+  # (those are used within feature computation; these weight the feature vector)
+  weights:
+    skill_coverage: 0.25
+    domain_match: 0.18
+    experience_score: 0.15
+    career_stability: 0.10
+    leadership_score: 0.08
+    learning_score: 0.07
+    promotion_score: 0.06
+    career_velocity: 0.05
+    behavior_score: 0.03
+    hiring_availability: 0.02
+    profile_completeness: 0.01
+
+  # Risk adjustment — subtract from final score
+  risk_penalty:
+    job_hop_risk: 0.08
+    gap_risk: 0.05
+    skill_inconsistency_risk: 0.03
+
+# ── Stage 3: Hiring Council ───────────────────────────────────────────────────
+stage3:
+  name: "Hiring Council Evaluation"
+  description: >
+    Five specialized council evaluators independently assess each of the
+    top-200 candidates and produce a consensus recommendation.
+  output_top_k: 100
+  parallel: true          # run evaluators concurrently
+  timeout_seconds: 60
+
+  # Council member weights in final consensus
+  council_weights:
+    technical_council: 0.30
+    career_council: 0.25
+    behavior_council: 0.15
+    growth_council: 0.15
+    risk_council: 0.15    # risk council subtracts (inverted)
+
+  # Confidence thresholds for promoting to output
+  min_council_score: 0.35  # below this = auto-reject regardless of rank
+
+# ── Score Combination ─────────────────────────────────────────────────────────
+score_combination:
+  # How Stage 1, 2, 3 scores are combined for the final ranking
+  # (Only Stage 3 candidates get a combined score)
+  stage1_weight: 0.15
+  stage2_weight: 0.30
+  stage3_weight: 0.55
+
+# ── Scoring Bands ─────────────────────────────────────────────────────────────
+# Used for Candidate Explorer UI labels
+score_bands:
+  excellent:
+    min: 0.85
+    label: "Exceptional Match"
+    color: "#10b981"   # emerald
+  strong:
+    min: 0.70
+    label: "Strong Match"
+    color: "#3b82f6"   # blue
+  good:
+    min: 0.55
+    label: "Good Match"
+    color: "#8b5cf6"   # violet
+  fair:
+    min: 0.40
+    label: "Potential Match"
+    color: "#f59e0b"   # amber
+  weak:
+    min: 0.0
+    label: "Weak Match"
+    color: "#6b7280"   # gray
+
+# ── Submission ────────────────────────────────────────────────────────────────
+submission:
+  columns:
+    - candidate_id
+    - rank
+    - overall_score
+    - confidence_level
+    - hiring_recommendation
+  max_candidates: 100
+  validate_duplicates: true
+  validate_format: true

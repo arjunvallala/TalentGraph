@@ -1,0 +1,199 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TalentGraph AI — Feature Engineering Configuration
+#
+# Every feature has:
+#   - weight: contribution to the overall feature score (Stage 2)
+#   - definition: human-readable description
+#   - formula: mathematical description of computation
+#   - normalization: how the raw value is scaled to [0, 1]
+#   - thresholds: optional thresholds for scoring bands
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Candidate Features ────────────────────────────────────────────────────────
+features:
+
+  experience_score:
+    weight: 0.15
+    definition: "Normalized years of relevant experience"
+    formula: "log(1 + years) / log(1 + max_years)"
+    normalization: "log_normalized"
+    max_years: 30.0
+    thresholds:
+      excellent: 0.8   # 10+ years
+      good: 0.6        # 5-10 years
+      fair: 0.4        # 2-5 years
+      poor: 0.2        # < 2 years
+
+  career_stability:
+    weight: 0.10
+    definition: >
+      Consistency of career trajectory. Higher stability means longer average
+      tenures and lower standard deviation between tenures.
+    formula: "mean_tenure_months / (std_tenure_months + epsilon)"
+    normalization: "minmax"
+    max_score: 3.0    # mean/std ratio cap
+    min_tenure_months: 6   # below this = job hopping
+
+  promotion_score:
+    weight: 0.08
+    definition: "Rate of career advancement as measured by title progressions"
+    formula: "title_progressions / (years_of_experience + 1)"
+    normalization: "minmax"
+    max_progressions_per_year: 0.5
+
+  skill_coverage:
+    weight: 0.20
+    definition: >
+      Overlap between candidate skills and JD required skills.
+      Computed at ranking time against the specific Job Description.
+    formula: "|candidate_skills ∩ jd_required_skills| / |jd_required_skills|"
+    normalization: "ratio"
+    partial_match: true    # partial string matching for skill variants
+    semantic_match: true   # embedding similarity for semantically similar skills
+    semantic_threshold: 0.75
+
+  domain_match:
+    weight: 0.15
+    definition: "Semantic similarity between candidate's domain and the JD domain"
+    formula: "cosine_similarity(candidate_embedding, jd_embedding)"
+    normalization: "cosine"
+    boost_exact_domain: 0.1   # bonus for exact domain keyword match
+
+  leadership_score:
+    weight: 0.08
+    definition: "Leadership and management signals from career history"
+    formula: "weighted_sum(management_keywords, team_size, title_seniority)"
+    normalization: "minmax"
+    keywords:
+      strong: ["CTO", "VP", "Director", "Head", "Principal", "Lead", "Chief", "Manager"]
+      moderate: ["Senior", "Architect", "Staff", "Tech Lead", "Team Lead"]
+      weak: ["Jr", "Junior", "Associate", "Intern"]
+    weights:
+      title_seniority: 0.4
+      management_keywords: 0.4
+      team_size_signals: 0.2
+
+  learning_score:
+    weight: 0.07
+    definition: "Continuous learning and skill acquisition signals"
+    formula: "weighted_sum(certification_score, recent_skills_score, education_level_score)"
+    normalization: "minmax"
+    weights:
+      certifications: 0.35
+      recent_skills: 0.35    # skills added in last 2 years
+      education_level: 0.30
+
+  research_score:
+    weight: 0.05
+    definition: "Research and innovation contributions"
+    formula: "weighted_sum(publications, patents, open_source_signals)"
+    normalization: "minmax"
+    keywords:
+      publications: ["published", "paper", "research", "journal", "IEEE", "ACM", "arxiv"]
+      patents: ["patent", "patented", "inventor"]
+      open_source: ["github", "open source", "contributor", "maintainer", "committer"]
+
+  behavior_score:
+    weight: 0.05
+    definition: "Composite behavioral reliability score from platform signals"
+    formula: >
+      0.4 * response_rate + 0.3 * activity_recency + 0.3 * consistency_score
+    normalization: "minmax"
+    activity_recency_window_days: 90  # recent activity window
+
+  hiring_availability:
+    weight: 0.04
+    definition: "How quickly the candidate can realistically join"
+    formula: "1 - (notice_period_days / max_notice_period)"
+    normalization: "inverse_minmax"
+    max_notice_period_days: 180
+    status_scores:
+      immediately_available: 1.0
+      open_to_opportunities: 0.8
+      notice_period: 0.5
+      not_looking: 0.1
+      unknown: 0.5
+
+  profile_completeness:
+    weight: 0.03
+    definition: "Fraction of important profile fields populated"
+    formula: "weighted_fields_filled / total_weighted_fields"
+    normalization: "ratio"
+    field_weights:
+      name: 0.05
+      email: 0.05
+      current_title: 0.10
+      work_experience: 0.25
+      skills: 0.20
+      education: 0.15
+      summary: 0.10
+      certifications: 0.05
+      location: 0.05
+
+  career_velocity:
+    weight: 0.05
+    definition: "Career advancement speed"
+    formula: "seniority_level_score / (career_age_years + 1)"
+    normalization: "minmax"
+
+  skill_consistency:
+    weight: 0.05
+    definition: "Coherence of skill set across career stages"
+    formula: "avg_pairwise_skill_overlap(career_stages)"
+    normalization: "minmax"
+
+# ── Risk Features ─────────────────────────────────────────────────────────────
+# Risk scores: higher value = higher risk
+risk_features:
+
+  job_hop_risk:
+    weight: 0.50
+    definition: "Risk from frequent company changes"
+    formula: "count(tenures < threshold) / total_positions"
+    threshold_months: 12
+    thresholds:
+      high: 0.6    # >60% of jobs were < 12 months
+      medium: 0.3
+      low: 0.0
+
+  gap_risk:
+    weight: 0.30
+    definition: "Risk from significant employment gaps"
+    formula: "max_gap_months / career_age_months"
+    threshold_months: 6
+    thresholds:
+      high: 0.15   # gap > 15% of career
+      medium: 0.08
+      low: 0.0
+
+  skill_inconsistency_risk:
+    weight: 0.20
+    definition: "Risk from incoherent skill set (e.g. abrupt career pivots)"
+    formula: "1 - skill_consistency"
+    # Derived from skill_consistency feature
+
+# ── Education Level Scoring ───────────────────────────────────────────────────
+education_levels:
+  phd: 1.0
+  masters: 0.85
+  mba: 0.80
+  bachelors: 0.70
+  diploma: 0.50
+  high_school: 0.30
+  other: 0.40
+  unknown: 0.40
+
+# ── Seniority Level Scoring ───────────────────────────────────────────────────
+seniority_levels:
+  executive: 1.0      # 20+ years, C-suite
+  principal: 0.90     # 12-20 years, Principal/Distinguished
+  senior: 0.75        # 7-12 years
+  mid: 0.55           # 4-7 years
+  junior: 0.35        # 2-4 years
+  entry: 0.15         # 0-2 years
+
+# ── Feature Normalization ─────────────────────────────────────────────────────
+normalization:
+  clip_min: 0.0
+  clip_max: 1.0
+  epsilon: 1e-8   # prevent division by zero

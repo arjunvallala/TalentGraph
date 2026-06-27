@@ -1,0 +1,101 @@
+version: "3.9"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TalentGraph AI — Docker Compose
+#
+# Services:
+#   api           - FastAPI backend (port 8000)
+#   dashboard     - React frontend (port 5173)
+#   preprocessing - Offline preprocessing pipeline (one-shot)
+#
+# Usage:
+#   docker-compose up                          # Start API + Dashboard
+#   docker-compose run --rm preprocessing      # Run preprocessing
+#   docker-compose up --build                  # Rebuild and start
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── API ─────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: talentgraph-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./configs:/app/configs
+      - ./logs:/app/logs
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_WORKERS=2
+      - DEMO_MODE=${DEMO_MODE:-false}
+      - DUCKDB_PATH=/app/data/processed/talentgraph.duckdb
+      - FAISS_INDEX_PATH=/app/data/indexes/candidates.faiss
+      - BM25_INDEX_PATH=/app/data/indexes/bm25_index.pkl
+      - EMBEDDING_MODEL_PATH=/app/models/embeddings/all-MiniLM-L6-v2
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - talentgraph-network
+
+  # ── Dashboard ────────────────────────────────────────────────────────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: talentgraph-dashboard
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - talentgraph-network
+
+  # ── Preprocessing (one-shot) ─────────────────────────────────────────────────
+  preprocessing:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.preprocessing
+    container_name: talentgraph-preprocessing
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./configs:/app/configs
+    environment:
+      - EMBEDDING_MODEL_PATH=/app/models/embeddings/all-MiniLM-L6-v2
+      - DUCKDB_PATH=/app/data/processed/talentgraph.duckdb
+      - FAISS_INDEX_PATH=/app/data/indexes/candidates.faiss
+      - BM25_INDEX_PATH=/app/data/indexes/bm25_index.pkl
+    env_file:
+      - .env
+    profiles:
+      - preprocessing  # Only starts with: docker-compose --profile preprocessing run preprocessing
+    networks:
+      - talentgraph-network
+
+networks:
+  talentgraph-network:
+    driver: bridge
+
+volumes:
+  data:
+  models:
+  logs:

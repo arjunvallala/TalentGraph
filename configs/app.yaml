@@ -1,0 +1,79 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TalentGraph AI — Application Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+app:
+  name: "TalentGraph AI"
+  version: "0.1.0"
+  tagline: "The AI Hiring Intelligence Platform that thinks like a hiring committee"
+  description: >
+    An offline, explainable, recruiter-grade hiring intelligence platform
+    that evaluates candidates the way experienced recruiters do.
+
+api:
+  prefix: "/api/v1"
+  title: "TalentGraph AI API"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+  openapi_url: "/openapi.json"
+  rate_limit:
+    enabled: true
+    requests_per_minute: 120
+
+preprocessing:
+  batch_size: 1000
+  max_workers: 4
+  checkpoint_interval: 500  # save checkpoint every N candidates
+  min_text_length: 10       # minimum characters for a valid profile
+  max_skills_per_candidate: 100
+  supported_date_formats:
+    - "%Y-%m"
+    - "%m/%Y"
+    - "%B %Y"
+    - "%b %Y"
+    - "%Y"
+
+embedding:
+  model_name: "all-MiniLM-L6-v2"
+  dimension: 384
+  batch_size: 64
+  normalize: true            # L2-normalize embeddings for cosine similarity
+  max_seq_length: 256
+  pooling_strategy: "mean"  # mean | cls | max
+
+retrieval:
+  semantic_top_k: 1500
+  bm25_top_k: 1500
+  hybrid_top_k: 2000
+  hybrid_alpha: 0.6          # 0.6 semantic, 0.4 BM25
+
+ranking:
+  stage2_top_k: 200
+  stage3_top_k: 100
+  final_top_k: 100
+  council_parallel: true     # run council evaluators in parallel
+  council_timeout_seconds: 30
+
+confidence:
+  high_threshold: 0.75
+  medium_threshold: 0.45
+  # < 0.45 = LOW confidence
+
+explainability:
+  max_strengths: 3
+  max_weaknesses: 3
+  max_evidence_per_feature: 3
+  min_evidence_strength: 0.3  # minimum to include in explanation
+
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} | {message}"
+  rotation: "500 MB"
+  retention: "10 days"
+  compression: "gz"
+
+demo:
+  enabled: false
+  data_path: "data/demo"
+  job_id: "demo_job_001"
+  candidate_count: 100

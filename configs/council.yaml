@@ -1,0 +1,174 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TalentGraph AI — Hiring Council Configuration
+#
+# Defines the behavior, weights, and scoring logic of each council evaluator.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Technical Council ─────────────────────────────────────────────────────────
+technical_council:
+  name: "Technical Evaluation Committee"
+  description: "Evaluates technical skills, depth, and domain expertise"
+  weight_in_consensus: 0.30
+
+  evaluation_dimensions:
+    skill_coverage:
+      weight: 0.35
+      description: "Coverage of required and preferred JD skills"
+    skill_depth:
+      weight: 0.25
+      description: "Years of experience in key required skills"
+    domain_expertise:
+      weight: 0.25
+      description: "Domain-specific knowledge aligned with the role"
+    technical_growth:
+      weight: 0.15
+      description: "Evidence of continuous technical skill acquisition"
+
+  scoring:
+    excellent_threshold: 0.80
+    strong_threshold: 0.65
+    adequate_threshold: 0.50
+    reject_threshold: 0.30
+
+  evidence_sources:
+    - work_experience
+    - skills
+    - certifications
+    - projects
+
+# ── Career Council ────────────────────────────────────────────────────────────
+career_council:
+  name: "Career Progression Committee"
+  description: "Evaluates career trajectory, growth, and stability"
+  weight_in_consensus: 0.25
+
+  evaluation_dimensions:
+    career_progression:
+      weight: 0.30
+      description: "Evidence of upward career movement"
+    stability:
+      weight: 0.25
+      description: "Consistency and longevity in roles"
+    company_quality:
+      weight: 0.20
+      description: "Quality and relevance of past employers"
+    domain_consistency:
+      weight: 0.25
+      description: "Coherence of career across domains"
+
+  company_tiers:
+    tier1: ["Google", "Microsoft", "Amazon", "Apple", "Meta", "Netflix", "OpenAI",
+            "DeepMind", "Stripe", "Airbnb", "Uber", "Lyft", "Salesforce", "Oracle",
+            "IBM", "Accenture", "McKinsey", "Goldman Sachs", "JP Morgan"]
+    tier2: []  # populated dynamically from candidate data
+    tier3: []  # all other companies
+
+  scoring:
+    excellent_threshold: 0.80
+    strong_threshold: 0.65
+    adequate_threshold: 0.50
+    reject_threshold: 0.30
+
+# ── Behavior Council ──────────────────────────────────────────────────────────
+behavior_council:
+  name: "Behavioral Signal Committee"
+  description: "Evaluates engagement, availability, and hiring readiness"
+  weight_in_consensus: 0.15
+
+  evaluation_dimensions:
+    hiring_readiness:
+      weight: 0.35
+      description: "Availability and eagerness to join"
+    recruiter_reliability:
+      weight: 0.30
+      description: "Historical responsiveness to recruiter outreach"
+    platform_engagement:
+      weight: 0.20
+      description: "Activity level on the hiring platform"
+    consistency:
+      weight: 0.15
+      description: "Consistent application behavior"
+
+  scoring:
+    excellent_threshold: 0.75
+    strong_threshold: 0.55
+    adequate_threshold: 0.35
+    reject_threshold: 0.20
+
+# ── Growth Council ────────────────────────────────────────────────────────────
+growth_council:
+  name: "Growth Potential Committee"
+  description: "Evaluates long-term growth potential and learning agility"
+  weight_in_consensus: 0.15
+
+  evaluation_dimensions:
+    learning_agility:
+      weight: 0.35
+      description: "Speed and breadth of skill acquisition"
+    career_velocity:
+      weight: 0.30
+      description: "Rate of advancement relative to peers"
+    initiative:
+      weight: 0.20
+      description: "Evidence of self-directed learning and projects"
+    education_investment:
+      weight: 0.15
+      description: "Formal and informal education achievements"
+
+  scoring:
+    excellent_threshold: 0.75
+    strong_threshold: 0.55
+    adequate_threshold: 0.40
+    reject_threshold: 0.25
+
+# ── Risk Council ──────────────────────────────────────────────────────────────
+risk_council:
+  name: "Risk Assessment Committee"
+  description: "Identifies hiring risks and flags concerns"
+  weight_in_consensus: 0.15  # inverted — high risk reduces final score
+
+  risk_dimensions:
+    job_hopping:
+      weight: 0.35
+      description: "Frequent short-term employment changes"
+      threshold_months: 12
+    career_gaps:
+      weight: 0.25
+      description: "Significant periods of unemployment"
+      threshold_months: 6
+    skill_inconsistency:
+      weight: 0.20
+      description: "Abrupt career pivots with mismatched skills"
+    profile_incompleteness:
+      weight: 0.10
+      description: "Missing key profile information"
+    engagement_risk:
+      weight: 0.10
+      description: "Low platform activity or declined offers"
+
+  risk_levels:
+    critical: 0.80    # strong red flag — auto-note for recruiter
+    high: 0.60
+    medium: 0.40
+    low: 0.20
+    minimal: 0.0
+
+  risk_descriptions:
+    job_hopping: >
+      Candidate has changed jobs frequently. {count} out of {total} positions
+      lasted less than {threshold} months. This may indicate difficulty
+      with long-term commitment or cultural fit challenges.
+    career_gap: >
+      Candidate has a {months}-month employment gap between {from_company}
+      and {to_company}. Consider asking about this during interview.
+    skill_inconsistency: >
+      Candidate's skill set shows significant changes across career stages.
+      This may indicate a career pivot, which could be a strength or risk
+      depending on the role's requirements.
+
+# ── Final Consensus Logic ─────────────────────────────────────────────────────
+consensus:
+  method: "weighted_average"  # weighted_average | min | max | trimmed_mean
+  trimmed_mean_pct: 0.1       # trim top/bottom 10% if method = trimmed_mean
+  risk_penalty_multiplier: 0.8  # risk_score × multiplier is subtracted
+  minimum_evaluator_agreement: 0.3  # if std_dev > this → low confidence

@@ -1,0 +1,14 @@
+Position: Senior Machine Learning Engineer
+Department: Core AI Platform
+Location: Bengaluru, India (Hybrid)
+
+About the Role:
+We are looking for a Senior Machine Learning Engineer to join our core AI product team. You will lead the design, development, and deployment of scalable deep learning models. Our stack is primarily PyTorch, FastAPI, Docker, and PostgreSQL.
+
+Requirements:
+- Minimum 5 years of experience in machine learning or software engineering.
+- Deep expertise in python, PyTorch or TensorFlow, and scikit-learn.
+- Hands-on experience with FastAPI or Django backend microservices.
+- Familiarity with containerization using Docker or Kubernetes.
+- Solid understanding of databases (PostgreSQL or Redis).
+- Strong track record of continuous learning or technical contributions.
