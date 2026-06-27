@@ -283,23 +283,19 @@ for feat_row in feature_rows:
     # Behavior/platform signal
     behavior_score = float(feat_dict.get('behavior_score', 0.5))
 
-    # Weighted composite score
-    # Weights tuned for "Senior ML Engineer" role
-    final_score = (
-        skill_coverage   * 0.30 +   # Skill match (most important)
-        exp_fit          * 0.20 +   # Experience fit 
-        exp_score        * 0.12 +   # General experience
-        edu_score        * 0.08 +   # Education
-        stab_score       * 0.10 +   # Stability
-        lead_score       * 0.07 +   # Leadership
-        avail_score      * 0.07 +   # Availability
-        behavior_score   * 0.06     # Platform signals
-    )
+    # Map features for TOPSIS evaluation
+    topsis_feats = {
+        "skill_coverage": skill_coverage,
+        "experience_fit": exp_fit,
+        "experience_score": exp_score,
+        "education_score": edu_score,
+        "stability_score": stab_score,
+        "leadership_score": lead_score,
+        "availability_score": avail_score,
+        "behavior_score": behavior_score,
+    }
 
-    # Clamp to [0, 1]
-    final_score = min(1.0, max(0.0, final_score))
-
-    # Confidence
+    # Confidence calculation
     evidence_count = jd_overlap + (1 if yoe >= 3 else 0) + (1 if edu_score > 0.5 else 0) + (1 if len(profile.work_experience) > 1 else 0)
     if evidence_count >= 4:
         conf = ConfidenceLevel.HIGH
@@ -310,13 +306,62 @@ for feat_row in feature_rows:
 
     results.append({
         'candidate_id': cid,
-        'score': final_score,
+        'topsis_feats': topsis_feats,
         'confidence': conf,
         'profile': profile,
         'features': features_map.get(cid),
     })
 
-# Sort descending by score
+# ── TOPSIS Engine Execution ────────────────────────────────────────────────────
+import numpy as np
+
+# Tuned weights for ML Engineer role
+weights_dict = {
+    "skill_coverage": 0.30,
+    "experience_fit": 0.20,
+    "experience_score": 0.12,
+    "education_score": 0.08,
+    "stability_score": 0.10,
+    "leadership_score": 0.07,
+    "availability_score": 0.07,
+    "behavior_score": 0.06,
+}
+keys = list(weights_dict.keys())
+w_vals = np.array([weights_dict[k] for k in keys])
+w_normalized = w_vals / np.sum(w_vals)
+
+# Build Decision Matrix
+matrix = []
+for r in results:
+    matrix.append([r['topsis_feats'].get(k, 0.0) for k in keys])
+matrix = np.array(matrix)
+
+# Vector normalization
+sq_sums = np.sqrt(np.sum(matrix ** 2, axis=0))
+sq_sums[sq_sums == 0] = 1e-8
+matrix_norm = matrix / sq_sums
+
+# Weighted normalization
+matrix_weighted = matrix_norm * w_normalized
+
+# Ideal best and worst
+ideal_best = np.max(matrix_weighted, axis=0)
+ideal_worst = np.min(matrix_weighted, axis=0)
+
+# Euclidean distances
+d_best = np.sqrt(np.sum((matrix_weighted - ideal_best) ** 2, axis=1))
+d_worst = np.sqrt(np.sum((matrix_weighted - ideal_worst) ** 2, axis=1))
+
+# Closeness coefficient
+denom = d_best + d_worst
+denom[denom == 0] = 1e-8
+scores = d_worst / denom
+
+# Assign final score
+for idx, r in enumerate(results):
+    r['score'] = float(scores[idx])
+
+# Sort descending by TOPSIS score
 results.sort(key=lambda x: x['score'], reverse=True)
 
 # Take top 100 and assign percentile-based recommendations

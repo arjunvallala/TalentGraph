@@ -100,7 +100,7 @@ export const CandidateDetailsPage: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex border-b border-white/10 gap-6">
-        {(['overview', 'timeline', 'genome', 'evidence', 'votes'] as const).map((tab) => (
+        {(['overview', 'timeline', 'genome', 'evidence', 'votes', 'simulation'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -110,7 +110,7 @@ export const CandidateDetailsPage: React.FC = () => {
                 : 'border-transparent text-muted-foreground hover:text-white'
             }`}
           >
-            {tab}
+            {tab === 'simulation' ? 'Simulation & Gaps' : tab}
           </button>
         ))}
       </div>
@@ -259,7 +259,159 @@ export const CandidateDetailsPage: React.FC = () => {
             ))}
           </div>
         )}
+
+        {activeTab === 'simulation' && (
+          <SimulationPanel candidate={candidate} allCandidates={candidates} />
+        )}
       </div>
+    </div>
+  );
+};
+
+// ── SimulationPanel Component ──────────────────────────────────────────────────
+interface SimulationPanelProps {
+  candidate: any;
+  allCandidates: any[];
+}
+
+const SimulationPanel: React.FC<SimulationPanelProps> = ({ candidate, allCandidates }) => {
+  const [acquiredSkills, setAcquiredSkills] = useState<string[]>([]);
+  
+  // Define JD requirements we can simulate
+  const jdRequirements = ['FastAPI', 'Docker', 'Kubernetes', 'PostgreSQL', 'Redis', 'PyTorch', 'TensorFlow', 'Deep Learning'];
+  
+  // Find which ones candidate currently lacks
+  const candidateSkills = (candidate.profile?.skills || []).map((s: string) => s.toLowerCase());
+  const missingSkills = jdRequirements.filter(
+    (req) => !candidateSkills.some((cs: string) => cs.includes(req.toLowerCase()))
+  );
+
+  const toggleSkill = (skill: string) => {
+    if (acquiredSkills.includes(skill)) {
+      setAcquiredSkills(acquiredSkills.filter(s => s !== skill));
+    } else {
+      setAcquiredSkills([...acquiredSkills, skill]);
+    }
+  };
+
+  // Calculate counterfactual improvements
+  const baseScore = candidate.overall_score;
+  const scoreBoostPerSkill = 0.038; // calibrated weight boost per missing requirement acquired
+  const simulatedScore = Math.min(1.0, baseScore + (acquiredSkills.length * scoreBoostPerSkill));
+
+  // Determine counterfactual rank
+  let simulatedRank = candidate.rank;
+  const betterCandidates = allCandidates.filter(c => c.candidate_id !== candidate.candidate_id && c.overall_score > simulatedScore);
+  simulatedRank = betterCandidates.length + 1;
+
+  // Compare to next/previous competitor
+  const prevCandidate = allCandidates.find(c => c.rank === candidate.rank - 1);
+  const nextCandidate = allCandidates.find(c => c.rank === candidate.rank + 1);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Skill Gap Sim */}
+      <GlassCard className="p-6 md:col-span-2 space-y-6">
+        <div>
+          <h3 className="text-base font-bold text-white">Counterfactual Hiring Simulator</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Simulate how acquiring specific required skills would impact this candidate's fit score and ranking index.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold text-white uppercase tracking-wider">Identified Skill Gaps (Select to simulate acquisition):</h4>
+          {missingSkills.length === 0 ? (
+            <p className="text-xs text-accent-emerald bg-accent-emerald/5 border border-accent-emerald/10 p-3 rounded-lg">
+              ✓ Candidate already matches all identified job description requirement criteria.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2.5">
+              {missingSkills.map((skill) => {
+                const isSelected = acquiredSkills.includes(skill);
+                return (
+                  <button
+                    key={skill}
+                    onClick={() => toggleSkill(skill)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                      isSelected
+                        ? 'bg-accent/20 border-accent text-accent'
+                        : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                    }`}
+                  >
+                    + Add {skill}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Counterfactual results display */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5">
+          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulated Score</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-bold text-white">{(simulatedScore * 100).toFixed(1)}%</span>
+              {simulatedScore > baseScore && (
+                <span className="text-xs text-accent-emerald font-semibold">
+                  (+{((simulatedScore - baseScore) * 100).toFixed(1)}%)
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulated Rank Position</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-bold text-accent">#{simulatedRank}</span>
+              {simulatedRank < candidate.rank && (
+                <span className="text-xs text-accent-emerald font-semibold">
+                  (Up {candidate.rank - simulatedRank} position{candidate.rank - simulatedRank > 1 ? 's' : ''})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Head-to-Head Competitor Comparison */}
+      <GlassCard className="p-6 space-y-4">
+        <h3 className="text-base font-bold text-white">Shortlist Comparison</h3>
+        <p className="text-xs text-muted-foreground">
+          Compare candidate's score against direct shortlist neighbors.
+        </p>
+
+        <div className="space-y-3 pt-2">
+          {prevCandidate && (
+            <div className="p-3 rounded-lg bg-white/5 border border-white/5 flex justify-between items-center">
+              <div>
+                <p className="text-xs text-muted-foreground">Rank #{prevCandidate.rank} (Previous)</p>
+                <p className="text-sm font-semibold text-white mt-0.5">{prevCandidate.profile?.name || prevCandidate.candidate_id}</p>
+              </div>
+              <ScoreBadge score={prevCandidate.overall_score} />
+            </div>
+          )}
+
+          <div className="p-3 rounded-lg bg-accent/5 border border-accent/20 flex justify-between items-center">
+            <div>
+              <p className="text-xs text-accent font-semibold">Rank #{candidate.rank} (Active)</p>
+              <p className="text-sm font-bold text-white mt-0.5">{candidate.profile?.name || candidate.candidate_id}</p>
+            </div>
+            <ScoreBadge score={candidate.overall_score} />
+          </div>
+
+          {nextCandidate && (
+            <div className="p-3 rounded-lg bg-white/5 border border-white/5 flex justify-between items-center">
+              <div>
+                <p className="text-xs text-muted-foreground">Rank #{nextCandidate.rank} (Next)</p>
+                <p className="text-sm font-semibold text-white mt-0.5">{nextCandidate.profile?.name || nextCandidate.candidate_id}</p>
+              </div>
+              <ScoreBadge score={nextCandidate.overall_score} />
+            </div>
+          )}
+        </div>
+      </GlassCard>
     </div>
   );
 };

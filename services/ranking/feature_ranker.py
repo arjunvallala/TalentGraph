@@ -124,7 +124,7 @@ class FeatureRanker:
                 certification_count=int(row.get("certifications_score", 0.0) * 5.0),
             )
 
-            # Map features to dict for weighted average
+            # Map features to dict for TOPSIS evaluation
             features_dict = {
                 "experience_score": features_obj.experience_score,
                 "skill_coverage": features_obj.skill_coverage,
@@ -134,28 +134,67 @@ class FeatureRanker:
                 "leadership_score": features_obj.leadership_score,
                 "education_score": features_obj.education_score,
                 "stability_score": features_obj.career_stability,
-                "certifications_score": features_obj.certifications_score,
+                "certifications_score": float(features_obj.certification_count) / 5.0,
                 "availability_score": features_obj.hiring_availability,
             }
 
-            # Calculate overall Stage 2 score
-            weights = job_genome.weights or {
-                "experience_score": 0.15,
-                "skill_coverage": 0.25,
-                "semantic_similarity": 0.15,
-                "domain_match": 0.10,
-                "career_velocity": 0.10,
-                "leadership_score": 0.08,
-                "stability_score": 0.07,
-                "availability_score": 0.10,
-            }
+            scored_candidates.append((cid, features_dict, features_obj))
 
-            score = weighted_average(features_dict, weights)
-            scored_candidates.append((cid, score, features_obj))
+        if not scored_candidates:
+            return []
 
-        # Sort descending by score
-        scored_candidates.sort(key=lambda x: x[1], reverse=True)
-        truncated = scored_candidates[:top_k]
+        # ── TOPSIS Algorithm Implementation ──────────────────────────────────────
+        # Weights normalized
+        weights_dict = job_genome.weights or {
+            "experience_score": 0.15,
+            "skill_coverage": 0.25,
+            "semantic_similarity": 0.15,
+            "domain_match": 0.10,
+            "career_velocity": 0.10,
+            "leadership_score": 0.08,
+            "stability_score": 0.07,
+            "availability_score": 0.10,
+        }
+        keys = list(weights_dict.keys())
+        w_vals = np.array([weights_dict.get(k, 0.01) for k in keys])
+        w_normalized = w_vals / np.sum(w_vals)
+
+        # Build Decision Matrix
+        matrix = []
+        for _, f_dict, _ in scored_candidates:
+            matrix.append([f_dict.get(k, 0.0) for k in keys])
+        matrix = np.array(matrix)
+
+        # Vector normalization
+        sq_sums = np.sqrt(np.sum(matrix ** 2, axis=0))
+        # Prevent division by zero
+        sq_sums[sq_sums == 0] = 1e-8
+        matrix_norm = matrix / sq_sums
+
+        # Weighted Normalized Decision Matrix
+        matrix_weighted = matrix_norm * w_normalized
+
+        # Ideal positive and negative solutions
+        ideal_best = np.max(matrix_weighted, axis=0)
+        ideal_worst = np.min(matrix_weighted, axis=0)
+
+        # Distances to ideal solutions
+        d_best = np.sqrt(np.sum((matrix_weighted - ideal_best) ** 2, axis=1))
+        d_worst = np.sqrt(np.sum((matrix_weighted - ideal_worst) ** 2, axis=1))
+
+        # Closeness coefficients (TOPSIS score)
+        denom = d_best + d_worst
+        denom[denom == 0] = 1e-8
+        topsis_scores = d_worst / denom
+
+        # Build final list
+        final_ranked = []
+        for idx, (cid, _, f_obj) in enumerate(scored_candidates):
+            final_ranked.append((cid, float(topsis_scores[idx]), f_obj))
+
+        # Sort descending by TOPSIS closeness coefficient score
+        final_ranked.sort(key=lambda x: x[1], reverse=True)
+        truncated = final_ranked[:top_k]
         
-        logger.info(f"Feature Ranker complete: ranked {len(scored_candidates)} candidates down to {len(truncated)}")
+        logger.info(f"Feature Ranker complete: ranked {len(scored_candidates)} candidates using TOPSIS engine down to {len(truncated)}")
         return truncated

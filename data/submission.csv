@@ -1,101 +1,101 @@
 candidate_id,rank,overall_score,confidence_level,hiring_recommendation
-cand_0593,1,0.832200,High,Strong Hire
-cand_0737,2,0.821837,High,Strong Hire
-cand_0419,3,0.820106,High,Strong Hire
-cand_0844,4,0.818634,High,Strong Hire
-cand_0202,5,0.816960,High,Strong Hire
-cand_0936,6,0.813336,High,Strong Hire
-cand_0156,7,0.811392,High,Strong Hire
-cand_0062,8,0.810551,High,Strong Hire
-cand_0091,9,0.809800,High,Strong Hire
-cand_0332,10,0.809033,High,Strong Hire
-cand_0956,11,0.805464,High,Strong Hire
-cand_0872,12,0.805124,High,Strong Hire
-cand_0337,13,0.804151,High,Hire
-cand_0402,14,0.803361,High,Hire
-cand_0621,15,0.801581,High,Hire
-cand_0592,16,0.798594,High,Hire
-cand_0722,17,0.793888,High,Hire
-cand_0127,18,0.791791,High,Hire
-cand_0638,19,0.790736,High,Hire
-cand_0826,20,0.790666,High,Hire
-cand_0246,21,0.790498,High,Hire
-cand_0111,22,0.788454,High,Hire
-cand_0494,23,0.787709,High,Hire
-cand_0462,24,0.785488,High,Hire
-cand_0809,25,0.785366,High,Hire
-cand_0185,26,0.782711,High,Hire
-cand_0021,27,0.782477,High,Hire
-cand_0647,28,0.781284,High,Hire
-cand_0272,29,0.780437,High,Hire
-cand_0170,30,0.779563,High,Hire
-cand_0856,31,0.779453,High,Hire
-cand_0886,32,0.779108,High,Hire
-cand_0088,33,0.778859,High,Hire
-cand_0902,34,0.778010,High,Hire
-cand_0602,35,0.777248,High,Hire
-cand_0269,36,0.775478,High,Hire
-cand_0501,37,0.774174,High,Hire
-cand_0281,38,0.773134,High,Hire
-cand_0684,39,0.773104,High,Hire
-cand_0433,40,0.772425,High,Hire
-cand_0097,41,0.772203,High,Hire
-cand_0505,42,0.771690,High,Hire
-cand_0335,43,0.769884,High,Hire
-cand_0773,44,0.768807,High,Hire
-cand_0772,45,0.767539,High,Hire
-cand_0122,46,0.766936,High,Consider
-cand_0831,47,0.766811,High,Consider
-cand_0588,48,0.766051,High,Consider
-cand_0508,49,0.765674,High,Consider
-cand_0618,50,0.765437,High,Consider
-cand_0483,51,0.764685,High,Consider
-cand_0221,52,0.763019,High,Consider
-cand_0363,53,0.762849,High,Consider
-cand_0529,54,0.762066,High,Consider
-cand_0998,55,0.759621,High,Consider
-cand_0653,56,0.757492,High,Consider
-cand_0623,57,0.755814,High,Consider
-cand_0079,58,0.755497,High,Consider
-cand_0063,59,0.755154,High,Consider
-cand_0965,60,0.752283,High,Consider
-cand_0427,61,0.752277,High,Consider
-cand_0418,62,0.751740,High,Consider
-cand_0739,63,0.750561,High,Consider
-cand_0440,64,0.748365,High,Consider
-cand_0926,65,0.747819,High,Consider
-cand_0140,66,0.746856,High,Consider
-cand_0253,67,0.746451,High,Consider
-cand_0163,68,0.746198,High,Consider
-cand_0200,69,0.746146,High,Consider
-cand_0182,70,0.745744,High,Consider
-cand_0470,71,0.745729,High,Consider
-cand_0837,72,0.744149,High,Consider
-cand_0224,73,0.743936,High,Consider
-cand_0203,74,0.743821,High,Consider
-cand_0372,75,0.742072,High,Consider
-cand_0160,76,0.740677,High,Pass
-cand_0104,77,0.740398,High,Pass
-cand_0644,78,0.739785,High,Pass
-cand_0193,79,0.739465,High,Pass
-cand_0082,80,0.739363,High,Pass
-cand_0090,81,0.738585,High,Pass
-cand_0215,82,0.737540,High,Pass
-cand_0001,83,0.736230,High,Pass
-cand_0848,84,0.735649,High,Pass
-cand_0095,85,0.734355,High,Pass
-cand_0329,86,0.734247,High,Pass
-cand_0487,87,0.733817,High,Pass
-cand_0106,88,0.733656,High,Pass
-cand_0742,89,0.733137,High,Pass
-cand_0766,90,0.732427,High,Pass
-cand_0205,91,0.731626,High,Pass
-cand_0569,92,0.731600,High,Pass
-cand_0276,93,0.729447,High,Pass
-cand_0589,94,0.728411,High,Pass
-cand_0620,95,0.726556,High,Pass
-cand_0496,96,0.725615,High,Pass
-cand_0071,97,0.724712,High,Pass
-cand_0853,98,0.724674,High,Pass
-cand_0456,99,0.723333,High,Pass
-cand_0180,100,0.722830,High,Pass
+cand_0593,1,0.961599,High,Strong Hire
+cand_0936,2,0.946058,High,Strong Hire
+cand_0844,3,0.940347,High,Strong Hire
+cand_0419,4,0.938563,High,Strong Hire
+cand_0156,5,0.938281,High,Strong Hire
+cand_0091,6,0.936964,High,Strong Hire
+cand_0202,7,0.936826,High,Strong Hire
+cand_0332,8,0.936738,High,Strong Hire
+cand_0737,9,0.933917,High,Strong Hire
+cand_0127,10,0.927675,High,Strong Hire
+cand_0722,11,0.926750,High,Strong Hire
+cand_0062,12,0.926669,High,Strong Hire
+cand_0592,13,0.926568,High,Hire
+cand_0402,14,0.924072,High,Hire
+cand_0621,15,0.923084,High,Hire
+cand_0638,16,0.921457,High,Hire
+cand_0337,17,0.918802,High,Hire
+cand_0185,18,0.917770,High,Hire
+cand_0088,19,0.915041,High,Hire
+cand_0272,20,0.914465,High,Hire
+cand_0956,21,0.914356,High,Hire
+cand_0170,22,0.912558,High,Hire
+cand_0872,23,0.912301,High,Hire
+cand_0462,24,0.911064,High,Hire
+cand_0886,25,0.909658,High,Hire
+cand_0111,26,0.909586,High,Hire
+cand_0647,27,0.909100,High,Hire
+cand_0269,28,0.908754,High,Hire
+cand_0494,29,0.908477,High,Hire
+cand_0826,30,0.906522,High,Hire
+cand_0021,31,0.906416,High,Hire
+cand_0246,32,0.905596,High,Hire
+cand_0505,33,0.904908,High,Hire
+cand_0902,34,0.903547,High,Hire
+cand_0529,35,0.902655,High,Hire
+cand_0122,36,0.901260,High,Hire
+cand_0809,37,0.899346,High,Hire
+cand_0281,38,0.898749,High,Hire
+cand_0508,39,0.898235,High,Hire
+cand_0501,40,0.897300,High,Hire
+cand_0618,41,0.897115,High,Hire
+cand_0998,42,0.896920,High,Hire
+cand_0335,43,0.896045,High,Hire
+cand_0856,44,0.895321,High,Hire
+cand_0427,45,0.894045,High,Hire
+cand_0772,46,0.891879,High,Consider
+cand_0203,47,0.890361,High,Consider
+cand_0221,48,0.889374,High,Consider
+cand_0831,49,0.888646,High,Consider
+cand_0079,50,0.888616,High,Consider
+cand_0470,51,0.888313,High,Consider
+cand_0163,52,0.886999,High,Consider
+cand_0433,53,0.886518,High,Consider
+cand_0372,54,0.885612,High,Consider
+cand_0063,55,0.885588,High,Consider
+cand_0773,56,0.885136,High,Consider
+cand_0837,57,0.884973,High,Consider
+cand_0653,58,0.882467,High,Consider
+cand_0965,59,0.882307,High,Consider
+cand_0483,60,0.881575,High,Consider
+cand_0090,61,0.881121,High,Consider
+cand_0363,62,0.880689,High,Consider
+cand_0253,63,0.878386,High,Consider
+cand_0766,64,0.878365,High,Consider
+cand_0160,65,0.878045,High,Consider
+cand_0082,66,0.876559,High,Consider
+cand_0588,67,0.875894,High,Consider
+cand_0097,68,0.874981,High,Consider
+cand_0095,69,0.874950,High,Consider
+cand_0684,70,0.874335,High,Consider
+cand_0569,71,0.874008,High,Consider
+cand_0140,72,0.872430,High,Consider
+cand_0602,73,0.872364,High,Consider
+cand_0182,74,0.871928,High,Consider
+cand_0742,75,0.871179,High,Consider
+cand_0487,76,0.870816,High,Pass
+cand_0623,77,0.869792,High,Pass
+cand_0644,78,0.869314,High,Pass
+cand_0106,79,0.868370,High,Pass
+cand_0104,80,0.867800,High,Pass
+cand_0200,81,0.867635,High,Pass
+cand_0440,82,0.867528,High,Pass
+cand_0220,83,0.867247,High,Pass
+cand_0001,84,0.865157,High,Pass
+cand_0224,85,0.864165,High,Pass
+cand_0193,86,0.862833,High,Pass
+cand_0739,87,0.861432,High,Pass
+cand_0045,88,0.859843,High,Pass
+cand_0329,89,0.858787,High,Pass
+cand_0303,90,0.857996,High,Pass
+cand_0926,91,0.855799,High,Pass
+cand_0873,92,0.855158,High,Pass
+cand_0496,93,0.852210,High,Pass
+cand_0961,94,0.851923,High,Pass
+cand_0180,95,0.850419,High,Pass
+cand_0780,96,0.849090,High,Pass
+cand_0624,97,0.848418,High,Pass
+cand_0276,98,0.846796,High,Pass
+cand_1000,99,0.845328,High,Pass
+cand_0620,100,0.843376,High,Pass
