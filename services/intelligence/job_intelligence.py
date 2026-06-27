@@ -168,18 +168,103 @@ class JobIntelligenceEngine:
 
         # Build IdealCandidatePersona
         ideal_yoe = min_yoe + 2.0
-        feature_weights = {
-            "experience_score": 0.15,
-            "skill_coverage": 0.25,
-            "semantic_similarity": 0.15,
-            "domain_match": 0.10,
-            "career_velocity": 0.08,
-            "leadership_score": 0.07,
-            "education_score": 0.05,
-            "stability_score": 0.08,
-            "certifications_score": 0.04,
-            "availability_score": 0.03,
+        # ── Dynamic Archetype Overlap Weight Engine ────────────────────────────────
+        # Resolve vague cold-starts by matching against structured archetype distributions
+        archetypes = {
+            "technical": {
+                "keywords": ["developer", "engineer", "programmer", "coding", "software", "backend", "frontend", "fullstack", "architect", "sysadmin", "database", "infrastructure", "pytorch", "tensorflow", "fastapi", "django"],
+                "weights": {
+                    "experience_score": 0.12,
+                    "skill_coverage": 0.35,
+                    "semantic_similarity": 0.15,
+                    "domain_match": 0.15,
+                    "career_velocity": 0.08,
+                    "leadership_score": 0.03,
+                    "education_score": 0.04,
+                    "stability_score": 0.06,
+                    "certifications_score": 0.04,
+                    "availability_score": 0.03,
+                }
+            },
+            "leadership": {
+                "keywords": ["lead", "manager", "director", "head", "executive", "vp", "president", "chief", "cto", "cio", "cfo", "coo", "manage", "leadership", "teams", "scrum", "agile", "supervise"],
+                "weights": {
+                    "experience_score": 0.15,
+                    "skill_coverage": 0.10,
+                    "semantic_similarity": 0.10,
+                    "domain_match": 0.10,
+                    "career_velocity": 0.15,
+                    "leadership_score": 0.30,
+                    "education_score": 0.05,
+                    "stability_score": 0.10,
+                    "certifications_score": 0.02,
+                    "availability_score": 0.03,
+                }
+            },
+            "research": {
+                "keywords": ["researcher", "scientist", "phd", "academic", "publications", "journals", "statistics", "math", "mathematical", "postdoc", "fellow", "lab", "novel", "papers"],
+                "weights": {
+                    "experience_score": 0.10,
+                    "skill_coverage": 0.15,
+                    "semantic_similarity": 0.15,
+                    "domain_match": 0.10,
+                    "career_velocity": 0.05,
+                    "leadership_score": 0.03,
+                    "education_score": 0.25,
+                    "stability_score": 0.05,
+                    "certifications_score": 0.02,
+                    "availability_score": 0.05,
+                }
+            }
         }
+
+        # Count occurrences of archetype keywords in JD text
+        match_scores = {}
+        total_matches = 0
+        for arch_name, arch_data in archetypes.items():
+            matches = sum(1 for kw in arch_data["keywords"] if kw in norm_text)
+            match_scores[arch_name] = matches
+            total_matches += matches
+
+        # Interpolate weights based on overlap scores
+        feature_weights = {
+            "experience_score": 0.0,
+            "skill_coverage": 0.0,
+            "semantic_similarity": 0.0,
+            "domain_match": 0.0,
+            "career_velocity": 0.0,
+            "leadership_score": 0.0,
+            "education_score": 0.0,
+            "stability_score": 0.0,
+            "certifications_score": 0.0,
+            "availability_score": 0.0,
+        }
+
+        if total_matches > 0:
+            for arch_name, score in match_scores.items():
+                weight_fraction = score / total_matches
+                arch_weights = archetypes[arch_name]["weights"]
+                for k in feature_weights.keys():
+                    feature_weights[k] += arch_weights.get(k, 0.01) * weight_fraction
+        else:
+            # Balanced default fallback for extremely vague job descriptions
+            feature_weights = {
+                "experience_score": 0.15,
+                "skill_coverage": 0.20,
+                "semantic_similarity": 0.15,
+                "domain_match": 0.12,
+                "career_velocity": 0.08,
+                "leadership_score": 0.08,
+                "education_score": 0.08,
+                "stability_score": 0.08,
+                "certifications_score": 0.04,
+                "availability_score": 0.04,
+            }
+
+        # Normalize weights to sum strictly to 1.0
+        w_sum = sum(feature_weights.values())
+        if w_sum > 0:
+            feature_weights = {k: v / w_sum for k, v in feature_weights.items()}
 
         # Boost leadership if role requires it
         if leadership_required:
