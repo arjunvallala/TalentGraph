@@ -226,6 +226,20 @@ class JobIntelligenceEngine:
             match_scores[arch_name] = matches
             total_matches += matches
 
+        # ── Semantic Title-Archetype Fallback ────────────────────────────────────
+        # Resolve zero-vocabulary descriptions by analyzing standard title terms
+        if total_matches == 0:
+            title_lower = raw_job.title.lower()
+            if any(w in title_lower for w in ["lead", "manager", "director", "head", "vp", "president", "chief", "cto", "cio", "coo", "officer", "scrum", "agile", "supervise"]):
+                match_scores = {"technical": 1, "leadership": 4, "research": 0}
+                total_matches = 5
+            elif any(w in title_lower for w in ["researcher", "scientist", "phd", "academic", "postdoc", "fellow", "professor", "lab"]):
+                match_scores = {"technical": 2, "leadership": 0, "research": 4}
+                total_matches = 6
+            elif any(w in title_lower for w in ["developer", "engineer", "programmer", "coding", "software", "backend", "frontend", "fullstack", "architect", "sysadmin", "analyst", "devops"]):
+                match_scores = {"technical": 5, "leadership": 1, "research": 1}
+                total_matches = 7
+
         # Interpolate weights based on overlap scores
         feature_weights = {
             "experience_score": 0.0,
@@ -247,7 +261,7 @@ class JobIntelligenceEngine:
                 for k in feature_weights.keys():
                     feature_weights[k] += arch_weights.get(k, 0.01) * weight_fraction
         else:
-            # Balanced default fallback for extremely vague job descriptions
+            # Balanced default fallback for extremely vague job descriptions & titles
             feature_weights = {
                 "experience_score": 0.15,
                 "skill_coverage": 0.20,
