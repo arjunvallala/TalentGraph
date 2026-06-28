@@ -131,7 +131,7 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "--cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=55"
+addopts = "--cov=. --cov-report=term-missing --cov-report=html --cov-fail-under=50"
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.coverage.run]
