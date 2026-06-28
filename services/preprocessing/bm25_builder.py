@@ -9,9 +9,6 @@ by capturing exact keyword matches (skill names, job titles, certifications).
 """
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List, Tuple
-
 import numpy as np
 
 from shared.logging_setup import get_logger
@@ -38,7 +35,7 @@ class BM25IndexBuilder:
         """Initialise the BM25 index builder."""
         logger.info("BM25IndexBuilder initialised")
 
-    def build_index(self, corpus: List[str]) -> "BM25Okapi":  # type: ignore
+    def build_index(self, corpus: list[str]) -> BM25Okapi:  # type: ignore
         """
         Build a BM25Okapi index from a list of document strings.
 
@@ -79,7 +76,7 @@ class BM25IndexBuilder:
         logger.info("BM25 index built successfully: %d documents", len(corpus))
         return index
 
-    def save_index(self, index: "BM25Okapi", path: str) -> None:  # type: ignore
+    def save_index(self, index: BM25Okapi, path: str) -> None:  # type: ignore
         """
         Save the BM25 index to disk using pickle.
 
@@ -90,7 +87,7 @@ class BM25IndexBuilder:
         save_pickle(index, path)
         logger.info("BM25 index saved to: %s", path)
 
-    def load_index(self, path: str) -> "BM25Okapi":  # type: ignore
+    def load_index(self, path: str) -> BM25Okapi:  # type: ignore
         """
         Load a BM25 index from disk.
 
@@ -109,10 +106,10 @@ class BM25IndexBuilder:
 
     def search(
         self,
-        index: "BM25Okapi",  # type: ignore
-        query_tokens: List[str],
+        index: BM25Okapi,  # type: ignore
+        query_tokens: list[str],
         top_k: int,
-    ) -> List[Tuple[int, float]]:
+    ) -> list[tuple[int, float]]:
         """
         Search the BM25 index for the most relevant documents.
 

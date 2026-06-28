@@ -10,8 +10,6 @@ All functions are deterministic and do not rely on any LLM or random component.
 from __future__ import annotations
 
 import re
-import string
-from typing import List, Optional
 
 from shared.logging_setup import get_logger
 
@@ -19,7 +17,7 @@ logger = get_logger(__name__)
 
 # ── Skill extraction uses a large canonical skill list ────────────────────────
 # 250+ skills across ML, Software, Data, Cloud, Business domains
-CANONICAL_SKILLS: List[str] = [
+CANONICAL_SKILLS: list[str] = [
     # Programming Languages
     "python", "java", "javascript", "typescript", "c++", "c#", "c", "go", "golang",
     "rust", "swift", "kotlin", "scala", "ruby", "php", "r", "matlab", "julia",
@@ -102,7 +100,7 @@ _STOPWORDS: set[str] = {
     "during", "before", "after", "above", "below", "between", "more", "most",
     "other", "some", "such", "than", "then", "there", "when", "where", "who",
     "which", "what", "how", "all", "each", "both", "few", "over", "under",
-    "again", "further", "also", "just", "very", "too", "also", "well",
+    "again", "further", "also", "just", "very", "too", "well",
 }
 
 # ── Seniority detection patterns ─────────────────────────────────────────────
@@ -172,7 +170,7 @@ def normalize_text(text: str) -> str:
     return text
 
 
-def extract_skills_from_text(text: str, skill_list: Optional[List[str]] = None) -> List[str]:
+def extract_skills_from_text(text: str, skill_list: list[str] | None = None) -> list[str]:
     """
     Find skills present in the given text using substring matching.
 
@@ -268,7 +266,7 @@ def extract_years_of_experience(text: str) -> float:
     return 0.0
 
 
-def tokenize_for_bm25(text: str) -> List[str]:
+def tokenize_for_bm25(text: str) -> list[str]:
     """
     Tokenise text for BM25 indexing.
 
@@ -297,7 +295,7 @@ def tokenize_for_bm25(text: str) -> List[str]:
     return result
 
 
-def build_candidate_text(profile: "CandidateProfile") -> str:  # type: ignore[name-defined]
+def build_candidate_text(profile: CandidateProfile) -> str:  # type: ignore[name-defined]
     """
     Build a rich text representation of a candidate profile for embedding.
 

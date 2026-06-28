@@ -10,7 +10,6 @@ Polars DataFrames — the original is never modified in-place.
 from __future__ import annotations
 
 import re
-from typing import List
 
 import polars as pl
 
@@ -144,7 +143,7 @@ class DataCleaner:
             logger.warning("Removed %d duplicate candidate_id rows", removed)
         return df
 
-    def normalize_skills(self, skills: List[str]) -> List[str]:
+    def normalize_skills(self, skills: list[str]) -> list[str]:
         """
         Normalise a list of skill strings.
 

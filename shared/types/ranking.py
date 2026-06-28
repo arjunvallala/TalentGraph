@@ -11,10 +11,8 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
-
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
@@ -67,7 +65,7 @@ class ExplanationStrength(BaseModel):
     """A single identified strength for a candidate."""
     title: str
     description: str
-    evidence: List[str] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
     score_contribution: float = Field(default=0.0, ge=0.0, le=1.0)
 
 
@@ -75,7 +73,7 @@ class ExplanationWeakness(BaseModel):
     """A single identified gap or weakness for a candidate."""
     title: str
     description: str
-    missing_requirement: Optional[str] = None
+    missing_requirement: str | None = None
     impact: str = ""  # How this gap affects the recommendation
 
 
@@ -88,8 +86,8 @@ class CounterfactualExplanation(BaseModel):
     """
     candidate_id: str
     current_recommendation: HiringRecommendation
-    next_recommendation: Optional[HiringRecommendation] = None
-    required_improvements: List[str] = Field(default_factory=list)
+    next_recommendation: HiringRecommendation | None = None
+    required_improvements: list[str] = Field(default_factory=list)
     score_gap: float = 0.0  # How far from the next threshold
 
 
@@ -115,12 +113,12 @@ class CandidateExplanation(BaseModel):
     """
     candidate_id: str
     summary: str = ""
-    strengths: List[ExplanationStrength] = Field(default_factory=list)
-    weaknesses: List[ExplanationWeakness] = Field(default_factory=list)
+    strengths: list[ExplanationStrength] = Field(default_factory=list)
+    weaknesses: list[ExplanationWeakness] = Field(default_factory=list)
     risk_summary: str = ""
     hiring_narrative: str = ""
     confidence_reason: str = ""
-    counterfactual: Optional[CounterfactualExplanation] = None
+    counterfactual: CounterfactualExplanation | None = None
     evidence_count: int = 0
     generated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -152,9 +150,9 @@ class RiskAssessment(BaseModel):
     skill_inconsistency_risk: float = Field(default=0.0, ge=0.0, le=1.0)
     profile_completeness_risk: float = Field(default=0.0, ge=0.0, le=1.0)
     engagement_risk: float = Field(default=0.0, ge=0.0, le=1.0)
-    risk_flags: List[str] = Field(default_factory=list)
-    risk_explanations: List[str] = Field(default_factory=list)
-    notice_period_days: Optional[int] = None
+    risk_flags: list[str] = Field(default_factory=list)
+    risk_explanations: list[str] = Field(default_factory=list)
+    notice_period_days: int | None = None
 
 
 # ── Stage Results ─────────────────────────────────────────────────────────────
@@ -177,8 +175,8 @@ class RankingStageResult(BaseModel):
     input_count: int
     output_count: int
     duration_seconds: float = 0.0
-    candidate_ids: List[str] = Field(default_factory=list)
-    scores: Dict[str, float] = Field(default_factory=dict)
+    candidate_ids: list[str] = Field(default_factory=list)
+    scores: dict[str, float] = Field(default_factory=dict)
 
 
 # ── Core Result Model ─────────────────────────────────────────────────────────
@@ -213,8 +211,8 @@ class CandidateResult(BaseModel):
     score_band: ScoreBand = ScoreBand.WEAK
     confidence_level: ConfidenceLevel = ConfidenceLevel.LOW
     hiring_recommendation: HiringRecommendation = HiringRecommendation.PASS
-    risk_assessment: Optional[RiskAssessment] = None
-    explanation: Optional[CandidateExplanation] = None
+    risk_assessment: RiskAssessment | None = None
+    explanation: CandidateExplanation | None = None
 
     # Stage-by-stage scores
     stage1_score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -222,8 +220,8 @@ class CandidateResult(BaseModel):
     stage3_score: float = Field(default=0.0, ge=0.0, le=1.0)
 
     # Detailed breakdowns
-    council_scores: Dict[str, float] = Field(default_factory=dict)
-    feature_scores: Dict[str, float] = Field(default_factory=dict)
+    council_scores: dict[str, float] = Field(default_factory=dict)
+    feature_scores: dict[str, float] = Field(default_factory=dict)
 
     ranked_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -241,9 +239,9 @@ class RankedList(BaseModel):
         ranked_at: When ranking completed.
     """
     job_id: str
-    candidates: List[CandidateResult] = Field(default_factory=list)
+    candidates: list[CandidateResult] = Field(default_factory=list)
     total_processed: int = 0
-    stage_results: List[RankingStageResult] = Field(default_factory=list)
+    stage_results: list[RankingStageResult] = Field(default_factory=list)
     ranking_duration_seconds: float = 0.0
     ranked_at: datetime = Field(default_factory=datetime.utcnow)
 

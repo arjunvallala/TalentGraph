@@ -6,13 +6,12 @@ whose profiles are semantically similar to the job description.
 """
 from __future__ import annotations
 
-from typing import List, Dict, Any, Tuple
 import numpy as np
 
-from shared.config import settings
-from shared.logging_setup import get_logger
 from services.preprocessing.faiss_builder import FAISSIndexBuilder
 from services.preprocessing.feature_store import FeatureStore
+from shared.config import settings
+from shared.logging_setup import get_logger
 
 logger = get_logger(__name__)
 
@@ -34,7 +33,7 @@ class SemanticRetrievalEngine:
         if self.index is None:
             self.index = self.index_builder.load_index(settings.faiss_index_path)
 
-    def retrieve(self, query_embedding: List[float], top_k: int = 1500) -> List[str]:
+    def retrieve(self, query_embedding: list[float], top_k: int = 1500) -> list[str]:
         """
         Retrieve candidate IDs matching the query embedding.
 

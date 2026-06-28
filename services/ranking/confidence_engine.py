@@ -14,14 +14,11 @@ Each factor contributes a genuine signal and can independently lower confidence.
 """
 from __future__ import annotations
 
-import math
-from typing import Tuple
-
 import numpy as np
 
-from shared.types.ranking import ConfidenceLevel
 from shared.types.candidate import CandidateFeatures
 from shared.types.council import FinalCouncilDecision
+from shared.types.ranking import ConfidenceLevel
 
 
 class ConfidenceEngine:
@@ -38,7 +35,7 @@ class ConfidenceEngine:
 
     def estimate_confidence(
         self, features: CandidateFeatures, council_decision: FinalCouncilDecision
-    ) -> Tuple[float, ConfidenceLevel]:
+    ) -> tuple[float, ConfidenceLevel]:
         """
         Estimate numeric confidence in [0, 1] and assign a ConfidenceLevel classification.
 

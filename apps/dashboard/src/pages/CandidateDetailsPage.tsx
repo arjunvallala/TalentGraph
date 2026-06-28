@@ -18,7 +18,7 @@ export const CandidateDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { demoData, setDemoData, setCurrentJobId, setCurrentJobTitle } = useAppStore();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'genome' | 'evidence' | 'votes'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'genome' | 'evidence' | 'votes' | 'simulation'>('overview');
 
   // Auto-init demo data so direct URL access works
   useEffect(() => {
@@ -135,10 +135,11 @@ export const CandidateDetailsPage: React.FC = () => {
                       <CheckCircle className="w-4 h-4" /> Top Strengths
                     </h4>
                     <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-4">
-                      {Array.isArray(candidate.explanation?.top_strengths) && candidate.explanation.top_strengths.length > 0
+                      {Array.isArray(candidate.explanation?.strengths) && candidate.explanation.strengths.length > 0
+                        ? candidate.explanation.strengths.map((s, i) => <li key={i}>{typeof s === 'string' ? s : s.title}</li>)
+                        : Array.isArray(candidate.explanation?.top_strengths) && candidate.explanation.top_strengths.length > 0
                         ? candidate.explanation.top_strengths.map((s, i) => <li key={i}>{s}</li>)
-                        : <li>Strong technical expertise</li>
-                      }
+                        : <li>Strong technical expertise</li>}
                     </ul>
                   </div>
 
@@ -228,25 +229,24 @@ export const CandidateDetailsPage: React.FC = () => {
         {activeTab === 'evidence' && (
           <EvidenceLedger
             candidateId={candidate.candidate_id}
+            explanation={candidate.explanation}
             evidence={
               candidate.explanation?.strengths ? {
-                experience_evidence: candidate.explanation.strengths.map(s => s.description),
-                skill_evidence: { 'Core Stack': candidate.profile?.skills || [] },
+                experience_evidence: candidate.explanation.strengths.map(s => typeof s === 'string' ? s : s.title),
+                skill_evidence: candidate.profile?.skills || [],
                 learning_evidence: [],
                 stability_evidence: [],
                 leadership_evidence: [],
                 behavior_evidence: [],
                 risk_evidence: [],
-                evidence_strength: 0.9,
               } : {
                 experience_evidence: [],
-                skill_evidence: {},
+                skill_evidence: [],
                 learning_evidence: [],
                 stability_evidence: [],
                 leadership_evidence: [],
                 behavior_evidence: [],
                 risk_evidence: [],
-                evidence_strength: 0.5,
               }
             }
           />

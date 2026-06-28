@@ -128,7 +128,7 @@ def load_json(path: str | Path) -> dict:
     if not p.exists():
         raise FileNotFoundError(f"JSON file not found: {p}")
     try:
-        with open(p, "r", encoding="utf-8") as f:
+        with open(p, encoding="utf-8") as f:
             data = json.load(f)
         logger.debug("Loaded JSON: %s", p)
         return data

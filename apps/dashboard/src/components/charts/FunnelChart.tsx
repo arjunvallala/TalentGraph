@@ -104,7 +104,8 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
           <LabelList
             dataKey="count"
             position="top"
-            formatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter={((v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v) as any}
             style={{ fill: '#9ca3af', fontSize: 10 }}
           />
           {data.map((entry, index) => (

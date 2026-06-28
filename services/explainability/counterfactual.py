@@ -6,11 +6,10 @@ would shift the candidate into the next higher hiring recommendation tier.
 """
 from __future__ import annotations
 
-from typing import List, Optional
 from shared.types.candidate import CandidateFeatures
 from shared.types.ranking import (
-    HiringRecommendation,
     CounterfactualExplanation,
+    HiringRecommendation,
 )
 
 

@@ -8,25 +8,24 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 import duckdb
 import polars as pl
-from pydantic import BaseModel
 
 from shared.config import settings
 from shared.constants import (
     DUCKDB_CANDIDATE_TABLE,
-    DUCKDB_FEATURES_TABLE,
     DUCKDB_EVIDENCE_TABLE,
+    DUCKDB_FEATURES_TABLE,
     DUCKDB_JOBS_TABLE,
     DUCKDB_RANKINGS_TABLE,
 )
 from shared.logging_setup import get_logger
 from shared.types.candidate import (
-    CandidateProfile,
-    CandidateFeatures,
     CandidateEvidence,
+    CandidateFeatures,
+    CandidateProfile,
 )
 from shared.types.job import JobProfile
 from shared.types.ranking import CandidateResult
@@ -38,7 +37,7 @@ def safe_json_dumps(obj: Any) -> str:
     """Safely serialize an object to JSON, handling datetimes, enums, and Pydantic models."""
     from datetime import datetime
     from enum import Enum
-    
+
     def default_serializer(o: Any) -> Any:
         if isinstance(o, datetime):
             return o.isoformat()
@@ -47,7 +46,7 @@ def safe_json_dumps(obj: Any) -> str:
         if hasattr(o, "model_dump"):
             return o.model_dump(mode="json")
         return str(o)
-        
+
     return json.dumps(obj, default=default_serializer)
 
 
@@ -252,7 +251,7 @@ class FeatureStore:
             [candidate_id, evidence_json, timeline_json],
         )
 
-    def get_candidate_profile(self, candidate_id: str) -> Optional[CandidateProfile]:
+    def get_candidate_profile(self, candidate_id: str) -> CandidateProfile | None:
         """Retrieve a candidate profile from DuckDB by ID."""
         conn = self.connect()
         res = conn.execute(
@@ -287,7 +286,7 @@ class FeatureStore:
             embedding_id=res[14],
         )
 
-    def get_candidate_features(self, candidate_id: str) -> Optional[CandidateFeatures]:
+    def get_candidate_features(self, candidate_id: str) -> CandidateFeatures | None:
         """Retrieve a candidate's features from DuckDB."""
         conn = self.connect()
         res = conn.execute(
@@ -319,7 +318,7 @@ class FeatureStore:
             skill_consistency=res[17],
         )
 
-    def save_job(self, job_id: str, title: str, description: str, profile: JobProfile, weights: Dict[str, float], genome: Dict[str, Any]) -> None:
+    def save_job(self, job_id: str, title: str, description: str, profile: JobProfile, weights: dict[str, float], genome: dict[str, Any]) -> None:
         """Save a job description and parsed details to DuckDB."""
         conn = self.connect()
         reqs_json = safe_json_dumps(profile)
@@ -335,7 +334,7 @@ class FeatureStore:
             [job_id, title, description, reqs_json, weights_json, genome_json],
         )
 
-    def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
+    def get_job(self, job_id: str) -> dict[str, Any] | None:
         """Retrieve a job profile and configuration from DuckDB."""
         conn = self.connect()
         res = conn.execute(
@@ -355,7 +354,7 @@ class FeatureStore:
             "genome": json.loads(res[4]) if res[4] else {},
         }
 
-    def save_rankings(self, job_id: str, rankings: List[Dict[str, Any]]) -> None:
+    def save_rankings(self, job_id: str, rankings: list[dict[str, Any]]) -> None:
         """Save final ranked results to DuckDB."""
         conn = self.connect()
         # Clean existing rankings for this job first
@@ -385,7 +384,7 @@ class FeatureStore:
             )
         logger.info(f"Saved {len(rankings)} rankings for job {job_id}")
 
-    def get_rankings(self, job_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_rankings(self, job_id: str, limit: int = 100) -> list[dict[str, Any]]:
         """Retrieve rankings for a specific job from DuckDB."""
         conn = self.connect()
         res = conn.execute(
@@ -418,7 +417,7 @@ class FeatureStore:
             })
         return out
 
-    def get_features_dataframe(self, candidate_ids: List[str]) -> pl.DataFrame:
+    def get_features_dataframe(self, candidate_ids: list[str]) -> pl.DataFrame:
         """Retrieve features for a list of candidate IDs as a Polars DataFrame."""
         conn = self.connect()
         ids_str = ",".join([f"'{cid}'" for cid in candidate_ids])
@@ -430,11 +429,11 @@ class FeatureStore:
         ).arrow()
         return pl.from_arrow(df_arrow)
 
-    def get_features(self, candidate_id: str) -> Optional[CandidateFeatures]:
+    def get_features(self, candidate_id: str) -> CandidateFeatures | None:
         """Alias for get_candidate_features."""
         return self.get_candidate_features(candidate_id)
 
-    def get_job_profile(self, job_id: str) -> Optional[JobProfile]:
+    def get_job_profile(self, job_id: str) -> JobProfile | None:
         """Retrieve structured JobProfile from database."""
         conn = self.connect()
         res = conn.execute(
@@ -445,11 +444,15 @@ class FeatureStore:
             return None
         return JobProfile.model_validate_json(res[0])
 
-    def get_ranking_results(self, job_id: str) -> List[CandidateResult]:
+    def get_ranking_results(self, job_id: str) -> list[CandidateResult]:
         """Retrieve ranking results as list of CandidateResult models."""
-        from shared.types.ranking import CandidateResult, ConfidenceLevel, HiringRecommendation
-        from shared.types.ranking import CandidateExplanation
-        
+        from shared.types.ranking import (
+            CandidateExplanation,
+            CandidateResult,
+            ConfidenceLevel,
+            HiringRecommendation,
+        )
+
         conn = self.connect()
         res = conn.execute(
             f"SELECT candidate_id, rank, overall_score, confidence_level, hiring_recommendation, explanation, stage_scores "
@@ -462,10 +465,10 @@ class FeatureStore:
             cid = row[0]
             profile = self.get_candidate_profile(cid)
             features = self.get_candidate_features(cid)
-            
+
             expl_data = json.loads(row[5]) if row[5] else {}
             explanation = CandidateExplanation.model_validate(expl_data) if expl_data else None
-            
+
             stage_scores = json.loads(row[6]) if row[6] else {}
 
             results.append(

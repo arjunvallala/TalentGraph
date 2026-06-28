@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -31,7 +32,7 @@ def validate(
 ) -> None:
     """Validate a submission.csv file for conformity and correctness."""
     console.print(f"🧐 Validating submission file: [yellow]{file}[/yellow]...")
-    
+
     generator = SubmissionGenerator()
     valid, errors = generator.validate(str(file))
 

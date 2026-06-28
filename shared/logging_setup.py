@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 from loguru import logger as _logger
 
@@ -82,7 +81,7 @@ def configure_logging() -> None:
     )
 
 
-def get_logger(name: str, **context) -> "BoundLogger":
+def get_logger(name: str, **context) -> BoundLogger:
     """
     Get a contextual logger bound to a module name.
 
@@ -108,12 +107,13 @@ BoundLogger = type(_logger)
 # ── Timing Decorator ──────────────────────────────────────────────────────────
 import functools
 import time
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 F = TypeVar("F", bound=Callable)
 
 
-def log_execution_time(operation: Optional[str] = None) -> Callable[[F], F]:
+def log_execution_time(operation: str | None = None) -> Callable[[F], F]:
     """
     Decorator that logs the execution time of a function.
 

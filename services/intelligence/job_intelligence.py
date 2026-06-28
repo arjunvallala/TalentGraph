@@ -6,24 +6,20 @@ to construct the structured JobProfile, IdealCandidatePersona, and JobGenome.
 """
 from __future__ import annotations
 
-import re
-from typing import Dict, List, Tuple, Any
-
 from shared.logging_setup import get_logger
 from shared.types.job import (
-    JobRaw,
-    JobProfile,
-    SkillRequirement,
+    ExperienceLevel,
     IdealCandidatePersona,
     JobGenome,
-    ExperienceLevel,
-    JobType,
+    JobProfile,
+    JobRaw,
+    SkillRequirement,
 )
 from shared.utils.text_utils import (
-    normalize_text,
+    detect_seniority_from_title,
     extract_skills_from_text,
     extract_years_of_experience,
-    detect_seniority_from_title,
+    normalize_text,
     tokenize_for_bm25,
 )
 
@@ -70,7 +66,7 @@ class JobIntelligenceEngine:
 
     def analyze_job(
         self, raw_job: JobRaw
-    ) -> Tuple[JobProfile, IdealCandidatePersona, JobGenome]:
+    ) -> tuple[JobProfile, IdealCandidatePersona, JobGenome]:
         """
         Analyze a raw job description and construct matching structures.
 
@@ -258,7 +254,7 @@ class JobIntelligenceEngine:
             for arch_name, score in match_scores.items():
                 weight_fraction = score / total_matches
                 arch_weights = archetypes[arch_name]["weights"]
-                for k in feature_weights.keys():
+                for k in feature_weights:
                     feature_weights[k] += arch_weights.get(k, 0.01) * weight_fraction
         else:
             # Balanced default fallback for extremely vague job descriptions & titles

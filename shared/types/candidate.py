@@ -11,10 +11,9 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
@@ -57,16 +56,16 @@ class EducationEntry(BaseModel):
     """
     institution: str = ""
     degree: str = ""
-    field_of_study: Optional[str] = None
+    field_of_study: str | None = None
     level: EducationLevel = EducationLevel.UNKNOWN
-    start_year: Optional[int] = None
-    end_year: Optional[int] = None
-    gpa: Optional[float] = None
+    start_year: int | None = None
+    end_year: int | None = None
+    gpa: float | None = None
     is_current: bool = False
 
     @field_validator("gpa")
     @classmethod
-    def validate_gpa(cls, v: Optional[float]) -> Optional[float]:
+    def validate_gpa(cls, v: float | None) -> float | None:
         """Clamp GPA to [0.0, 10.0] to handle both 4.0 and 10.0 scales."""
         if v is not None:
             return max(0.0, min(v, 10.0))
@@ -92,19 +91,19 @@ class WorkExperience(BaseModel):
     """
     company: str = ""
     title: str = ""
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: str | None = None
+    end_date: str | None = None
     is_current: bool = False
-    duration_months: Optional[int] = None
-    description: Optional[str] = None
-    skills_used: List[str] = Field(default_factory=list)
-    location: Optional[str] = None
-    company_size: Optional[str] = None
-    industry: Optional[str] = None
+    duration_months: int | None = None
+    description: str | None = None
+    skills_used: list[str] = Field(default_factory=list)
+    location: str | None = None
+    company_size: str | None = None
+    industry: str | None = None
 
     @field_validator("duration_months")
     @classmethod
-    def clamp_duration(cls, v: Optional[int]) -> Optional[int]:
+    def clamp_duration(cls, v: int | None) -> int | None:
         """Clamp tenure to realistic range."""
         if v is not None:
             return max(0, min(v, 600))  # 0 to 50 years
@@ -134,11 +133,11 @@ class RedrobSignals(BaseModel):
     profile_views: int = Field(default=0, ge=0)
     application_count: int = Field(default=0, ge=0)
     response_rate: float = Field(default=0.0, ge=0.0, le=1.0)
-    last_active_days: Optional[int] = Field(default=None, ge=0)
+    last_active_days: int | None = Field(default=None, ge=0)
     availability_status: AvailabilityStatus = AvailabilityStatus.UNKNOWN
-    notice_period_days: Optional[int] = Field(default=None, ge=0, le=365)
-    expected_salary: Optional[float] = Field(default=None, ge=0)
-    preferred_locations: List[str] = Field(default_factory=list)
+    notice_period_days: int | None = Field(default=None, ge=0, le=365)
+    expected_salary: float | None = Field(default=None, ge=0)
+    preferred_locations: list[str] = Field(default_factory=list)
     open_to_remote: bool = False
     interview_declined_count: int = Field(default=0, ge=0)
     offer_declined_count: int = Field(default=0, ge=0)
@@ -176,24 +175,24 @@ class CandidateProfile(BaseModel):
         created_at: Timestamp when this profile was parsed.
     """
     candidate_id: str
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    linkedin: Optional[str] = None
-    embedding_id: Optional[int] = None
-    location: Optional[str] = None
-    current_title: Optional[str] = None
-    current_company: Optional[str] = None
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    linkedin: str | None = None
+    embedding_id: int | None = None
+    location: str | None = None
+    current_title: str | None = None
+    current_company: str | None = None
     years_of_experience: float = Field(default=0.0, ge=0.0)
-    skills: List[str] = Field(default_factory=list)
-    education: List[EducationEntry] = Field(default_factory=list)
-    work_experience: List[WorkExperience] = Field(default_factory=list)
-    certifications: List[str] = Field(default_factory=list)
-    languages: List[str] = Field(default_factory=list)
-    summary: Optional[str] = None
+    skills: list[str] = Field(default_factory=list)
+    education: list[EducationEntry] = Field(default_factory=list)
+    work_experience: list[WorkExperience] = Field(default_factory=list)
+    certifications: list[str] = Field(default_factory=list)
+    languages: list[str] = Field(default_factory=list)
+    summary: str | None = None
     redrob_signals: RedrobSignals = Field(default_factory=RedrobSignals)
-    raw_text: Optional[str] = None
-    raw_data: Dict[str, Any] = Field(default_factory=dict)
+    raw_text: str | None = None
+    raw_data: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     @field_validator("years_of_experience")
@@ -204,10 +203,10 @@ class CandidateProfile(BaseModel):
 
     @field_validator("skills")
     @classmethod
-    def deduplicate_skills(cls, v: List[str]) -> List[str]:
+    def deduplicate_skills(cls, v: list[str]) -> list[str]:
         """Remove duplicate skills (case-insensitive)."""
         seen: set[str] = set()
-        result: List[str] = []
+        result: list[str] = []
         for skill in v:
             normalised = skill.strip().lower()
             if normalised and normalised not in seen:
@@ -216,7 +215,7 @@ class CandidateProfile(BaseModel):
         return result[:100]  # cap at 100 skills
 
     @property
-    def highest_education(self) -> Optional[EducationEntry]:
+    def highest_education(self) -> EducationEntry | None:
         """Return the highest education entry by level."""
         level_order = {
             EducationLevel.PHD: 6,
@@ -233,7 +232,7 @@ class CandidateProfile(BaseModel):
         return max(self.education, key=lambda e: level_order.get(e.level, 0))
 
     @property
-    def current_work(self) -> Optional[WorkExperience]:
+    def current_work(self) -> WorkExperience | None:
         """Return the current/most recent work experience entry."""
         current = [w for w in self.work_experience if w.is_current]
         if current:
@@ -356,17 +355,17 @@ class CandidateEvidence(BaseModel):
         evidence_strength: Overall evidence quality score [0, 1].
     """
     candidate_id: str
-    skill_evidence: Dict[str, List[str]] = Field(default_factory=dict)
-    experience_evidence: List[str] = Field(default_factory=list)
-    leadership_evidence: List[str] = Field(default_factory=list)
-    learning_evidence: List[str] = Field(default_factory=list)
-    stability_evidence: List[str] = Field(default_factory=list)
-    risk_evidence: List[str] = Field(default_factory=list)
-    behavior_evidence: List[str] = Field(default_factory=list)
+    skill_evidence: dict[str, list[str]] = Field(default_factory=dict)
+    experience_evidence: list[str] = Field(default_factory=list)
+    leadership_evidence: list[str] = Field(default_factory=list)
+    learning_evidence: list[str] = Field(default_factory=list)
+    stability_evidence: list[str] = Field(default_factory=list)
+    risk_evidence: list[str] = Field(default_factory=list)
+    behavior_evidence: list[str] = Field(default_factory=list)
     evidence_strength: float = Field(default=0.0, ge=0.0, le=1.0)
 
     @property
-    def evidence(self) -> Dict[str, Any]:
+    def evidence(self) -> dict[str, Any]:
         """Aggregate all evidence categories into a single dictionary."""
         return {
             "skill_evidence": self.skill_evidence,
@@ -380,7 +379,7 @@ class CandidateEvidence(BaseModel):
         }
 
     @property
-    def timeline(self) -> List[Any]:
+    def timeline(self) -> list[Any]:
         """Return timeline events (mock or empty list if not explicitly stored)."""
         return []
 
@@ -426,11 +425,11 @@ class CandidateGenome(BaseModel):
     behavioral_signals: float = Field(default=0.0, ge=0.0, le=1.0)
     hiring_readiness: float = Field(default=0.0, ge=0.0, le=1.0)
 
-    embedding_id: Optional[int] = None  # FAISS internal index
+    embedding_id: int | None = None  # FAISS internal index
     computed_at: datetime = Field(default_factory=datetime.utcnow)
 
     @property
-    def genome_vector(self) -> List[float]:
+    def genome_vector(self) -> list[float]:
         """Return genome dimensions as a list for radar chart data."""
         return [
             self.technical_capability,

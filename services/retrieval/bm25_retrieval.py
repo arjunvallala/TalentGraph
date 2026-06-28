@@ -6,12 +6,10 @@ who match exact job description terms, skills, or job titles.
 """
 from __future__ import annotations
 
-from typing import List, Dict, Any, Tuple
-
-from shared.config import settings
-from shared.logging_setup import get_logger
 from services.preprocessing.bm25_builder import BM25IndexBuilder
 from services.preprocessing.feature_store import FeatureStore
+from shared.config import settings
+from shared.logging_setup import get_logger
 
 logger = get_logger(__name__)
 
@@ -33,7 +31,7 @@ class BM25RetrievalEngine:
         if self.index is None:
             self.index = self.index_builder.load_index(settings.bm25_index_path)
 
-    def retrieve(self, query_tokens: List[str], top_k: int = 1500) -> List[str]:
+    def retrieve(self, query_tokens: list[str], top_k: int = 1500) -> list[str]:
         """
         Retrieve candidate IDs matching the tokenized query terms.
 

@@ -14,10 +14,8 @@ Reports generated:
 """
 from __future__ import annotations
 
-import sys
-import json
 import random
-import time
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -198,7 +196,7 @@ def run(
     console.print(risk_table)
 
     # ── Final Summary ──────────────────────────────────────────────────────────
-    console.print(f"\n[bold green]Evaluation Complete[/bold green]")
+    console.print("\n[bold green]Evaluation Complete[/bold green]")
     console.print(f"  Candidates evaluated : {n:,}")
     console.print(f"  Score IQR            : {np.percentile(scores, 75) - np.percentile(scores, 25):.4f} "
                   f"({'good spread' if np.percentile(scores, 75) - np.percentile(scores, 25) > 0.10 else 'concentrated'})")

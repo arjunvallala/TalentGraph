@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import datetime
-from typing import Generator
 from pathlib import Path
 
 import pytest
@@ -28,7 +26,9 @@ os.environ["DUCKDB_PATH"] = ":memory:"
 # Mock sentence_transformers package globally
 import sys
 from unittest.mock import MagicMock
+
 import numpy as np
+
 
 class MockSentenceTransformer:
     def __init__(self, model_name_or_path, *args, **kwargs):
@@ -50,12 +50,15 @@ sys.modules["sentence_transformers"] = mock_st_module
 
 from shared.config import get_settings
 from shared.types.candidate import (
-    CandidateProfile, CandidateFeatures, CandidateEvidence,
-    WorkExperience, EducationEntry, RedrobSignals,
-    AvailabilityStatus, EducationLevel,
+    AvailabilityStatus,
+    CandidateFeatures,
+    CandidateProfile,
+    EducationEntry,
+    EducationLevel,
+    RedrobSignals,
+    WorkExperience,
 )
-from shared.types.job import JobRaw, JobProfile, ExperienceLevel, SkillRequirement
-
+from shared.types.job import ExperienceLevel, JobProfile, JobRaw, SkillRequirement
 
 # ── Test Settings ─────────────────────────────────────────────────────────────
 
@@ -244,6 +247,7 @@ def sample_job_profile():
 @pytest.fixture
 def api_client(test_settings):
     """Return an async HTTP test client for the FastAPI app."""
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
+
     from apps.api.main import app
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")

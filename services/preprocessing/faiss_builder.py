@@ -10,7 +10,6 @@ For large corpora (>100k candidates), switches to IVF for efficiency.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 
@@ -42,7 +41,7 @@ class FAISSIndexBuilder:
         """Initialise the FAISS index builder."""
         logger.info("FAISSIndexBuilder initialised")
 
-    def build_index(self, embeddings: np.ndarray) -> "faiss.Index":  # type: ignore
+    def build_index(self, embeddings: np.ndarray) -> faiss.Index:  # type: ignore
         """
         Build a FAISS index from a numpy embedding matrix.
 
@@ -100,7 +99,7 @@ class FAISSIndexBuilder:
 
         return index
 
-    def save_index(self, index: "faiss.Index", path: str) -> None:  # type: ignore
+    def save_index(self, index: faiss.Index, path: str) -> None:  # type: ignore
         """
         Save a FAISS index to disk.
 
@@ -118,7 +117,7 @@ class FAISSIndexBuilder:
         faiss.write_index(index, str(p))
         logger.info("FAISS index saved to: %s (%d vectors)", p, index.ntotal)
 
-    def load_index(self, path: str) -> "faiss.Index":  # type: ignore
+    def load_index(self, path: str) -> faiss.Index:  # type: ignore
         """
         Load a FAISS index from disk.
 
@@ -146,10 +145,10 @@ class FAISSIndexBuilder:
 
     def search(
         self,
-        index: "faiss.Index",  # type: ignore
+        index: faiss.Index,  # type: ignore
         query: np.ndarray,
         top_k: int,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Search the FAISS index for the most similar vectors.
 

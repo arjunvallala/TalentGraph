@@ -14,12 +14,11 @@ from __future__ import annotations
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 # Add project root to path

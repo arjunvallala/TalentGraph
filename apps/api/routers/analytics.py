@@ -6,7 +6,7 @@ candidate distributions, and risk breakdowns.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import ORJSONResponse
 
 from shared.config import settings
@@ -41,9 +41,9 @@ async def get_analytics_summary(
         404: If no rankings exist for this job.
     """
     try:
-        from services.preprocessing.feature_store import FeatureStore
-        from services.analytics.funnel_analytics import FunnelAnalytics
         from services.analytics.feature_importance import FeatureImportanceAnalyzer
+        from services.analytics.funnel_analytics import FunnelAnalytics
+        from services.preprocessing.feature_store import FeatureStore
 
         store = FeatureStore(settings.duckdb_path)
         results = store.get_ranking_results(job_id)
@@ -130,8 +130,8 @@ async def get_feature_importance(
         List of FeatureImportance objects sorted by importance descending.
     """
     try:
-        from services.preprocessing.feature_store import FeatureStore
         from services.analytics.feature_importance import FeatureImportanceAnalyzer
+        from services.preprocessing.feature_store import FeatureStore
 
         store = FeatureStore(settings.duckdb_path)
         results = store.get_ranking_results(job_id)

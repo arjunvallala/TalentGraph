@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from shared.logging_setup import get_logger
 from shared.types.candidate import WorkExperience
@@ -20,7 +20,7 @@ from shared.types.candidate import WorkExperience
 logger = get_logger(__name__)
 
 # Date formats to attempt for parsing
-_DATE_FORMATS: List[str] = [
+_DATE_FORMATS: list[str] = [
     "%Y-%m-%d",
     "%Y-%m",
     "%m/%Y",
@@ -39,7 +39,7 @@ _CURRENT_KEYWORDS: set[str] = {
 }
 
 # Promotion indicators: lower title → higher title
-_SENIORITY_ORDER: Dict[str, int] = {
+_SENIORITY_ORDER: dict[str, int] = {
     "intern": 0, "trainee": 0, "fresher": 0,
     "junior": 1, "jr": 1, "associate": 1,
     "engineer": 2, "developer": 2, "analyst": 2, "consultant": 2,
@@ -52,7 +52,7 @@ _SENIORITY_ORDER: Dict[str, int] = {
 }
 
 
-def _parse_date(date_str: str) -> Optional[date]:
+def _parse_date(date_str: str) -> date | None:
     """
     Attempt to parse a date string using multiple format patterns.
 
@@ -117,7 +117,7 @@ class CareerParser:
         """Initialise the career parser."""
         logger.debug("CareerParser initialised")
 
-    def parse_work_history(self, raw: str | list) -> List[WorkExperience]:
+    def parse_work_history(self, raw: str | list) -> list[WorkExperience]:
         """
         Parse raw work history data into a list of WorkExperience objects.
 
@@ -133,7 +133,7 @@ class CareerParser:
         if raw is None or raw == "":
             return []
 
-        experiences: List[WorkExperience] = []
+        experiences: list[WorkExperience] = []
 
         # If already a list, process directly
         if isinstance(raw, list):
@@ -215,7 +215,7 @@ class CareerParser:
             return True
         return str(end_date).lower().strip() in _CURRENT_KEYWORDS
 
-    def detect_promotions(self, experiences: List[WorkExperience]) -> int:
+    def detect_promotions(self, experiences: list[WorkExperience]) -> int:
         """
         Count the number of clear promotions in the career history.
 
@@ -252,8 +252,8 @@ class CareerParser:
         return promotions
 
     def find_career_gaps(
-        self, experiences: List[WorkExperience]
-    ) -> List[Tuple[str, str, int]]:
+        self, experiences: list[WorkExperience]
+    ) -> list[tuple[str, str, int]]:
         """
         Find significant employment gaps between consecutive roles.
 
@@ -273,7 +273,7 @@ class CareerParser:
             key=lambda e: _parse_date(e.start_date or "") or date.min,
         )
 
-        gaps: List[Tuple[str, str, int]] = []
+        gaps: list[tuple[str, str, int]] = []
         for i in range(1, len(sorted_exp)):
             prev = sorted_exp[i - 1]
             curr = sorted_exp[i]
@@ -299,7 +299,7 @@ class CareerParser:
 
         return sorted(gaps, key=lambda g: g[2], reverse=True)
 
-    def compute_career_age_months(self, experiences: List[WorkExperience]) -> int:
+    def compute_career_age_months(self, experiences: list[WorkExperience]) -> int:
         """
         Compute total career age in months from first role to now.
 
@@ -327,7 +327,7 @@ class CareerParser:
         months = (today.year - earliest.year) * 12 + (today.month - earliest.month)
         return max(0, months)
 
-    def compute_avg_tenure(self, experiences: List[WorkExperience]) -> float:
+    def compute_avg_tenure(self, experiences: list[WorkExperience]) -> float:
         """
         Compute the average tenure in months across all experiences.
 
@@ -350,7 +350,7 @@ class CareerParser:
 
         return sum(tenures) / len(tenures)
 
-    def _parse_experience_dict(self, data: Dict[str, Any]) -> Optional[WorkExperience]:
+    def _parse_experience_dict(self, data: dict[str, Any]) -> WorkExperience | None:
         """Parse a single work experience dict."""
         try:
             company = str(data.get("company", data.get("employer", data.get("organization", "")))).strip()
@@ -397,7 +397,7 @@ class CareerParser:
             logger.debug("Experience dict parse error: %s — %s", data, exc)
             return None
 
-    def _parse_text_experience(self, text: str) -> Optional[WorkExperience]:
+    def _parse_text_experience(self, text: str) -> WorkExperience | None:
         """Parse a plain-text experience description (best-effort)."""
         if not text or len(text.strip()) < 3:
             return None
@@ -412,10 +412,7 @@ class CareerParser:
             start_date = year_range.group(1)
             end_raw = year_range.group(2)
             is_current = end_raw.lower() in _CURRENT_KEYWORDS
-            if is_current:
-                end_date = None
-            else:
-                end_date = end_raw
+            end_date = None if is_current else end_raw
             duration = self.compute_tenure_months(start_date, end_date or "present")
 
         return WorkExperience(
@@ -428,7 +425,7 @@ class CareerParser:
             description=text[:500],
         )
 
-    def _sort_experiences(self, experiences: List[WorkExperience]) -> List[WorkExperience]:
+    def _sort_experiences(self, experiences: list[WorkExperience]) -> list[WorkExperience]:
         """Sort experiences newest-first by start_date."""
         def sort_key(e: WorkExperience) -> date:
             if e.is_current:

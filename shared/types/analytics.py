@@ -7,7 +7,6 @@ feature importance, candidate distributions, and risk breakdowns.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -71,12 +70,12 @@ class CandidateDistribution(BaseModel):
         location_distribution: Count by top locations.
         availability_distribution: Count by availability status.
     """
-    score_histogram: Dict[str, int] = Field(default_factory=dict)
-    experience_distribution: Dict[str, int] = Field(default_factory=dict)
-    education_distribution: Dict[str, int] = Field(default_factory=dict)
-    domain_distribution: Dict[str, int] = Field(default_factory=dict)
-    location_distribution: Dict[str, int] = Field(default_factory=dict)
-    availability_distribution: Dict[str, int] = Field(default_factory=dict)
+    score_histogram: dict[str, int] = Field(default_factory=dict)
+    experience_distribution: dict[str, int] = Field(default_factory=dict)
+    education_distribution: dict[str, int] = Field(default_factory=dict)
+    domain_distribution: dict[str, int] = Field(default_factory=dict)
+    location_distribution: dict[str, int] = Field(default_factory=dict)
+    availability_distribution: dict[str, int] = Field(default_factory=dict)
 
 
 class RiskBreakdown(BaseModel):
@@ -90,12 +89,12 @@ class RiskBreakdown(BaseModel):
         critical_risk_candidates: Count of candidates with critical risk.
         top_risk_flags: Most common risk flags encountered.
     """
-    risk_level_distribution: Dict[str, int] = Field(default_factory=dict)
+    risk_level_distribution: dict[str, int] = Field(default_factory=dict)
     avg_job_hop_risk: float = 0.0
     avg_gap_risk: float = 0.0
     critical_risk_candidates: int = 0
     high_risk_candidates: int = 0
-    top_risk_flags: List[str] = Field(default_factory=list)
+    top_risk_flags: list[str] = Field(default_factory=list)
 
 
 class ConfidenceDistribution(BaseModel):
@@ -127,7 +126,7 @@ class AnalyticsSummary(BaseModel):
     """
     job_id: str
     funnel: HiringFunnelStats = Field(default_factory=HiringFunnelStats)
-    feature_importance: List[FeatureImportance] = Field(default_factory=list)
+    feature_importance: list[FeatureImportance] = Field(default_factory=list)
     candidate_distribution: CandidateDistribution = Field(
         default_factory=CandidateDistribution
     )
@@ -135,8 +134,8 @@ class AnalyticsSummary(BaseModel):
     confidence_distribution: ConfidenceDistribution = Field(
         default_factory=ConfidenceDistribution
     )
-    recommendation_distribution: Dict[str, int] = Field(default_factory=dict)
-    top_skills: List[str] = Field(default_factory=list)
-    skill_gap_analysis: List[str] = Field(default_factory=list)
+    recommendation_distribution: dict[str, int] = Field(default_factory=dict)
+    top_skills: list[str] = Field(default_factory=list)
+    skill_gap_analysis: list[str] = Field(default_factory=list)
     avg_overall_score: float = 0.0
     generated_at: datetime = Field(default_factory=datetime.utcnow)

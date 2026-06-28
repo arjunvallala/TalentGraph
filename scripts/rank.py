@@ -13,7 +13,6 @@ from __future__ import annotations
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -36,12 +35,12 @@ app = typer.Typer(
 
 @app.command()
 def run(
-    jd: Optional[Path] = typer.Option(
+    jd: Path | None = typer.Option(
         None,
         "--jd",
         help="Path to job description text file",
     ),
-    jd_text: Optional[str] = typer.Option(
+    jd_text: str | None = typer.Option(
         None,
         "--jd-text",
         help="Job description text (inline)",
@@ -51,12 +50,12 @@ def run(
         "--title", "-t",
         help="Job title",
     ),
-    job_id: Optional[str] = typer.Option(
+    job_id: str | None = typer.Option(
         None,
         "--job-id",
         help="Use an already-analyzed job ID",
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output", "-o",
         help="Output path for submission.csv",
@@ -97,9 +96,9 @@ def run(
     start_time = time.perf_counter()
 
     try:
+        from services.analytics.submission_generator import SubmissionGenerator
         from services.preprocessing.feature_store import FeatureStore
         from services.ranking.ranking_pipeline import RankingPipeline
-        from services.analytics.submission_generator import SubmissionGenerator
         from shared.types.job import JobRaw
 
         # Load JD text

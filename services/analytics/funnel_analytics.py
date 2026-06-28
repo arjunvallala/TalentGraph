@@ -5,9 +5,8 @@ Computes candidate retention and drop-off stats across all pipeline stages.
 """
 from __future__ import annotations
 
-from typing import List
-from shared.types.ranking import CandidateResult
 from shared.types.analytics import HiringFunnelStats
+from shared.types.ranking import CandidateResult
 
 
 class FunnelAnalytics:
@@ -19,7 +18,7 @@ class FunnelAnalytics:
         """Initialize funnel analytics."""
         pass
 
-    def compute_from_results(self, results: List[CandidateResult]) -> HiringFunnelStats:
+    def compute_from_results(self, results: list[CandidateResult]) -> HiringFunnelStats:
         """
         Compute stage-by-stage funnel drop-off stats.
 
@@ -30,7 +29,7 @@ class FunnelAnalytics:
             HiringFunnelStats object containing funnel counts and retention rates.
         """
         total = 100000  # Assume standard starting pool size for India Runs
-        
+
         # In a real environment, we'd query the total processed from the pipeline run log,
         # but for individual job analytics, we can extrapolate or use static targets.
         stage1 = min(total, 2000)

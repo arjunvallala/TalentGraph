@@ -6,11 +6,10 @@ Defines the abstract base class for all council members.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
 
 from shared.types.candidate import CandidateGenome
+from shared.types.council import CouncilType, CouncilVote
 from shared.types.job import JobGenome
-from shared.types.council import CouncilVote, CouncilType
 
 
 class BaseCouncil(ABC):

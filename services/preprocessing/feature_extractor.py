@@ -12,9 +12,8 @@ All computations are deterministic — no randomness, no LLMs.
 from __future__ import annotations
 
 import math
-import re
-from typing import List
 
+from services.preprocessing.career_parser import CareerParser
 from shared.constants import (
     CAREER_GAP_THRESHOLD_MONTHS,
     EPSILON,
@@ -33,7 +32,6 @@ from shared.types.candidate import (
     WorkExperience,
 )
 from shared.utils.math_utils import clip, normalize_log, safe_divide
-from services.preprocessing.career_parser import CareerParser
 
 logger = get_logger(__name__)
 
@@ -112,9 +110,7 @@ class FeatureExtractor:
             years = profile.years_of_experience
 
             # Career metadata
-            total_companies = len(set(
-                e.company.strip().lower() for e in experiences if e.company.strip()
-            ))
+            total_companies = len({e.company.strip().lower() for e in experiences if e.company.strip()})
             avg_tenure = self._career_parser.compute_avg_tenure(experiences)
             max_tenure = max(
                 (e.duration_months for e in experiences if e.duration_months),
@@ -191,7 +187,7 @@ class FeatureExtractor:
         return normalize_log(years, max_val=MAX_EXPERIENCE_YEARS)
 
     @staticmethod
-    def compute_skill_coverage_static(candidate_skills: List[str], jd_skills: List[str]) -> float:
+    def compute_skill_coverage_static(candidate_skills: list[str], jd_skills: list[str]) -> float:
         """
         Compute static skill coverage score.
 
@@ -211,7 +207,7 @@ class FeatureExtractor:
         overlap = len(candidate_set.intersection(jd_set))
         return clip(float(overlap) / len(jd_set))
 
-    def compute_career_stability(self, experiences: List[WorkExperience]) -> float:
+    def compute_career_stability(self, experiences: list[WorkExperience]) -> float:
         """
         Compute career stability as the inverse coefficient of variation of tenures.
 
@@ -252,7 +248,7 @@ class FeatureExtractor:
         return clip(stability * tenure_penalty)
 
     def compute_promotion_score(
-        self, experiences: List[WorkExperience], years: float
+        self, experiences: list[WorkExperience], years: float
     ) -> float:
         """
         Compute promotion score based on detected title progression.
@@ -489,17 +485,13 @@ class FeatureExtractor:
             val = getattr(profile, field, None)
             if val is None:
                 continue
-            if isinstance(val, str) and val.strip():
-                score += weight
-            elif isinstance(val, list) and len(val) > 0:
-                score += weight
-            elif isinstance(val, (int, float)) and val > 0:
+            if isinstance(val, str) and val.strip() or isinstance(val, list) and len(val) > 0 or isinstance(val, int | float) and val > 0:
                 score += weight
 
         return clip(score / sum(_COMPLETENESS_FIELD_WEIGHTS.values()))
 
     def compute_career_velocity(
-        self, experiences: List[WorkExperience], years: float
+        self, experiences: list[WorkExperience], years: float
     ) -> float:
         """
         Compute career velocity: how fast the candidate has advanced.
@@ -544,7 +536,7 @@ class FeatureExtractor:
         velocity = safe_divide(seniority_ratio, year_factor, 0.0)
         return clip(velocity)
 
-    def compute_skill_consistency(self, experiences: List[WorkExperience]) -> float:
+    def compute_skill_consistency(self, experiences: list[WorkExperience]) -> float:
         """
         Compute skill coherence across career stages.
 
@@ -583,7 +575,7 @@ class FeatureExtractor:
         avg_similarity = total_similarity / total_pairs
         return clip(avg_similarity)
 
-    def compute_job_hop_risk(self, experiences: List[WorkExperience]) -> float:
+    def compute_job_hop_risk(self, experiences: list[WorkExperience]) -> float:
         """
         Compute job-hopping risk based on short tenure frequency.
 
@@ -618,7 +610,7 @@ class FeatureExtractor:
 
         return clip(risk + extra_penalty)
 
-    def compute_gap_risk(self, experiences: List[WorkExperience]) -> float:
+    def compute_gap_risk(self, experiences: list[WorkExperience]) -> float:
         """
         Compute career gap risk from employment gaps.
 

@@ -6,28 +6,24 @@ and combines their votes into a FinalCouncilDecision consensus.
 """
 from __future__ import annotations
 
-import time
-import math
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import Dict, List, Any, Optional
 
 import numpy as np
 
-from shared.logging_setup import get_logger
-from shared.types.candidate import CandidateGenome
-from shared.types.job import JobGenome
-from shared.types.council import (
-    CouncilVote,
-    CouncilType,
-    FinalCouncilDecision,
-    CouncilEvaluationResult,
-)
-from services.ranking.council.technical_council import TechnicalCouncil
-from services.ranking.council.career_council import CareerCouncil
 from services.ranking.council.behavior_council import BehaviorCouncil
+from services.ranking.council.career_council import CareerCouncil
 from services.ranking.council.growth_council import GrowthCouncil
 from services.ranking.council.risk_council import RiskCouncil
+from services.ranking.council.technical_council import TechnicalCouncil
+from shared.logging_setup import get_logger
+from shared.types.candidate import CandidateGenome
+from shared.types.council import (
+    CouncilType,
+    CouncilVote,
+    FinalCouncilDecision,
+)
+from shared.types.job import JobGenome
 
 logger = get_logger(__name__)
 
@@ -68,8 +64,7 @@ class HiringCouncil:
         Returns:
             FinalCouncilDecision representing the consensus decision.
         """
-        start_time = time.perf_counter()
-        votes: Dict[str, CouncilVote] = {}
+        votes: dict[str, CouncilVote] = {}
 
         # 1. Run evaluators in parallel using ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -77,7 +72,7 @@ class HiringCouncil:
                 executor.submit(member.evaluate, candidate, job): member
                 for member in self.members
             }
-            
+
             for future in futures:
                 member = futures[future]
                 try:
@@ -86,7 +81,6 @@ class HiringCouncil:
                 except Exception as e:
                     logger.error(f"Council member '{member.council_type.value}' failed: {e}")
 
-        duration = time.perf_counter() - start_time
 
         # 2. Compute Consensus Score
         individual_scores = {}

@@ -10,8 +10,7 @@ Usage:
 """
 from __future__ import annotations
 
-from typing import Any, Optional
-
+from typing import Any
 
 # ── Base ──────────────────────────────────────────────────────────────────────
 
@@ -22,7 +21,7 @@ class TalentGraphError(Exception):
         self,
         message: str,
         code: str = "TALENTGRAPH_ERROR",
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.message = message
         self.code = code
@@ -43,7 +42,7 @@ class TalentGraphError(Exception):
 class ConfigurationError(TalentGraphError):
     """Raised when required configuration is missing or invalid."""
 
-    def __init__(self, message: str, config_key: Optional[str] = None) -> None:
+    def __init__(self, message: str, config_key: str | None = None) -> None:
         super().__init__(
             message=message,
             code="CONFIGURATION_ERROR",
@@ -61,7 +60,7 @@ class DataError(TalentGraphError):
 class CandidateNotFoundError(DataError):
     """Raised when a candidate cannot be found in the store."""
 
-    def __init__(self, candidate_id: str, message: Optional[str] = None) -> None:
+    def __init__(self, candidate_id: str, message: str | None = None) -> None:
         super().__init__(
             message=message or f"Candidate '{candidate_id}' not found",
             code="CANDIDATE_NOT_FOUND",
@@ -72,7 +71,7 @@ class CandidateNotFoundError(DataError):
 class JobNotFoundError(DataError):
     """Raised when a job cannot be found in the store."""
 
-    def __init__(self, job_id: str, message: Optional[str] = None) -> None:
+    def __init__(self, job_id: str, message: str | None = None) -> None:
         super().__init__(
             message=message or f"Job '{job_id}' not found",
             code="JOB_NOT_FOUND",
@@ -83,7 +82,7 @@ class JobNotFoundError(DataError):
 class InvalidDataError(DataError):
     """Raised when input data fails schema or domain validation."""
 
-    def __init__(self, message: str, field: Optional[str] = None) -> None:
+    def __init__(self, message: str, field: str | None = None) -> None:
         super().__init__(
             message=message,
             code="INVALID_DATA",
@@ -123,7 +122,7 @@ class ParseError(PreprocessingError):
 class EmbeddingError(PreprocessingError):
     """Raised when embedding generation fails."""
 
-    def __init__(self, message: str, batch_index: Optional[int] = None) -> None:
+    def __init__(self, message: str, batch_index: int | None = None) -> None:
         super().__init__(
             message=message,
             code="EMBEDDING_ERROR",
@@ -145,7 +144,7 @@ class IndexBuildError(PreprocessingError):
 class CheckpointError(PreprocessingError):
     """Raised when checkpoint save/load fails."""
 
-    def __init__(self, message: str, checkpoint_path: Optional[str] = None) -> None:
+    def __init__(self, message: str, checkpoint_path: str | None = None) -> None:
         super().__init__(
             message=message,
             code="CHECKPOINT_ERROR",
@@ -218,7 +217,7 @@ class CouncilError(RankingError):
 class PipelineError(RankingError):
     """Raised when the ranking pipeline encounters a fatal error."""
 
-    def __init__(self, message: str, stage: Optional[int] = None) -> None:
+    def __init__(self, message: str, stage: int | None = None) -> None:
         super().__init__(
             message=message,
             code="PIPELINE_ERROR",
@@ -231,7 +230,7 @@ class PipelineError(RankingError):
 class FeatureStoreError(TalentGraphError):
     """Raised when feature store read/write fails."""
 
-    def __init__(self, message: str, operation: Optional[str] = None) -> None:
+    def __init__(self, message: str, operation: str | None = None) -> None:
         super().__init__(
             message=message,
             code="FEATURE_STORE_ERROR",
@@ -244,7 +243,7 @@ class FeatureStoreError(TalentGraphError):
 class SubmissionError(TalentGraphError):
     """Raised when submission generation or validation fails."""
 
-    def __init__(self, message: str, row_index: Optional[int] = None) -> None:
+    def __init__(self, message: str, row_index: int | None = None) -> None:
         super().__init__(
             message=message,
             code="SUBMISSION_ERROR",
@@ -262,7 +261,7 @@ class APIError(TalentGraphError):
         message: str,
         status_code: int = 500,
         code: str = "API_ERROR",
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.status_code = status_code
         super().__init__(message=message, code=code, details=details)
@@ -283,7 +282,7 @@ class NotFoundError(APIError):
 class ValidationError(APIError):
     """422 — Request validation failed."""
 
-    def __init__(self, message: str, field: Optional[str] = None) -> None:
+    def __init__(self, message: str, field: str | None = None) -> None:
         super().__init__(
             message=message,
             status_code=422,

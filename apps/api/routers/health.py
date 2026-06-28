@@ -6,11 +6,10 @@ Used by Docker health checks, load balancers, and monitoring systems.
 """
 from __future__ import annotations
 
-import os
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
@@ -67,7 +66,7 @@ async def readiness_check() -> ORJSONResponse:
     Returns:
         200 if ready, 503 if dependencies are missing.
     """
-    checks: Dict[str, Any] = {}
+    checks: dict[str, Any] = {}
     all_ready = True
 
     # Check DuckDB

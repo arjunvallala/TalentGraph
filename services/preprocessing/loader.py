@@ -8,8 +8,6 @@ Handles missing optional columns gracefully — only candidate_id is required.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
-
 import polars as pl
 
 from shared.logging_setup import get_logger
@@ -17,10 +15,10 @@ from shared.logging_setup import get_logger
 logger = get_logger(__name__)
 
 # Required columns that MUST be present in the CSV
-REQUIRED_COLUMNS: List[str] = ["candidate_id"]
+REQUIRED_COLUMNS: list[str] = ["candidate_id"]
 
 # Optional columns — loaded if present, defaults used if absent
-OPTIONAL_COLUMNS: List[str] = [
+OPTIONAL_COLUMNS: list[str] = [
     "name", "email", "phone", "current_title", "current_company",
     "years_of_experience", "skills", "education", "work_history",
     "certifications", "languages", "summary", "location",
@@ -30,7 +28,7 @@ OPTIONAL_COLUMNS: List[str] = [
 ]
 
 # Column default values for graceful filling
-COLUMN_DEFAULTS: Dict[str, object] = {
+COLUMN_DEFAULTS: dict[str, object] = {
     "name": "",
     "email": "",
     "phone": "",
@@ -118,7 +116,7 @@ class CandidateLoader:
         existing_cols = set(df.columns)
         for col in OPTIONAL_COLUMNS:
             if col not in existing_cols:
-                default_val = COLUMN_DEFAULTS.get(col, None)
+                default_val = COLUMN_DEFAULTS.get(col)
                 logger.debug("Injecting missing column '%s' with default %r", col, default_val)
                 df = df.with_columns(pl.lit(default_val).alias(col))
 
@@ -153,7 +151,7 @@ class CandidateLoader:
         logger.info("CSV loaded successfully: %d candidates", df.height)
         return df
 
-    def load_csv(self, path: str) -> Tuple[pl.DataFrame, Dict[str, object]]:
+    def load_csv(self, path: str) -> tuple[pl.DataFrame, dict[str, object]]:
         """
         Load candidate CSV and compute statistics.
 
@@ -169,7 +167,7 @@ class CandidateLoader:
         stats["total_rows"] = stats.get("row_count", len(df))
         return df, stats
 
-    def validate_schema(self, df: pl.DataFrame) -> Tuple[bool, List[str]]:
+    def validate_schema(self, df: pl.DataFrame) -> tuple[bool, list[str]]:
         """
         Validate that the DataFrame has all required columns.
 
@@ -181,7 +179,7 @@ class CandidateLoader:
             is_valid is True if all required columns are present.
             issues_list contains human-readable descriptions of problems found.
         """
-        issues: List[str] = []
+        issues: list[str] = []
         existing_cols = set(df.columns)
 
         for col in REQUIRED_COLUMNS:
@@ -207,7 +205,7 @@ class CandidateLoader:
 
         return is_valid, issues
 
-    def get_statistics(self, df: pl.DataFrame) -> Dict[str, object]:
+    def get_statistics(self, df: pl.DataFrame) -> dict[str, object]:
         """
         Compute basic statistics about the loaded dataset.
 
@@ -218,14 +216,14 @@ class CandidateLoader:
             Dictionary with row_count, column_count, missing_rates,
             and numeric summaries for key columns.
         """
-        stats: Dict[str, object] = {
+        stats: dict[str, object] = {
             "row_count": df.height,
             "column_count": df.width,
             "columns": df.columns,
         }
 
         # Missing value rates per column
-        missing_rates: Dict[str, float] = {}
+        missing_rates: dict[str, float] = {}
         for col in df.columns:
             null_count = df[col].null_count()
             missing_rates[col] = round(null_count / max(df.height, 1), 4)

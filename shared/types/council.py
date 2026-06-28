@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -51,10 +50,10 @@ class CouncilVote(BaseModel):
     score: float = Field(default=0.0, ge=0.0, le=1.0)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     recommendation: str = ""
-    dimension_scores: Dict[str, float] = Field(default_factory=dict)
-    strengths: List[str] = Field(default_factory=list)
-    concerns: List[str] = Field(default_factory=list)
-    evidence: List[str] = Field(default_factory=list)
+    dimension_scores: dict[str, float] = Field(default_factory=dict)
+    strengths: list[str] = Field(default_factory=list)
+    concerns: list[str] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
     rationale: str = ""
     evaluated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -74,12 +73,12 @@ class CouncilEvaluationResult(BaseModel):
         failed_councils: List of council types that failed/timed out.
     """
     candidate_id: str
-    votes: Dict[str, CouncilVote] = Field(default_factory=dict)
+    votes: dict[str, CouncilVote] = Field(default_factory=dict)
     evaluation_duration_seconds: float = 0.0
     all_voted: bool = False
-    failed_councils: List[str] = Field(default_factory=list)
+    failed_councils: list[str] = Field(default_factory=list)
 
-    def get_vote(self, council_type: CouncilType) -> Optional[CouncilVote]:
+    def get_vote(self, council_type: CouncilType) -> CouncilVote | None:
         """Retrieve a specific council's vote by type."""
         return self.votes.get(council_type.value)
 
@@ -116,12 +115,12 @@ class FinalCouncilDecision(BaseModel):
     council_score: float = Field(default=0.0, ge=0.0, le=1.0)
     council_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     agreement_score: float = Field(default=0.0, ge=0.0, le=1.0)
-    individual_scores: Dict[str, float] = Field(default_factory=dict)
-    individual_confidences: Dict[str, float] = Field(default_factory=dict)
-    all_strengths: List[str] = Field(default_factory=list)
-    all_concerns: List[str] = Field(default_factory=list)
-    decisive_factors: List[str] = Field(default_factory=list)
-    dissenting_opinion: Optional[str] = None
+    individual_scores: dict[str, float] = Field(default_factory=dict)
+    individual_confidences: dict[str, float] = Field(default_factory=dict)
+    all_strengths: list[str] = Field(default_factory=list)
+    all_concerns: list[str] = Field(default_factory=list)
+    decisive_factors: list[str] = Field(default_factory=list)
+    dissenting_opinion: str | None = None
     risk_penalty_applied: float = Field(default=0.0, ge=0.0, le=1.0)
     final_score: float = Field(default=0.0, ge=0.0, le=1.0)
     decided_at: datetime = Field(default_factory=datetime.utcnow)

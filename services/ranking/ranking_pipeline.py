@@ -12,37 +12,30 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
-from typing import List, Dict, Any, Tuple
 
+from services.explainability.explanation_generator import ExplanationGenerator
+from services.intelligence.candidate_intelligence import CandidateIntelligenceEngine
+from services.intelligence.job_intelligence import JobIntelligenceEngine
+from services.preprocessing.feature_store import FeatureStore
+from services.ranking.confidence_engine import ConfidenceEngine
+from services.ranking.council.hiring_council import HiringCouncil
+from services.ranking.feature_ranker import FeatureRanker
+from services.retrieval.hybrid_retrieval import HybridRetrievalEngine
 from shared.config import Settings
 from shared.constants import (
+    FINAL_TOP_K,
     STAGE1_TOP_K,
     STAGE2_TOP_K,
     STAGE3_TOP_K,
-    FINAL_TOP_K,
 )
 from shared.logging_setup import get_logger
-from shared.types.job import JobRaw, JobProfile, JobGenome
-from shared.types.candidate import (
-    CandidateProfile,
-    CandidateFeatures,
-    CandidateGenome,
-)
+from shared.types.job import JobRaw
 from shared.types.ranking import (
     CandidateResult,
+    HiringRecommendation,
     RankedList,
     RankingStageResult,
-    HiringRecommendation,
-    ConfidenceLevel,
 )
-from services.preprocessing.feature_store import FeatureStore
-from services.intelligence.job_intelligence import JobIntelligenceEngine
-from services.intelligence.candidate_intelligence import CandidateIntelligenceEngine
-from services.retrieval.hybrid_retrieval import HybridRetrievalEngine
-from services.ranking.feature_ranker import FeatureRanker
-from services.ranking.council.hiring_council import HiringCouncil
-from services.ranking.confidence_engine import ConfidenceEngine
-from services.explainability.explanation_generator import ExplanationGenerator
 
 logger = get_logger(__name__)
 
@@ -52,7 +45,7 @@ class RankingPipeline:
     Coordinates and executes the 4-stage talent ranking workflow.
     """
 
-    def __init__(self, config: Settings, feature_store: Optional[FeatureStore] = None) -> None:
+    def __init__(self, config: Settings, feature_store: FeatureStore | None = None) -> None:
         """Initialize all pipeline engine stages."""
         self.settings = config
         self.db = feature_store or FeatureStore(config.duckdb_path)
@@ -107,7 +100,7 @@ class RankingPipeline:
             job_genome.model_dump(),
         )
 
-        stage_results: List[RankingStageResult] = []
+        stage_results: list[RankingStageResult] = []
 
         # ── STAGE 1: HYBRID RETRIEVAL ──
         stage1_start = time.perf_counter()
@@ -116,7 +109,7 @@ class RankingPipeline:
             job_genome.embedding, job_genome.key_terms, top_k=STAGE1_TOP_K
         )
         stage1_duration = time.perf_counter() - stage1_start
-        
+
         stage_results.append(
             RankingStageResult(
                 stage=1,
@@ -157,21 +150,18 @@ class RankingPipeline:
         stage3_start = time.perf_counter()
         logger.info("--- Stage 3: Running Hiring Council Committee ---")
 
-        scored_results: List[CandidateResult] = []
+        scored_results: list[CandidateResult] = []
 
         # Evaluate top candidates
-        for rank_idx, cid in enumerate(stage2_ids[:STAGE3_TOP_K]):
+        for _rank_idx, cid in enumerate(stage2_ids[:STAGE3_TOP_K]):
             features = stage2_features_map[cid]
             profile = self.db.get_candidate_profile(cid)
-            evidence = self.db.get_candidate_profile(cid)  # Mock or retrieve from DB
-            # Fetch structured evidence from DB
-            # Note: in preprocessing, we did `db.save_candidate_evidence`
-            # Let's retrieve evidence
             evidence_obj = None
             conn = self.db.connect()
             ev_res = conn.execute("SELECT evidence FROM candidate_evidence WHERE candidate_id = ?", [cid]).fetchone()
             if ev_res:
                 import json
+
                 from shared.types.candidate import CandidateEvidence
                 ev_data = json.loads(ev_res[0])
                 evidence_obj = CandidateEvidence(
@@ -185,7 +175,7 @@ class RankingPipeline:
                     behavior_evidence=ev_data.get("behavior_evidence", []),
                     evidence_strength=ev_data.get("evidence_strength", 0.9),
                 )
-            
+
             if not evidence_obj:
                 from services.preprocessing.feature_extractor import FeatureExtractor
                 extractor = FeatureExtractor()
@@ -290,7 +280,7 @@ class RankingPipeline:
         self.db.save_rankings(raw_job.job_id, rankings_payload)
 
         self.db.close()
-        
+
         return RankedList(
             job_id=raw_job.job_id,
             candidates=final_list,

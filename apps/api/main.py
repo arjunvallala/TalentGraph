@@ -16,26 +16,26 @@ Usage:
 from __future__ import annotations
 
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import ORJSONResponse
 
-from shared.config import settings
-from shared.constants import APP_NAME, APP_VERSION, API_PREFIX
-from shared.logging_setup import configure_logging, get_logger
 from apps.api.middleware.error_handler import register_error_handlers
 from apps.api.routers import (
-    health,
-    candidates,
-    jobs,
     analytics,
+    candidates,
+    health,
+    jobs,
     submission,
     system,
 )
+from shared.config import settings
+from shared.constants import API_PREFIX, APP_NAME, APP_VERSION
+from shared.logging_setup import configure_logging, get_logger
 
 logger = get_logger(__name__)
 
@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     if settings.demo_mode:
         logger.info("🎭 Demo mode is ENABLED — using pre-generated fixture data")
-    
+
     logger.info(f"✅ {APP_NAME} is ready to serve requests")
 
     yield

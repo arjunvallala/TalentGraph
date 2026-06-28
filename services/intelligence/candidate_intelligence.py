@@ -6,15 +6,14 @@ aggregating low-level metrics into recruiter-understandable dimension scores.
 """
 from __future__ import annotations
 
-from typing import List, Optional
 from datetime import datetime
 
 from shared.logging_setup import get_logger
 from shared.types.candidate import (
-    CandidateProfile,
-    CandidateFeatures,
     CandidateEvidence,
+    CandidateFeatures,
     CandidateGenome,
+    CandidateProfile,
 )
 from shared.utils.math_utils import clip
 
@@ -49,22 +48,22 @@ class CandidateIntelligenceEngine:
             Calculated CandidateGenome object.
         """
         # Composite aggregate formulas for 8 radar chart dimensions:
-        
+
         # 1. Technical Capability: skill coverage + certifications
         tech_cap = (
-            features.skill_coverage * 0.6 + 
+            features.skill_coverage * 0.6 +
             features.certifications_score * 0.4
         )
 
         # 2. Career Progression: velocity + overall experience score
         career_prog = (
-            features.career_velocity * 0.5 + 
+            features.career_velocity * 0.5 +
             features.experience_score * 0.5
         )
 
         # 3. Domain Expertise: domain match + consistency of skills
         domain_exp = (
-            features.domain_match * 0.7 + 
+            features.domain_match * 0.7 +
             features.skill_consistency * 0.3
         )
 
@@ -80,7 +79,7 @@ class CandidateIntelligenceEngine:
 
         # 6. Work Stability: stability score penalty-subtracted by job-hopping
         stability = (
-            features.stability_score * 0.7 + 
+            features.stability_score * 0.7 +
             (1.0 - features.job_hop_risk) * 0.3
         )
 
@@ -92,7 +91,7 @@ class CandidateIntelligenceEngine:
 
         # 8. Hiring Readiness: notice availability - gap risk
         readiness = (
-            features.availability_score * 0.8 - 
+            features.availability_score * 0.8 -
             features.gap_risk * 0.2
         )
 

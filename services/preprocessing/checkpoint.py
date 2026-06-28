@@ -7,9 +7,9 @@ and resuming long-running operations.
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from typing import Any, Dict, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from shared.config import settings
 from shared.logging_setup import get_logger
@@ -28,7 +28,7 @@ class CheckpointManager:
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         logger.debug(f"CheckpointManager initialised at {self.checkpoint_dir}")
 
-    def save(self, name: str, state: Dict[str, Any]) -> None:
+    def save(self, name: str, state: dict[str, Any]) -> None:
         """
         Save the current state to a checkpoint file.
 
@@ -45,7 +45,7 @@ class CheckpointManager:
         except Exception as e:
             logger.error(f"Failed to save checkpoint '{name}': {e}")
 
-    def load(self, name: str) -> Optional[Dict[str, Any]]:
+    def load(self, name: str) -> dict[str, Any] | None:
         """
         Load state from a checkpoint file.
 
@@ -82,7 +82,7 @@ class CheckpointManager:
             file.unlink()
         logger.info("All checkpoints cleared")
 
-    def get_all_status(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_status(self) -> dict[str, dict[str, Any]]:
         """
         Retrieve completion status and details for all pipeline stages.
 

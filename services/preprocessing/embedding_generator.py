@@ -9,7 +9,6 @@ Embeddings power Stage 1 semantic retrieval via FAISS index search.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
 
 import numpy as np
 
@@ -106,7 +105,7 @@ class EmbeddingGenerator:
 
     def encode_batch(
         self,
-        texts: List[str],
+        texts: list[str],
         batch_size: int = EMBEDDING_BATCH_SIZE,
         show_progress: bool = False,
     ) -> np.ndarray:
@@ -162,7 +161,7 @@ class EmbeddingGenerator:
         result = self.encode_batch([text or "unknown"], batch_size=1)
         return result[0] if result.shape[0] > 0 else np.zeros(self._dimension, dtype=np.float32)
 
-    def encode_candidates(self, profiles: List[CandidateProfile]) -> np.ndarray:
+    def encode_candidates(self, profiles: list[CandidateProfile]) -> np.ndarray:
         """
         Encode a list of CandidateProfile instances into embeddings.
 

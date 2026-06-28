@@ -6,7 +6,6 @@ based on feature score differentials.
 """
 from __future__ import annotations
 
-from typing import List, Optional
 from shared.types.candidate import CandidateFeatures
 from shared.types.job import JobGenome
 from shared.types.ranking import ExplanationWeakness
@@ -23,7 +22,7 @@ class WeaknessAnalyzer:
 
     def analyze(
         self, features: CandidateFeatures, job: JobGenome
-    ) -> List[ExplanationWeakness]:
+    ) -> list[ExplanationWeakness]:
         """
         Identify top 3 weaknesses/gaps for the candidate.
 

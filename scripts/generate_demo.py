@@ -11,8 +11,6 @@ import json
 import random
 from pathlib import Path
 
-from shared.config import settings
-
 # Sample lists for generation
 FIRST_NAMES = ["Aarav", "Aditi", "Arjun", "Ananya", "Deepak", "Divya", "Ishaan", "Kavya", "Rahul", "Priya", "Sanjay", "Sneha", "Vikram", "Riya", "Vivek", "Neha"]
 LAST_NAMES = ["Sharma", "Patel", "Kumar", "Singh", "Nair", "Mehta", "Reddy", "Gupta", "Joshi", "Verma", "Iyer", "Sen", "Rao", "Bose", "Pillai", "Thakur"]
@@ -44,12 +42,12 @@ def generate_candidate(cid_num: int) -> dict:
     skills = random.sample(SKILL_POOL[domain], k=random.randint(4, 7))
     # Add some common skills
     skills.extend(random.sample(["git", "sql", "agile", "communication"], k=2))
-    
+
     first = random.choice(FIRST_NAMES)
     last = random.choice(LAST_NAMES)
-    
+
     yoe = round(random.uniform(1.0, 12.0), 1)
-    
+
     # Title seniority based on yoe
     if yoe >= 8.0:
         title = f"Principal {random.choice(TITLES[domain])}"
@@ -109,17 +107,17 @@ def main():
     # 1. Generate Candidates CSV
     raw_dir = Path("data/raw")
     raw_dir.mkdir(parents=True, exist_ok=True)
-    
+
     csv_path = raw_dir / "candidates.csv"
     print(f"Generating 1,000 candidates in {csv_path}...")
-    
+
     headers = [
         "candidate_id", "name", "email", "phone", "current_title", "current_company",
         "years_of_experience", "skills", "education", "work_history", "profile_views",
         "application_count", "response_rate", "last_active_days", "availability_status",
         "notice_period_days", "expected_salary"
     ]
-    
+
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
@@ -129,7 +127,7 @@ def main():
     # 2. Generate Sample Job Description
     jd_path = raw_dir / "job_description.txt"
     print(f"Generating sample job description in {jd_path}...")
-    
+
     jd_content = """Position: Senior Machine Learning Engineer
 Department: Core AI Platform
 Location: Bengaluru, India (Hybrid)
@@ -145,7 +143,7 @@ Requirements:
 - Solid understanding of databases (PostgreSQL or Redis).
 - Strong track record of continuous learning or technical contributions.
 """
-    
+
     jd_path.write_text(jd_content.strip(), encoding="utf-8")
     print("Demo generation complete!")
 

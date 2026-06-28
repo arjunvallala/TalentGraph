@@ -11,10 +11,8 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
-
+from pydantic import BaseModel, Field
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
@@ -62,9 +60,9 @@ class SkillRequirement(BaseModel):
     """
     skill: str
     importance: float = Field(default=1.0, ge=0.0, le=1.0)
-    min_years: Optional[float] = Field(default=None, ge=0.0)
+    min_years: float | None = Field(default=None, ge=0.0)
     is_mandatory: bool = True
-    category: Optional[str] = None
+    category: str | None = None
 
 
 # ── Core Models ───────────────────────────────────────────────────────────────
@@ -88,8 +86,8 @@ class JobRaw(BaseModel):
     job_id: str
     title: str
     description: str
-    company: Optional[str] = None
-    location: Optional[str] = None
+    company: str | None = None
+    location: str | None = None
     job_type: JobType = JobType.FULL_TIME
     raw_text: str = ""
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -131,28 +129,28 @@ class JobProfile(BaseModel):
     job_id: str
     title: str
     seniority_level: ExperienceLevel = ExperienceLevel.MID
-    required_skills: List[SkillRequirement] = Field(default_factory=list)
-    preferred_skills: List[str] = Field(default_factory=list)
+    required_skills: list[SkillRequirement] = Field(default_factory=list)
+    preferred_skills: list[str] = Field(default_factory=list)
     min_experience_years: float = Field(default=0.0, ge=0.0)
-    max_experience_years: Optional[float] = Field(default=None, ge=0.0)
-    primary_domain: Optional[str] = None
-    secondary_domains: List[str] = Field(default_factory=list)
-    industry: Optional[str] = None
-    education_required: Optional[str] = None
-    education_preferred: Optional[str] = None
-    key_responsibilities: List[str] = Field(default_factory=list)
+    max_experience_years: float | None = Field(default=None, ge=0.0)
+    primary_domain: str | None = None
+    secondary_domains: list[str] = Field(default_factory=list)
+    industry: str | None = None
+    education_required: str | None = None
+    education_preferred: str | None = None
+    key_responsibilities: list[str] = Field(default_factory=list)
     leadership_required: bool = False
     remote_friendly: bool = False
     travel_required: bool = False
     analyzed_at: datetime = Field(default_factory=datetime.utcnow)
 
     @property
-    def all_required_skill_names(self) -> List[str]:
+    def all_required_skill_names(self) -> list[str]:
         """Return flat list of mandatory skill names."""
         return [s.skill for s in self.required_skills if s.is_mandatory]
 
     @property
-    def all_skill_names(self) -> List[str]:
+    def all_skill_names(self) -> list[str]:
         """Return all skill names (required + preferred)."""
         required = [s.skill for s in self.required_skills]
         return required + self.preferred_skills
@@ -184,19 +182,19 @@ class IdealCandidatePersona(BaseModel):
         created_at: When this persona was generated.
     """
     job_id: str
-    must_have_skills: List[str] = Field(default_factory=list)
-    nice_to_have_skills: List[str] = Field(default_factory=list)
+    must_have_skills: list[str] = Field(default_factory=list)
+    nice_to_have_skills: list[str] = Field(default_factory=list)
     min_experience_years: float = Field(default=0.0, ge=0.0)
     ideal_experience_years: float = Field(default=3.0, ge=0.0)
-    preferred_career_progression: List[str] = Field(default_factory=list)
-    preferred_company_types: List[str] = Field(default_factory=list)
+    preferred_career_progression: list[str] = Field(default_factory=list)
+    preferred_company_types: list[str] = Field(default_factory=list)
     expected_seniority: ExperienceLevel = ExperienceLevel.MID
     domain_weight: float = Field(default=0.8, ge=0.0, le=1.0)
     technical_weight: float = Field(default=0.7, ge=0.0, le=1.0)
     leadership_weight: float = Field(default=0.5, ge=0.0, le=1.0)
-    implicit_expectations: List[str] = Field(default_factory=list)
-    red_flags: List[str] = Field(default_factory=list)
-    feature_weights: Dict[str, float] = Field(default_factory=dict)
+    implicit_expectations: list[str] = Field(default_factory=list)
+    red_flags: list[str] = Field(default_factory=list)
+    feature_weights: dict[str, float] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -227,10 +225,10 @@ class JobGenome(BaseModel):
     target_behavior_score: float = Field(default=0.7, ge=0.0, le=1.0)
 
     # ── Feature Weights for This Role ─────────────────────────────────────────
-    weights: Dict[str, float] = Field(default_factory=dict)
+    weights: dict[str, float] = Field(default_factory=dict)
 
     # ── Retrieval Artifacts ───────────────────────────────────────────────────
-    embedding: Optional[List[float]] = None      # dense vector for FAISS
-    key_terms: List[str] = Field(default_factory=list)  # BM25 terms
+    embedding: list[float] | None = None      # dense vector for FAISS
+    key_terms: list[str] = Field(default_factory=list)  # BM25 terms
 
     created_at: datetime = Field(default_factory=datetime.utcnow)

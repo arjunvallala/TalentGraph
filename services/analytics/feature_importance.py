@@ -6,11 +6,10 @@ feature importance and variance metrics.
 """
 from __future__ import annotations
 
-from typing import List
 import numpy as np
 
-from shared.types.ranking import CandidateResult
 from shared.types.analytics import FeatureImportance
+from shared.types.ranking import CandidateResult
 
 
 class FeatureImportanceAnalyzer:
@@ -22,7 +21,7 @@ class FeatureImportanceAnalyzer:
         """Initialize the analyzer."""
         pass
 
-    def compute(self, results: List[CandidateResult]) -> List[FeatureImportance]:
+    def compute(self, results: list[CandidateResult]) -> list[FeatureImportance]:
         """
         Calculate relative feature importance scores from candidate results.
 
@@ -43,7 +42,7 @@ class FeatureImportanceAnalyzer:
         ]
 
         importance_list = []
-        
+
         # Simple simulation: relative importance is proportional to variance in the shortlist
         # and its weight in the job genome.
         # In a real environment, we'd run correlation with overall_score.
@@ -55,7 +54,7 @@ class FeatureImportanceAnalyzer:
 
             arr = np.array(scores, dtype=np.float32)
             variance = float(arr.var())
-            
+
             # Simple importance proxy (correlation or variance-driven)
             importance_score = float(arr.mean() * 0.8 + 0.2)
 

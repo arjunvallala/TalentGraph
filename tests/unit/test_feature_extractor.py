@@ -6,11 +6,11 @@ normalization bounds [0,1], and edge case handling.
 """
 from __future__ import annotations
 
-import pytest
-
 from shared.types.candidate import (
-    CandidateProfile, WorkExperience, EducationEntry, EducationLevel,
-    RedrobSignals, AvailabilityStatus,
+    AvailabilityStatus,
+    CandidateProfile,
+    RedrobSignals,
+    WorkExperience,
 )
 
 

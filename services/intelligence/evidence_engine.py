@@ -6,12 +6,11 @@ from a candidate's profile and links them to the computed feature scores.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Any
 from shared.logging_setup import get_logger
 from shared.types.candidate import (
-    CandidateProfile,
-    CandidateFeatures,
     CandidateEvidence,
+    CandidateFeatures,
+    CandidateProfile,
 )
 
 logger = get_logger(__name__)
@@ -39,7 +38,7 @@ class EvidenceEngine:
         Returns:
             CandidateEvidence containing the structured evidence ledger.
         """
-        skill_evidence_map: Dict[str, List[str]] = {}
+        skill_evidence_map: dict[str, list[str]] = {}
         for s in profile.skills or []:
             skill_evidence_map[s] = [f"Found skill '{s}' mentioned in candidate profile."]
 

@@ -138,14 +138,17 @@ export const JobIntelligencePage: React.FC = () => {
               <Award className="w-4 h-4 text-accent" /> Explicit Required Skills
             </h2>
             <div className="flex flex-wrap gap-2">
-              {profile.required_skills?.map((s) => (
-                <span
-                  key={s.skill}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white/5 border border-white/10 text-white"
-                >
-                  {s.skill}
-                </span>
-              )) || <span className="text-xs text-muted-foreground">No explicit skills listed.</span>}
+               {profile.required_skills?.map((s) => {
+                const skillName = typeof s === 'string' ? s : s?.skill || '';
+                return (
+                  <span
+                    key={skillName}
+                    className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white/5 border border-white/10 text-white"
+                  >
+                    {skillName}
+                  </span>
+                );
+              }) || <span className="text-xs text-muted-foreground">No explicit skills listed.</span>}
             </div>
           </GlassCard>
         </div>

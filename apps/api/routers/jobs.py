@@ -5,15 +5,14 @@ Endpoints for job description analysis and ideal candidate persona generation.
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel, Field
 
 from shared.config import settings
 from shared.logging_setup import get_logger
-from shared.types import JobProfile, IdealCandidatePersona, JobGenome
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -33,9 +32,9 @@ class AnalyzeJobRequest(BaseModel):
 class AnalyzeJobResponse(BaseModel):
     """Response containing full job intelligence analysis."""
     job_id: str
-    job_profile: Dict[str, Any]
-    ideal_persona: Dict[str, Any]
-    job_genome: Dict[str, Any]
+    job_profile: dict[str, Any]
+    ideal_persona: dict[str, Any]
+    job_genome: dict[str, Any]
     analysis_duration_ms: float
 
 
@@ -79,9 +78,9 @@ async def analyze_job(request: AnalyzeJobRequest) -> ORJSONResponse:
 
     try:
         # Import here to avoid circular imports and enable lazy loading
-        from shared.types.job import JobRaw, JobType
         from services.intelligence.job_intelligence import JobIntelligenceEngine
         from services.preprocessing.embedding_generator import EmbeddingGenerator
+        from shared.types.job import JobRaw, JobType
 
         job_raw = JobRaw(
             job_id=request.job_id,

@@ -13,19 +13,17 @@ If the gate fails (feature below threshold), the claim is NOT included.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
 
+from services.explainability.counterfactual import CounterfactualEngine
+from services.explainability.strength_analyzer import StrengthAnalyzer
+from services.explainability.weakness_analyzer import WeaknessAnalyzer
 from shared.types.candidate import CandidateFeatures
+from shared.types.council import FinalCouncilDecision
+from shared.types.job import JobGenome
 from shared.types.ranking import (
     CandidateExplanation,
     HiringRecommendation,
 )
-from services.explainability.strength_analyzer import StrengthAnalyzer
-from services.explainability.weakness_analyzer import WeaknessAnalyzer
-from services.explainability.counterfactual import CounterfactualEngine
-from shared.types.job import JobGenome
-from shared.types.council import FinalCouncilDecision
-
 
 # ── Evidence Thresholds ─────────────────────────────────────────────────────
 # A claim is only made when the supporting feature exceeds this threshold.
@@ -108,19 +106,17 @@ class ExplanationGenerator:
 
         # ── Evidence Gates ────────────────────────────────────────────────────
         tech_score = (skill_cov + domain_m) / 2.0
-        risk_safety = 1.0 - max(job_hop, gap_r)
 
         is_exceptional_technical = tech_score >= _THRESHOLDS["exceptional_technical"]
         is_solid_technical       = tech_score >= _THRESHOLDS["solid_technical"]
         is_strong_career         = career_vel >= _THRESHOLDS["strong_career"]
         is_strong_leadership     = leadership >= _THRESHOLDS["strong_leadership"]
         is_available             = availability >= _THRESHOLDS["high_availability"]
-        is_low_risk              = risk_safety >= _THRESHOLDS["low_risk"]
         is_rich_profile          = completeness >= _THRESHOLDS["rich_profile"]
         is_council_unanimous     = agreement >= _THRESHOLDS["unanimous_council"]
 
         # ── Build Evidence-Backed Summary ─────────────────────────────────────
-        summary_parts: List[str] = []
+        summary_parts: list[str] = []
         if is_exceptional_technical:
             summary_parts.append(
                 f"exceptional skill-to-JD alignment ({tech_score * 100:.0f}% coverage)"
@@ -142,7 +138,7 @@ class ExplanationGenerator:
         )
 
         # ── Build Risk Summary (evidence-gated) ───────────────────────────────
-        risk_parts: List[str] = []
+        risk_parts: list[str] = []
         if job_hop > 0.4:
             risk_parts.append(f"job-hopping risk flag (score {job_hop:.2f})")
         if gap_r > 0.3:
@@ -153,7 +149,7 @@ class ExplanationGenerator:
             risk_summary = "Risk flags noted: " + "; ".join(risk_parts) + "."
 
         # ── Build Hiring Narrative (evidence-gated) ───────────────────────────
-        narrative_parts: List[str] = [
+        narrative_parts: list[str] = [
             f"Composite pipeline score: {score_pct:.1f}%."
         ]
 
@@ -202,7 +198,7 @@ class ExplanationGenerator:
         hiring_narrative = " ".join(narrative_parts)
 
         # ── Build Confidence Reason (evidence-gated) ──────────────────────────
-        conf_reasons: List[str] = []
+        conf_reasons: list[str] = []
         if is_rich_profile:
             conf_reasons.append(f"complete profile data ({completeness * 100:.0f}% populated)")
         else:

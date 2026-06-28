@@ -7,11 +7,9 @@ no simulations, no sleep() calls, no estimated values.
 """
 from __future__ import annotations
 
+import random
 import sys
 import time
-import json
-import random
-import string
 from pathlib import Path
 
 import typer
@@ -20,7 +18,6 @@ from rich.table import Table
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.config import settings
 
 console = Console()
 app = typer.Typer(name="tg-benchmark", help="TalentGraph AI Benchmark Utility")
@@ -89,12 +86,17 @@ def run(
 
     # ── Import real pipeline components ──────────────────────────────────────
     try:
+        import numpy as np
+
         from services.preprocessing.feature_extractor import FeatureExtractor
         from shared.types.candidate import (
-            CandidateProfile, WorkExperience, EducationEntry,
-            EducationLevel, RedrobSignals, AvailabilityStatus
+            AvailabilityStatus,
+            CandidateProfile,
+            EducationEntry,
+            EducationLevel,
+            RedrobSignals,
+            WorkExperience,
         )
-        import numpy as np
     except ImportError as e:
         console.print(f"[red]Import error: {e}[/red]")
         raise typer.Exit(1)
@@ -169,12 +171,6 @@ def run(
     console.print("[yellow]Phase 2: Running TOPSIS ranking engine...[/yellow]")
 
     # Build a feature matrix and run TOPSIS directly (identical to FeatureRanker logic)
-    feature_keys = [
-        "experience_score", "skill_coverage", "domain_match",
-        "career_velocity", "leadership_score",
-        "stability_score", "availability_score",
-    ]
-
     rank_start = time.perf_counter()
 
     # Extract decision matrix
@@ -238,7 +234,7 @@ def run(
     # Summary
     total = prep_duration + rank_duration
     console.print(f"\n[bold]End-to-end wall time:[/bold] {total:.3f}s for {candidates_count:,} candidates")
-    console.print(f"[bold]TOPSIS top-3 candidate IDs:[/bold] "
+    console.print("[bold]TOPSIS top-3 candidate IDs:[/bold] "
                   + ", ".join(profiles[i].candidate_id for i in ranked_indices[:3]))
     console.print("\n[green]Benchmark complete. All measurements are real — no simulations.[/green]")
 

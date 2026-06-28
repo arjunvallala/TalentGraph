@@ -6,9 +6,10 @@ and candidate tenure growth patterns.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Any
+from typing import Any
+
 from shared.logging_setup import get_logger
-from shared.types.candidate import CandidateProfile, WorkExperience
+from shared.types.candidate import CandidateProfile
 
 logger = get_logger(__name__)
 
@@ -22,7 +23,7 @@ class CareerEngine:
         """Initialize the career engine."""
         logger.info("CareerEngine initialised")
 
-    def analyze_trajectory(self, profile: CandidateProfile) -> Dict[str, Any]:
+    def analyze_trajectory(self, profile: CandidateProfile) -> dict[str, Any]:
         """
         Analyze candidate career trajectory, tenure patterns, and progression.
 
@@ -50,7 +51,7 @@ class CareerEngine:
         # Look at title changes to count promotions (or seniority growth)
         promotions = 0
         seniority_levels = []
-        
+
         # Simple keywords for seniority rank
         def get_rank(title: str) -> int:
             t = title.lower()

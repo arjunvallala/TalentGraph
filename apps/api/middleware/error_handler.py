@@ -14,7 +14,6 @@ from shared.exceptions import (
     APIError,
     CandidateNotFoundError,
     JobNotFoundError,
-    NotFoundError,
     TalentGraphError,
 )
 from shared.logging_setup import get_logger
@@ -38,7 +37,7 @@ def register_error_handlers(app: FastAPI) -> None:
         # Determine status code
         if isinstance(exc, APIError):
             status_code = exc.status_code
-        elif isinstance(exc, (CandidateNotFoundError, JobNotFoundError)):
+        elif isinstance(exc, CandidateNotFoundError | JobNotFoundError):
             status_code = status.HTTP_404_NOT_FOUND
         else:
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import List, Tuple
 
 from shared.constants import SUBMISSION_COLUMNS
 from shared.logging_setup import get_logger
@@ -26,7 +25,7 @@ class SubmissionGenerator:
         """Initialize the submission generator."""
         pass
 
-    def generate(self, candidates: List[CandidateResult], output_path: str) -> None:
+    def generate(self, candidates: list[CandidateResult], output_path: str) -> None:
         """
         Export candidate shortlist to a CSV file.
 
@@ -42,7 +41,7 @@ class SubmissionGenerator:
                 writer = csv.writer(f)
                 # Write header
                 writer.writerow(SUBMISSION_COLUMNS)
-                
+
                 # Write rows
                 for c in candidates:
                     writer.writerow([
@@ -77,7 +76,7 @@ class SubmissionGenerator:
             logger.error(f"Failed to generate submission files: {e}")
             raise
 
-    def validate(self, path: str) -> Tuple[bool, List[str]]:
+    def validate(self, path: str) -> tuple[bool, list[str]]:
         """
         Validate the generated submission CSV schema and data integrity constraints.
 
@@ -96,7 +95,7 @@ class SubmissionGenerator:
             with p.open("r", newline="", encoding="utf-8") as f:
                 reader = csv.reader(f)
                 header = next(reader, None)
-                
+
                 # 1. Header Validation
                 if not header:
                     return False, ["CSV file is empty"]
@@ -141,7 +140,7 @@ class SubmissionGenerator:
                     # Enum validation
                     if conf not in ["High", "Medium", "Low"]:
                         errors.append(f"Row {idx}: Invalid confidence level '{conf}'")
-                    
+
                     valid_recs = ["Strong Hire", "Hire", "Consider", "Pass", "Reject"]
                     if rec not in valid_recs:
                         errors.append(f"Row {idx}: Invalid hiring recommendation '{rec}'")

@@ -6,8 +6,10 @@ on processed candidate features, generating a structured QA report.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Any
+from typing import Any
+
 import polars as pl
+
 from shared.logging_setup import get_logger
 
 logger = get_logger(__name__)
@@ -23,7 +25,7 @@ class QualityChecker:
         """Initialize the quality checker."""
         logger.info("QualityChecker initialized")
 
-    def run_checks(self, df: pl.DataFrame) -> Dict[str, Any]:
+    def run_checks(self, df: pl.DataFrame) -> dict[str, Any]:
         """
         Run completeness, range, and consistency checks on features dataframe.
 

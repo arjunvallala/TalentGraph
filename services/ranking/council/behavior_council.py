@@ -20,10 +20,11 @@ This council does NOT consider skills, career trajectory, or research output.
 from __future__ import annotations
 
 from datetime import datetime
-from shared.types.candidate import CandidateGenome
-from shared.types.job import JobGenome
-from shared.types.council import CouncilVote, CouncilType
+
 from services.ranking.council.base_council import BaseCouncil
+from shared.types.candidate import CandidateGenome
+from shared.types.council import CouncilType, CouncilVote
+from shared.types.job import JobGenome
 
 
 class BehaviorCouncil(BaseCouncil):

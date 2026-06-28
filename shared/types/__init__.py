@@ -3,6 +3,13 @@ TalentGraph AI — Shared Types Package
 
 Exports all Pydantic models used across the platform.
 """
+from shared.types.analytics import (
+    AnalyticsSummary,
+    CandidateDistribution,
+    FeatureImportance,
+    HiringFunnelStats,
+    RiskBreakdown,
+)
 from shared.types.candidate import (
     AvailabilityStatus,
     CandidateEvidence,
@@ -13,6 +20,12 @@ from shared.types.candidate import (
     EducationLevel,
     RedrobSignals,
     WorkExperience,
+)
+from shared.types.council import (
+    CouncilEvaluationResult,
+    CouncilType,
+    CouncilVote,
+    FinalCouncilDecision,
 )
 from shared.types.job import (
     ExperienceLevel,
@@ -29,19 +42,6 @@ from shared.types.ranking import (
     RankedList,
     RankingStageResult,
     SubmissionRow,
-)
-from shared.types.council import (
-    CouncilEvaluationResult,
-    CouncilType,
-    CouncilVote,
-    FinalCouncilDecision,
-)
-from shared.types.analytics import (
-    AnalyticsSummary,
-    CandidateDistribution,
-    FeatureImportance,
-    HiringFunnelStats,
-    RiskBreakdown,
 )
 
 __all__ = [

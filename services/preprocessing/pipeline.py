@@ -8,23 +8,23 @@ and vector/keyword index building.
 from __future__ import annotations
 
 import time
-import numpy as np
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any
 
-from shared.config import Settings
-from shared.logging_setup import get_logger
-from shared.types.candidate import CandidateProfile, CandidateFeatures
-from services.preprocessing.loader import CandidateLoader
+import numpy as np
+
+from services.preprocessing.bm25_builder import BM25IndexBuilder
+from services.preprocessing.checkpoint import CheckpointManager
 from services.preprocessing.cleaner import DataCleaner
-from services.preprocessing.parser import CandidateParser
-from services.preprocessing.feature_extractor import FeatureExtractor
 from services.preprocessing.embedding_generator import EmbeddingGenerator
 from services.preprocessing.faiss_builder import FAISSIndexBuilder
-from services.preprocessing.bm25_builder import BM25IndexBuilder
+from services.preprocessing.feature_extractor import FeatureExtractor
 from services.preprocessing.feature_store import FeatureStore
+from services.preprocessing.loader import CandidateLoader
+from services.preprocessing.parser import CandidateParser
 from services.preprocessing.quality_checker import QualityChecker
-from services.preprocessing.checkpoint import CheckpointManager
+from shared.config import Settings
+from shared.logging_setup import get_logger
+from shared.types.candidate import CandidateFeatures, CandidateProfile
 
 logger = get_logger(__name__)
 
@@ -41,7 +41,7 @@ class StageResult:
 
 class PipelineResult:
     """Contains the overall outcome and stats of a pipeline run."""
-    def __init__(self, total_processed: int, stage_results: List[StageResult]) -> None:
+    def __init__(self, total_processed: int, stage_results: list[StageResult]) -> None:
         self.total_processed = total_processed
         self.stage_results = stage_results
 
@@ -73,7 +73,7 @@ class PreprocessingPipeline:
         resume: bool = True,
         batch_size: int = 100,
         skip_embeddings: bool = False,
-        progress: Optional[Any] = None,
+        progress: Any | None = None,
     ) -> PipelineResult:
         """
         Execute all stages of the preprocessing pipeline.
@@ -92,8 +92,6 @@ class PreprocessingPipeline:
         self.db.connect()
 
         # Define stages for tracking
-        total_steps = 5
-        current_step = 0
 
         # Helper to update Rich progress if active
         def update_progress(desc: str, completed_frac: float):
@@ -132,8 +130,8 @@ class PreprocessingPipeline:
         logger.info("--- Stage 3: Parsing Profiles & Extracting Features ---")
         start_time = time.perf_counter()
 
-        profiles: List[CandidateProfile] = []
-        features_list: List[CandidateFeatures] = []
+        profiles: list[CandidateProfile] = []
+        features_list: list[CandidateFeatures] = []
 
         # Load existing features checkpoint if resuming
         processed_candidates_state = {}
@@ -197,7 +195,7 @@ class PreprocessingPipeline:
         corpus_texts = []
         embeddings = []
 
-        for cid in processed_candidates_state.keys():
+        for cid in processed_candidates_state:
             prof = self.db.get_candidate_profile(cid)
             if prof:
                 all_profiles.append(prof)

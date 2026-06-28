@@ -5,7 +5,7 @@ Endpoints for generating and validating the submission.csv file.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import FileResponse, ORJSONResponse
 
 from shared.config import settings
@@ -40,8 +40,8 @@ async def generate_submission(
         404: If no rankings exist for this job.
     """
     try:
-        from services.preprocessing.feature_store import FeatureStore
         from services.analytics.submission_generator import SubmissionGenerator
+        from services.preprocessing.feature_store import FeatureStore
 
         store = FeatureStore(settings.duckdb_path)
         results = store.get_ranking_results(job_id)

@@ -6,7 +6,6 @@ based on feature score differentials.
 """
 from __future__ import annotations
 
-from typing import List
 from shared.types.candidate import CandidateFeatures
 from shared.types.job import JobGenome
 from shared.types.ranking import ExplanationStrength
@@ -23,7 +22,7 @@ class StrengthAnalyzer:
 
     def analyze(
         self, features: CandidateFeatures, job: JobGenome
-    ) -> List[ExplanationStrength]:
+    ) -> list[ExplanationStrength]:
         """
         Identify top 3 strengths for the candidate.
 
@@ -52,7 +51,7 @@ class StrengthAnalyzer:
                 ExplanationStrength(
                     title="Deep Domain Experience",
                     description="Possesses substantial relevant years of experience in the target field.",
-                    evidence=[f"Features calculate deep career length indicators."],
+                    evidence=["Features calculate deep career length indicators."],
                     score_contribution=0.15,
                 )
             )

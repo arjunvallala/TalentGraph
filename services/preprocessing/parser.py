@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from shared.logging_setup import get_logger
 from shared.types.candidate import (
@@ -69,7 +69,7 @@ _FIELD_KEYWORDS: dict[str, list[str]] = {
 }
 
 
-def _infer_field_of_study(text: str) -> Optional[str]:
+def _infer_field_of_study(text: str) -> str | None:
     """Infer field of study from free-form text."""
     text_lower = text.lower()
     for field, keywords in _FIELD_KEYWORDS.items():
@@ -95,7 +95,7 @@ class CandidateParser:
         """Initialise the parser."""
         logger.debug("CandidateParser initialised")
 
-    def parse_row(self, row: Dict[str, Any]) -> CandidateProfile:
+    def parse_row(self, row: dict[str, Any]) -> CandidateProfile:
         """
         Parse a single raw CSV row dictionary into a CandidateProfile.
 
@@ -169,7 +169,7 @@ class CandidateParser:
 
         return profile
 
-    def parse_skills(self, skills_str: str) -> List[str]:
+    def parse_skills(self, skills_str: str) -> list[str]:
         """
         Parse a comma-separated skills string into a clean list.
 
@@ -198,7 +198,7 @@ class CandidateParser:
 
         return result[:100]
 
-    def parse_education(self, education_str: str) -> List[EducationEntry]:
+    def parse_education(self, education_str: str) -> list[EducationEntry]:
         """
         Parse free-form education text into structured EducationEntry objects.
 
@@ -279,7 +279,7 @@ class CandidateParser:
 
         return EducationLevel.UNKNOWN
 
-    def _parse_education_dict(self, data: dict) -> Optional[EducationEntry]:
+    def _parse_education_dict(self, data: dict) -> EducationEntry | None:
         """Parse a single education dict into an EducationEntry."""
         try:
             degree = str(data.get("degree", data.get("qualification", ""))).strip()
@@ -331,7 +331,7 @@ class CandidateParser:
             logger.debug("Education dict parse error: %s — %s", data, exc)
             return None
 
-    def _parse_redrob_signals(self, row: Dict[str, Any]) -> RedrobSignals:
+    def _parse_redrob_signals(self, row: dict[str, Any]) -> RedrobSignals:
         """Extract and validate RedrobSignals from a raw row dict."""
         def safe_int(val: Any, default: int = 0) -> int:
             try:
@@ -392,7 +392,7 @@ class CandidateParser:
             open_to_remote=open_to_remote,
         )
 
-    def _parse_comma_list(self, raw: str) -> List[str]:
+    def _parse_comma_list(self, raw: str) -> list[str]:
         """Parse a comma-separated string into a deduplicated list."""
         if not raw or not raw.strip():
             return []
@@ -406,7 +406,7 @@ class CandidateParser:
                 seen.add(clean.lower())
         return result
 
-    def _safe_str(self, val: Any) -> Optional[str]:
+    def _safe_str(self, val: Any) -> str | None:
         """Safely convert a value to string, returning None for empty."""
         if val is None:
             return None

@@ -7,15 +7,13 @@ JD-dependent scores.
 """
 from __future__ import annotations
 
-from typing import List, Dict, Any, Tuple
 import numpy as np
 
+from services.preprocessing.feature_store import FeatureStore
 from shared.constants import STAGE2_TOP_K
 from shared.logging_setup import get_logger
-from shared.utils.math_utils import weighted_average, cosine_similarity
-from services.preprocessing.feature_store import FeatureStore
-from shared.types.job import JobProfile, JobGenome
-from shared.types.candidate import CandidateProfile, CandidateFeatures
+from shared.types.candidate import CandidateFeatures
+from shared.types.job import JobGenome, JobProfile
 
 logger = get_logger(__name__)
 
@@ -32,11 +30,11 @@ class FeatureRanker:
 
     def rank_candidates(
         self,
-        candidate_ids: List[str],
+        candidate_ids: list[str],
         job_profile: JobProfile,
         job_genome: JobGenome,
         top_k: int = STAGE2_TOP_K,
-    ) -> List[Tuple[str, float, CandidateFeatures]]:
+    ) -> list[tuple[str, float, CandidateFeatures]]:
         """
         Rank candidate IDs and output the top candidates with their feature vectors.
 
@@ -64,7 +62,6 @@ class FeatureRanker:
             cid = row["candidate_id"]
             features_map[cid] = row
 
-        job_required_skills = set(job_profile.all_required_skill_names)
         job_all_skills = set(job_profile.all_skill_names)
 
         scored_candidates = []
@@ -80,7 +77,7 @@ class FeatureRanker:
                 continue
 
             # Calculate JD-dependent features:
-            
+
             # A. Skill Coverage
             candidate_skills = set(profile.skills or [])
             if job_all_skills:
@@ -213,6 +210,6 @@ class FeatureRanker:
         # Sort descending by TOPSIS closeness coefficient score
         final_ranked.sort(key=lambda x: x[1], reverse=True)
         truncated = final_ranked[:top_k]
-        
+
         logger.info(f"Feature Ranker complete: ranked {len(scored_candidates)} candidates using TOPSIS engine down to {len(truncated)}")
         return truncated

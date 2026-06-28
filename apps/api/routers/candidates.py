@@ -5,9 +5,7 @@ Endpoints for retrieving ranked candidate lists and individual profiles.
 """
 from __future__ import annotations
 
-from typing import Optional
-
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import ORJSONResponse
 
 from shared.config import settings
@@ -30,11 +28,11 @@ async def get_ranked_candidates(
     job_id: str = Query(..., description="Job ID to retrieve rankings for"),
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)"),
     page_size: int = Query(default=20, ge=1, le=100, description="Results per page"),
-    min_score: Optional[float] = Query(default=None, ge=0.0, le=1.0),
-    max_score: Optional[float] = Query(default=None, ge=0.0, le=1.0),
-    recommendation: Optional[str] = Query(default=None),
-    confidence: Optional[str] = Query(default=None),
-    risk_level: Optional[str] = Query(default=None),
+    min_score: float | None = Query(default=None, ge=0.0, le=1.0),
+    max_score: float | None = Query(default=None, ge=0.0, le=1.0),
+    recommendation: str | None = Query(default=None),
+    confidence: str | None = Query(default=None),
+    risk_level: str | None = Query(default=None),
 ) -> ORJSONResponse:
     """
     Retrieve the ranked candidate list for a specific job.
@@ -117,7 +115,7 @@ async def get_ranked_candidates(
 )
 async def get_candidate_detail(
     candidate_id: str,
-    job_id: Optional[str] = Query(default=None, description="Job context for scores"),
+    job_id: str | None = Query(default=None, description="Job context for scores"),
 ) -> ORJSONResponse:
     """
     Retrieve complete candidate detail for the Candidate Detail page.
@@ -153,7 +151,7 @@ async def get_candidate_detail(
             )
 
         features = store.get_features(candidate_id)
-        
+
         # If a job context is provided, try to get the ranked result
         if job_id:
             results = store.get_ranking_results(job_id)
@@ -231,7 +229,7 @@ async def run_ranking(
             )
 
         pipeline = RankingPipeline(config=settings, feature_store=store)
-        
+
         # Build a minimal JobRaw from stored profile
         from shared.types.job import JobRaw
         job_raw = JobRaw(

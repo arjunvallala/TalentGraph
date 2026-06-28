@@ -22,7 +22,7 @@ export const AppShell: React.FC = () => {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              variants={pageVariants}
+              variants={pageVariants as any}
               initial="initial"
               animate="animate"
               exit="exit"

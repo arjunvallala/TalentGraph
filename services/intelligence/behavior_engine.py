@@ -6,9 +6,10 @@ profile activity, notice period) to assess candidate engagement and hiring readi
 """
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any
+
 from shared.logging_setup import get_logger
-from shared.types.candidate import CandidateProfile, AvailabilityStatus
+from shared.types.candidate import AvailabilityStatus, CandidateProfile
 
 logger = get_logger(__name__)
 
@@ -22,7 +23,7 @@ class BehaviorEngine:
         """Initialize the behavior engine."""
         logger.info("BehaviorEngine initialised")
 
-    def analyze_behavior(self, profile: CandidateProfile) -> Dict[str, Any]:
+    def analyze_behavior(self, profile: CandidateProfile) -> dict[str, Any]:
         """
         Analyze candidate responsiveness, decline frequency, and activity indicators.
 
@@ -34,10 +35,10 @@ class BehaviorEngine:
             readiness score.
         """
         signals = profile.redrob_signals
-        
+
         # Calculate responsiveness
         response_rate = signals.response_rate
-        
+
         # Calculate declination rate index
         decline_index = 0.0
         if signals.interview_declined_count > 0 or signals.offer_declined_count > 0:

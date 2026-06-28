@@ -6,14 +6,12 @@ searches and merging them using Reciprocal Rank Fusion (RRF) to output top-N can
 """
 from __future__ import annotations
 
-from typing import List
-
-from shared.constants import STAGE1_TOP_K, RRF_K
+from services.preprocessing.feature_store import FeatureStore
+from services.retrieval.bm25_retrieval import BM25RetrievalEngine
+from services.retrieval.semantic_retrieval import SemanticRetrievalEngine
+from shared.constants import RRF_K, STAGE1_TOP_K
 from shared.logging_setup import get_logger
 from shared.utils.math_utils import reciprocal_rank_fusion
-from services.preprocessing.feature_store import FeatureStore
-from services.retrieval.semantic_retrieval import SemanticRetrievalEngine
-from services.retrieval.bm25_retrieval import BM25RetrievalEngine
 
 logger = get_logger(__name__)
 
@@ -32,10 +30,10 @@ class HybridRetrievalEngine:
 
     def retrieve(
         self,
-        query_embedding: List[float],
-        query_tokens: List[str],
+        query_embedding: list[float],
+        query_tokens: list[str],
         top_k: int = STAGE1_TOP_K,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Run semantic and lexical retrievals, fuse lists with RRF, and truncate to top_k.
 

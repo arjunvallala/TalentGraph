@@ -10,7 +10,6 @@ scores in [0.0, 1.0] unless explicitly documented otherwise.
 from __future__ import annotations
 
 import math
-from typing import Dict, List
 
 import numpy as np
 
@@ -93,7 +92,7 @@ def clip(value: float, min_val: float = 0.0, max_val: float = 1.0) -> float:
     return float(max(min_val, min(max_val, value)))
 
 
-def weighted_average(scores: Dict[str, float], weights: Dict[str, float]) -> float:
+def weighted_average(scores: dict[str, float], weights: dict[str, float]) -> float:
     """
     Compute weighted average of scores using provided weights.
 
@@ -119,7 +118,7 @@ def weighted_average(scores: Dict[str, float], weights: Dict[str, float]) -> flo
     return clip(safe_divide(weighted_sum, total_weight, default=0.0))
 
 
-def reciprocal_rank_fusion(rank_lists: List[List[str]], k: int = 60) -> List[str]:
+def reciprocal_rank_fusion(rank_lists: list[list[str]], k: int = 60) -> list[str]:
     """
     Combine multiple ranked candidate lists using Reciprocal Rank Fusion.
 
@@ -133,7 +132,7 @@ def reciprocal_rank_fusion(rank_lists: List[List[str]], k: int = 60) -> List[str
     Returns:
         Merged list of candidate_ids sorted by descending RRF score.
     """
-    rrf_scores: Dict[str, float] = {}
+    rrf_scores: dict[str, float] = {}
     for ranked_list in rank_lists:
         for rank_idx, candidate_id in enumerate(ranked_list):
             rank = rank_idx + 1  # 1-indexed
@@ -162,7 +161,7 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / (norm_a * norm_b))
 
 
-def softmax(values: List[float]) -> List[float]:
+def softmax(values: list[float]) -> list[float]:
     """
     Apply softmax to convert a list of real-valued scores to probabilities.
 

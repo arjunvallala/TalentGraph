@@ -2,20 +2,31 @@
 TalentGraph AI — Fix & Re-Rank Script
 Fixes broken feature extraction and re-runs ranking to produce correct submission.
 """
-import sys, os, json, re, time
+import json
+import os
+import sys
+
 sys.path.insert(0, '.')
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
-from services.preprocessing.feature_store import FeatureStore
-from services.preprocessing.parser import CandidateParser
+import polars as pl
+
+from services.analytics.submission_generator import SubmissionGenerator
 from services.preprocessing.career_parser import CareerParser
 from services.preprocessing.feature_extractor import FeatureExtractor
-from services.analytics.submission_generator import SubmissionGenerator
+from services.preprocessing.feature_store import FeatureStore
+from services.preprocessing.parser import CandidateParser
 from shared.config import settings
-from shared.types.candidate import CandidateProfile, WorkExperience, EducationEntry, EducationLevel, RedrobSignals, AvailabilityStatus
-from shared.types.ranking import CandidateResult, HiringRecommendation, ConfidenceLevel
 from shared.constants import SUBMISSION_COLUMNS
-import polars as pl
+from shared.types.candidate import (
+    AvailabilityStatus,
+    CandidateProfile,
+    EducationEntry,
+    EducationLevel,
+    RedrobSignals,
+    WorkExperience,
+)
+from shared.types.ranking import CandidateResult, ConfidenceLevel, HiringRecommendation
 
 print("=" * 60)
 print("TalentGraph AI — Fix & Re-Rank")
@@ -112,7 +123,7 @@ for i, row in enumerate(rows):
 
         try:
             notice = int(float(row.get('notice_period_days', 0) or 0))
-        except:
+        except (ValueError, TypeError):
             notice = 0
 
         redrob = RedrobSignals(
@@ -154,7 +165,7 @@ for i, row in enumerate(rows):
         if (i + 1) % 100 == 0:
             print(f"  Parsed {i+1}/{len(rows)} candidates...", end='\r')
 
-    except Exception as e:
+    except Exception:
         pass
 
 print(f"\n  Successfully parsed {len(profiles)} profiles")
@@ -163,7 +174,7 @@ print(f"\n  Successfully parsed {len(profiles)} profiles")
 print("\n[3/5] Saving updated features to feature store...")
 saved = 0
 conn = db.connect()
-for cid, feats in features_map.items():
+for _cid, feats in features_map.items():
     try:
         # Upsert directly into DuckDB
         conn.execute("""
@@ -194,7 +205,7 @@ for cid, feats in features_map.items():
             feats.skill_consistency,
         ])
         saved += 1
-    except Exception as e:
+    except Exception:
         pass
 print(f"  Saved {saved} feature vectors")
 
@@ -219,7 +230,7 @@ JD_SKILLS = {
     'lightgbm', 'neural', 'cv', 'computer vision', 'bert', 'gpt',
     'sql', 'mysql', 'mongodb', 'api', 'apis', 'git', 'linux', 'spark',
     'airflow', 'aws', 'gcp', 'azure', 'celery', 'kafka', 'go', 'java',
-    'spring', 'tensorflow', 'keras', 'numpy', 'pandas', 'scipy',
+    'spring', 'keras', 'numpy', 'pandas', 'scipy',
 }
 
 # Soft scoring - broader group for ML/backend roles
@@ -233,13 +244,13 @@ feature_rows = conn.execute("SELECT * FROM candidate_features").fetchall()
 feat_cols = [d[0] for d in conn.execute("SELECT * FROM candidate_features LIMIT 0").description]
 
 for feat_row in feature_rows:
-    feat_dict = dict(zip(feat_cols, feat_row))
+    feat_dict = dict(zip(feat_cols, feat_row, strict=False))
     cid = feat_dict['candidate_id']
     profile = profiles.get(cid)
     if not profile:
         continue
 
-    candidate_skills = set(s.lower().strip() for s in profile.skills)
+    candidate_skills = {s.lower().strip() for s in profile.skills}
 
     # Broad skill coverage: count any overlap with JD-related skills (normalized)
     jd_overlap = len(candidate_skills.intersection(JD_SKILLS))
@@ -262,7 +273,7 @@ for feat_row in feature_rows:
 
     # Leadership score
     lead_score = float(feat_dict.get('leadership_score', 0.0))
-    
+
     # Stability
     stab_score = float(feat_dict.get('stability_score', 0.5))
     if stab_score == 0.0:
@@ -396,7 +407,7 @@ for i, r in enumerate(top100_raw):
     top100.append(cr)
 
 print(f"  Scored {len(results)} candidates")
-print(f"  Top 100 selected")
+print("  Top 100 selected")
 print()
 print("  Score distribution of top 100:")
 buckets = {'Strong Hire': 0, 'Hire': 0, 'Consider': 0, 'Pass': 0, 'Reject': 0}
@@ -451,7 +462,6 @@ except ImportError:
     print("  (pandas/openpyxl not available, XLSX skipped)")
 
 # Validate
-from services.analytics.submission_generator import SubmissionGenerator
 gen = SubmissionGenerator()
 valid, errors = gen.validate(csv_path)
 print(f"\n  Submission valid: {valid}")
