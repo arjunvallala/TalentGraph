@@ -99,6 +99,7 @@ ignore = [
     "B008",   # Do not perform function calls in default arguments
     "B904",   # Within an except clause, raise from err
     "UP007",  # Use X | Y for type hints — keep Optional for 3.11 compat
+    "UP042",  # Class inherits from str and enum.Enum — keep for python version compatibility
 ]
 
 [tool.ruff.lint]
@@ -110,6 +111,7 @@ ignore = [
     "B008",   # Do not perform function calls in default arguments
     "B904",   # Within an except clause, raise from err
     "UP007",  # Use X | Y for type hints — keep Optional for 3.11 compat
+    "UP042",  # Class inherits from str and enum.Enum — keep for python version compatibility
 ]
 
 [tool.ruff.lint.isort]
