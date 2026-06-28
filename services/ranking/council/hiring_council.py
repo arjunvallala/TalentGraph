@@ -7,6 +7,7 @@ and combines their votes into a FinalCouncilDecision consensus.
 from __future__ import annotations
 
 import time
+import math
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -139,10 +140,9 @@ class HiringCouncil:
         ]
         agreement_score = 1.0
         if len(scores_list) > 1:
-            std_dev = float(time.struct_time(time.localtime(0)).tm_sec) # dummy or compute std dev
-            # Let's compute actual standard deviation
+            # Agreement = 1 - std_dev: all councils agree (std=0) → 1.0; high disagreement (std=0.5) → 0.5
             np_arr = np.array(scores_list, dtype=np.float32)
-            agreement_score = float(1.0 - np_arr.std())
+            agreement_score = float(max(0.0, 1.0 - np_arr.std()))
 
         # Check for strong dissent (e.g. if technical council scores very low but others high)
         dissenting_opinion = None
