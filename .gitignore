@@ -128,3 +128,6 @@ temp/
 # ── Submission ────────────────────────────────────────────────────────────────
 # Submission files should be versioned explicitly
 # data/submission.csv  ← uncomment to gitignore
+
+# ── Whitelist Frontend Lib ────────────────────────────────────────────────────
+!apps/dashboard/src/lib/
