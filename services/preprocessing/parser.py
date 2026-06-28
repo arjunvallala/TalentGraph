@@ -7,6 +7,7 @@ Handles skill parsing, education parsing, signal extraction, and seniority infer
 Each parse_* method is independently robust — a failure in one field
 does not abort the whole candidate parse.
 """
+
 from __future__ import annotations
 
 import json
@@ -27,29 +28,37 @@ logger = get_logger(__name__)
 
 # ── Education Level Inference ─────────────────────────────────────────────────
 _EDU_LEVEL_PATTERNS: list[tuple[EducationLevel, re.Pattern]] = [
-    (EducationLevel.PHD, re.compile(
-        r"\b(ph\.?d|d\.phil|doctor(?:ate)?|phd)\b", re.IGNORECASE
-    )),
-    (EducationLevel.MBA, re.compile(
-        r"\b(mba|master\s+of\s+business\s+administration)\b", re.IGNORECASE
-    )),
-    (EducationLevel.MASTERS, re.compile(
-        r"\b(m\.?s\.?|m\.?e\.?|m\.?tech|master(?:s)?|msc|m\.?a\.?|mphil)\b",
-        re.IGNORECASE
-    )),
-    (EducationLevel.BACHELORS, re.compile(
-        r"\b(b\.?s\.?|b\.?e\.?|b\.?tech|bachelor(?:s)?|b\.?sc|b\.?a\.?|"
-        r"be|btech|bsc|ba|bs)\b",
-        re.IGNORECASE
-    )),
-    (EducationLevel.DIPLOMA, re.compile(
-        r"\b(diploma|certificate|certification|associate)\b", re.IGNORECASE
-    )),
-    (EducationLevel.HIGH_SCHOOL, re.compile(
-        r"\b(high\s+school|12th|10\+2|hsc|ssc|secondary|matriculation|"
-        r"ged|a\s+level|o\s+level)\b",
-        re.IGNORECASE
-    )),
+    (EducationLevel.PHD, re.compile(r"\b(ph\.?d|d\.phil|doctor(?:ate)?|phd)\b", re.IGNORECASE)),
+    (
+        EducationLevel.MBA,
+        re.compile(r"\b(mba|master\s+of\s+business\s+administration)\b", re.IGNORECASE),
+    ),
+    (
+        EducationLevel.MASTERS,
+        re.compile(
+            r"\b(m\.?s\.?|m\.?e\.?|m\.?tech|master(?:s)?|msc|m\.?a\.?|mphil)\b", re.IGNORECASE
+        ),
+    ),
+    (
+        EducationLevel.BACHELORS,
+        re.compile(
+            r"\b(b\.?s\.?|b\.?e\.?|b\.?tech|bachelor(?:s)?|b\.?sc|b\.?a\.?|"
+            r"be|btech|bsc|ba|bs)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        EducationLevel.DIPLOMA,
+        re.compile(r"\b(diploma|certificate|certification|associate)\b", re.IGNORECASE),
+    ),
+    (
+        EducationLevel.HIGH_SCHOOL,
+        re.compile(
+            r"\b(high\s+school|12th|10\+2|hsc|ssc|secondary|matriculation|"
+            r"ged|a\s+level|o\s+level)\b",
+            re.IGNORECASE,
+        ),
+    ),
 ]
 
 # ── Common degree field keywords → field_of_study ────────────────────────────
@@ -250,12 +259,14 @@ class CandidateParser:
         if not entries and education_str.strip():
             level = self.infer_education_level(education_str)
             field = _infer_field_of_study(education_str)
-            entries.append(EducationEntry(
-                institution="",
-                degree=education_str[:100],
-                field_of_study=field,
-                level=level,
-            ))
+            entries.append(
+                EducationEntry(
+                    institution="",
+                    degree=education_str[:100],
+                    field_of_study=field,
+                    level=level,
+                )
+            )
 
         return entries
 
@@ -283,8 +294,13 @@ class CandidateParser:
         """Parse a single education dict into an EducationEntry."""
         try:
             degree = str(data.get("degree", data.get("qualification", ""))).strip()
-            institution = str(data.get("institution", data.get("school", data.get("university", "")))).strip()
-            field = str(data.get("field_of_study", data.get("major", data.get("stream", "")))).strip() or None
+            institution = str(
+                data.get("institution", data.get("school", data.get("university", "")))
+            ).strip()
+            field = (
+                str(data.get("field_of_study", data.get("major", data.get("stream", "")))).strip()
+                or None
+            )
 
             if not degree and not institution:
                 return None
@@ -333,6 +349,7 @@ class CandidateParser:
 
     def _parse_redrob_signals(self, row: dict[str, Any]) -> RedrobSignals:
         """Extract and validate RedrobSignals from a raw row dict."""
+
         def safe_int(val: Any, default: int = 0) -> int:
             try:
                 return int(float(str(val))) if val is not None else default
@@ -356,13 +373,17 @@ class CandidateParser:
         application_count = safe_int(row.get("application_count"), 0)
         response_rate = min(1.0, max(0.0, safe_float(row.get("response_rate"), 0.0)))
         last_active_days_raw = row.get("last_active_days")
-        last_active_days = safe_int(last_active_days_raw) if last_active_days_raw is not None else None
+        last_active_days = (
+            safe_int(last_active_days_raw) if last_active_days_raw is not None else None
+        )
         notice_period_raw = row.get("notice_period_days")
         notice_period_days = safe_int(notice_period_raw) if notice_period_raw is not None else None
         if notice_period_days is not None:
             notice_period_days = min(365, max(0, notice_period_days))
         expected_salary_raw = row.get("expected_salary")
-        expected_salary = safe_float(expected_salary_raw) if expected_salary_raw is not None else None
+        expected_salary = (
+            safe_float(expected_salary_raw) if expected_salary_raw is not None else None
+        )
         open_to_remote = safe_bool(row.get("open_to_remote"), False)
 
         # Parse availability status

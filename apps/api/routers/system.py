@@ -3,6 +3,7 @@ TalentGraph AI — System API Router
 
 System status, configuration, and pipeline management endpoints.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
@@ -32,8 +33,7 @@ async def get_system_status() -> ORJSONResponse:
     from pathlib import Path
 
     indexes_ready = (
-        Path(settings.faiss_index_path).exists()
-        and Path(settings.bm25_index_path).exists()
+        Path(settings.faiss_index_path).exists() and Path(settings.bm25_index_path).exists()
     )
     db_ready = Path(settings.duckdb_path).exists()
     model_ready = Path(settings.embedding_model_path).exists()

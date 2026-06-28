@@ -5,6 +5,7 @@ Measures REAL candidate preprocessing and ranking pipeline performance.
 All timings are wall-clock measurements on actual code execution paths —
 no simulations, no sleep() calls, no estimated values.
 """
+
 from __future__ import annotations
 
 import random
@@ -26,10 +27,26 @@ app = typer.Typer(name="tg-benchmark", help="TalentGraph AI Benchmark Utility")
 def _make_synthetic_profile(idx: int) -> dict:
     """Generate a synthetic candidate profile dict for benchmarking."""
     skills = random.sample(
-        ["Python", "Java", "SQL", "React", "Docker", "Kubernetes",
-         "TensorFlow", "FastAPI", "PostgreSQL", "Redis", "Kafka",
-         "Go", "TypeScript", "AWS", "GCP", "Spark", "Airflow"],
-        k=random.randint(3, 10)
+        [
+            "Python",
+            "Java",
+            "SQL",
+            "React",
+            "Docker",
+            "Kubernetes",
+            "TensorFlow",
+            "FastAPI",
+            "PostgreSQL",
+            "Redis",
+            "Kafka",
+            "Go",
+            "TypeScript",
+            "AWS",
+            "GCP",
+            "Spark",
+            "Airflow",
+        ],
+        k=random.randint(3, 10),
     )
     return {
         "candidate_id": f"bench_{idx:05d}",
@@ -38,7 +55,9 @@ def _make_synthetic_profile(idx: int) -> dict:
         "current_company": f"Company{idx % 50}",
         "years_of_experience": float(random.randint(1, 20)),
         "skills": skills,
-        "education": [{"degree": "B.Tech", "institution": "IIT", "level": "BACHELORS", "end_year": 2015}],
+        "education": [
+            {"degree": "B.Tech", "institution": "IIT", "level": "BACHELORS", "end_year": 2015}
+        ],
         "work_experience": [
             {
                 "company": f"Corp{i}",
@@ -50,7 +69,9 @@ def _make_synthetic_profile(idx: int) -> dict:
             }
             for i in range(random.randint(1, 4))
         ],
-        "certifications": random.sample(["AWS Certified", "GCP Pro", "CKA"], k=random.randint(0, 2)),
+        "certifications": random.sample(
+            ["AWS Certified", "GCP Pro", "CKA"], k=random.randint(0, 2)
+        ),
         "redrob_signals": {
             "response_rate": round(random.uniform(0.4, 1.0), 2),
             "last_active_days": random.randint(0, 90),
@@ -60,7 +81,7 @@ def _make_synthetic_profile(idx: int) -> dict:
             "notice_period_days": random.randint(0, 90),
             "interview_declined_count": 0,
             "offer_declined_count": 0,
-        }
+        },
     }
 
 
@@ -68,7 +89,8 @@ def _make_synthetic_profile(idx: int) -> dict:
 def run(
     candidates_count: int = typer.Option(
         1000,
-        "--count", "-c",
+        "--count",
+        "-c",
         help="Number of synthetic candidates to benchmark",
     ),
 ) -> None:
@@ -81,7 +103,9 @@ def run(
 
     All measurements are real wall-clock durations — no simulations.
     """
-    console.print(f"[bold cyan]TalentGraph AI[/bold cyan] — Real Pipeline Benchmark ({candidates_count:,} candidates)")
+    console.print(
+        f"[bold cyan]TalentGraph AI[/bold cyan] — Real Pipeline Benchmark ({candidates_count:,} candidates)"
+    )
     console.print("")
 
     # ── Import real pipeline components ──────────────────────────────────────
@@ -112,27 +136,31 @@ def run(
     for rp in raw_profiles:
         we_list = []
         for we in rp["work_experience"]:
-            we_list.append(WorkExperience(
-                company=we["company"],
-                title=we["title"],
-                duration_months=we["duration_months"],
-                start_date=we["start_date"],
-                end_date=we["end_date"],
-                is_current=we["is_current"],
-            ))
+            we_list.append(
+                WorkExperience(
+                    company=we["company"],
+                    title=we["title"],
+                    duration_months=we["duration_months"],
+                    start_date=we["start_date"],
+                    end_date=we["end_date"],
+                    is_current=we["is_current"],
+                )
+            )
         edu_list = []
         for edu in rp["education"]:
             try:
                 lev = EducationLevel(edu["level"])
             except Exception:
                 lev = EducationLevel.UNKNOWN
-            edu_list.append(EducationEntry(
-                institution=edu["institution"],
-                degree=edu["degree"],
-                level=lev,
-                field_of_study="Engineering",
-                end_year=edu.get("end_year"),
-            ))
+            edu_list.append(
+                EducationEntry(
+                    institution=edu["institution"],
+                    degree=edu["degree"],
+                    level=lev,
+                    field_of_study="Engineering",
+                    end_year=edu.get("end_year"),
+                )
+            )
         sigs = rp["redrob_signals"]
         try:
             avail = AvailabilityStatus(sigs["availability_status"])
@@ -148,18 +176,20 @@ def run(
             interview_declined_count=sigs["interview_declined_count"],
             offer_declined_count=sigs["offer_declined_count"],
         )
-        profiles.append(CandidateProfile(
-            candidate_id=rp["candidate_id"],
-            name=rp["name"],
-            current_title=rp["current_title"],
-            current_company=rp["current_company"],
-            years_of_experience=rp["years_of_experience"],
-            skills=rp["skills"],
-            education=edu_list,
-            work_experience=we_list,
-            certifications=rp["certifications"],
-            redrob_signals=redrob,
-        ))
+        profiles.append(
+            CandidateProfile(
+                candidate_id=rp["candidate_id"],
+                name=rp["name"],
+                current_title=rp["current_title"],
+                current_company=rp["current_company"],
+                years_of_experience=rp["years_of_experience"],
+                skills=rp["skills"],
+                education=edu_list,
+                work_experience=we_list,
+                certifications=rp["certifications"],
+                redrob_signals=redrob,
+            )
+        )
 
     # REAL timing: feature extraction
     prep_start = time.perf_counter()
@@ -174,23 +204,26 @@ def run(
     rank_start = time.perf_counter()
 
     # Extract decision matrix
-    matrix = np.array([
+    matrix = np.array(
         [
-            f.experience_score,
-            f.skill_coverage,
-            f.domain_match,
-            f.career_velocity if hasattr(f, 'career_velocity') else 0.0,
-            f.leadership_score,
-            f.stability_score if hasattr(f, 'stability_score') else f.career_stability,
-            f.availability_score if hasattr(f, 'availability_score') else f.hiring_availability,
-        ]
-        for f in features_list
-    ], dtype=np.float64)
+            [
+                f.experience_score,
+                f.skill_coverage,
+                f.domain_match,
+                f.career_velocity if hasattr(f, "career_velocity") else 0.0,
+                f.leadership_score,
+                f.stability_score if hasattr(f, "stability_score") else f.career_stability,
+                f.availability_score if hasattr(f, "availability_score") else f.hiring_availability,
+            ]
+            for f in features_list
+        ],
+        dtype=np.float64,
+    )
 
     # TOPSIS
     weights = np.array([0.15, 0.25, 0.15, 0.10, 0.08, 0.08, 0.10])
     weights = weights / weights.sum()
-    sq_sums = np.sqrt(np.sum(matrix ** 2, axis=0))
+    sq_sums = np.sqrt(np.sum(matrix**2, axis=0))
     sq_sums[sq_sums == 0] = 1e-8
     matrix_norm = matrix / sq_sums
     matrix_weighted = matrix_norm * weights
@@ -219,24 +252,30 @@ def run(
         f"{candidates_count:,}",
         f"{prep_duration:.3f}s",
         f"{prep_throughput:,.0f}/s",
-        "[green]PASS[/green]" if prep_throughput > 500 else "[red]SLOW[/red]"
+        "[green]PASS[/green]" if prep_throughput > 500 else "[red]SLOW[/red]",
     )
     table.add_row(
         "TOPSIS Ranking Engine\n(matrix build + ideal distance)",
         f"{candidates_count:,}",
         f"{rank_duration:.4f}s",
         f"{rank_throughput:,.0f}/s",
-        "[green]PASS[/green]" if rank_throughput > 1000 else "[red]SLOW[/red]"
+        "[green]PASS[/green]" if rank_throughput > 1000 else "[red]SLOW[/red]",
     )
 
     console.print(table)
 
     # Summary
     total = prep_duration + rank_duration
-    console.print(f"\n[bold]End-to-end wall time:[/bold] {total:.3f}s for {candidates_count:,} candidates")
-    console.print("[bold]TOPSIS top-3 candidate IDs:[/bold] "
-                  + ", ".join(profiles[i].candidate_id for i in ranked_indices[:3]))
-    console.print("\n[green]Benchmark complete. All measurements are real — no simulations.[/green]")
+    console.print(
+        f"\n[bold]End-to-end wall time:[/bold] {total:.3f}s for {candidates_count:,} candidates"
+    )
+    console.print(
+        "[bold]TOPSIS top-3 candidate IDs:[/bold] "
+        + ", ".join(profiles[i].candidate_id for i in ranked_indices[:3])
+    )
+    console.print(
+        "\n[green]Benchmark complete. All measurements are real — no simulations.[/green]"
+    )
 
 
 if __name__ == "__main__":

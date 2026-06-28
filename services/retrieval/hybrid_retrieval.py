@@ -4,6 +4,7 @@ TalentGraph AI — Hybrid Retrieval Engine
 Performs Stage 1 hybrid retrieval, running both semantic (FAISS) and lexical (BM25)
 searches and merging them using Reciprocal Rank Fusion (RRF) to output top-N candidates.
 """
+
 from __future__ import annotations
 
 from services.preprocessing.feature_store import FeatureStore
@@ -53,5 +54,7 @@ class HybridRetrievalEngine:
         fused_ids = reciprocal_rank_fusion([semantic_ids, bm25_ids], k=RRF_K)
 
         truncated = fused_ids[:top_k]
-        logger.info(f"Hybrid retrieval finished: fused {len(fused_ids)} down to {len(truncated)} candidates")
+        logger.info(
+            f"Hybrid retrieval finished: fused {len(fused_ids)} down to {len(truncated)} candidates"
+        )
         return truncated

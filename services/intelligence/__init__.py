@@ -4,6 +4,7 @@ TalentGraph AI — Intelligence Engines Package
 Contains the JobIntelligenceEngine, CandidateIntelligenceEngine,
 CareerEngine, BehaviorEngine, RiskEngine, and EvidenceEngine.
 """
+
 from services.intelligence.behavior_engine import BehaviorEngine
 from services.intelligence.candidate_intelligence import CandidateIntelligenceEngine
 from services.intelligence.career_engine import CareerEngine

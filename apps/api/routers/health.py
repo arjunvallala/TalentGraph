@@ -4,6 +4,7 @@ TalentGraph AI — Health Check Endpoints
 Provides health, readiness, and liveness endpoints for the API.
 Used by Docker health checks, load balancers, and monitoring systems.
 """
+
 from __future__ import annotations
 
 import time

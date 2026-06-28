@@ -4,6 +4,7 @@ TalentGraph AI — Shared Utilities Package
 Provides text processing, mathematical operations, and file I/O
 utilities used across the entire service layer.
 """
+
 from shared.utils.file_utils import (
     ensure_dir,
     load_json,

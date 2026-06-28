@@ -3,6 +3,7 @@ TalentGraph AI — Shared Types Package
 
 Exports all Pydantic models used across the platform.
 """
+
 from shared.types.analytics import (
     AnalyticsSummary,
     CandidateDistribution,

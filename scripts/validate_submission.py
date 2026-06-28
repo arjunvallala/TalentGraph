@@ -3,6 +3,7 @@ TalentGraph AI — Submission Validation CLI
 
 Validates a submission.csv file against schema, types, range, and format constraints.
 """
+
 from __future__ import annotations
 
 import sys
@@ -24,7 +25,8 @@ app = typer.Typer(name="tg-validate", help="TalentGraph AI Submission Validator"
 def validate(
     file: Path = typer.Option(
         Path("submission.csv"),
-        "--file", "-f",
+        "--file",
+        "-f",
         help="Path to submission.csv file",
         exists=True,
         readable=True,
@@ -37,19 +39,23 @@ def validate(
     valid, errors = generator.validate(str(file))
 
     if valid:
-        console.print(Panel.fit(
-            "✅ [bold green]Validation Passed![/bold green]\n"
-            f"The file {file} is fully formatted and ready for submission.",
-            title="Success",
-            border_style="green"
-        ))
+        console.print(
+            Panel.fit(
+                "✅ [bold green]Validation Passed![/bold green]\n"
+                f"The file {file} is fully formatted and ready for submission.",
+                title="Success",
+                border_style="green",
+            )
+        )
     else:
-        console.print(Panel.fit(
-            "❌ [bold red]Validation Failed![/bold red]\n"
-            f"Found {len(errors)} format errors. See details below.",
-            title="Error",
-            border_style="red"
-        ))
+        console.print(
+            Panel.fit(
+                "❌ [bold red]Validation Failed![/bold red]\n"
+                f"Found {len(errors)} format errors. See details below.",
+                title="Error",
+                border_style="red",
+            )
+        )
         for err in errors:
             console.print(f"  - [red]{err}[/red]")
         sys.exit(1)

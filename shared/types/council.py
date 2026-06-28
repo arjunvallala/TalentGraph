@@ -8,6 +8,7 @@ Each council evaluator independently assesses one aspect of a candidate
 and produces a CouncilVote. The HiringCouncil combines all votes
 into a FinalCouncilDecision.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -18,6 +19,7 @@ from pydantic import BaseModel, Field
 
 class CouncilType(str, Enum):
     """Identifies which council member produced an evaluation."""
+
     TECHNICAL = "technical_council"
     CAREER = "career_council"
     BEHAVIOR = "behavior_council"
@@ -45,6 +47,7 @@ class CouncilVote(BaseModel):
         rationale: One-sentence evaluation rationale.
         evaluated_at: Timestamp of evaluation.
     """
+
     council_type: CouncilType
     candidate_id: str
     score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -72,6 +75,7 @@ class CouncilEvaluationResult(BaseModel):
         all_voted: True if all 5 evaluators produced a vote.
         failed_councils: List of council types that failed/timed out.
     """
+
     candidate_id: str
     votes: dict[str, CouncilVote] = Field(default_factory=dict)
     evaluation_duration_seconds: float = 0.0
@@ -111,6 +115,7 @@ class FinalCouncilDecision(BaseModel):
         final_score: council_score - risk_penalty_applied.
         decided_at: Timestamp of consensus.
     """
+
     candidate_id: str
     council_score: float = Field(default=0.0, ge=0.0, le=1.0)
     council_confidence: float = Field(default=0.0, ge=0.0, le=1.0)

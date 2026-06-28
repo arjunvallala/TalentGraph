@@ -4,6 +4,7 @@ TalentGraph AI — Semantic Retrieval Engine
 Performs Stage 1 dense vector search using FAISS to retrieve candidates
 whose profiles are semantically similar to the job description.
 """
+
 from __future__ import annotations
 
 import numpy as np

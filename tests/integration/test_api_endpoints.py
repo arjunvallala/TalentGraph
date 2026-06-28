@@ -4,6 +4,7 @@ TalentGraph AI — API Integration Tests
 Tests the FastAPI endpoints using an async test client.
 Runs in demo mode to avoid requiring a real database.
 """
+
 from __future__ import annotations
 
 import pytest

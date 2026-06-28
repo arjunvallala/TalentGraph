@@ -4,6 +4,7 @@ TalentGraph AI — Hiring Council Consensus Engine
 Runs all 5 independent council members in parallel using a thread pool
 and combines their votes into a FinalCouncilDecision consensus.
 """
+
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
@@ -69,8 +70,7 @@ class HiringCouncil:
         # 1. Run evaluators in parallel using ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = {
-                executor.submit(member.evaluate, candidate, job): member
-                for member in self.members
+                executor.submit(member.evaluate, candidate, job): member for member in self.members
             }
 
             for future in futures:
@@ -80,7 +80,6 @@ class HiringCouncil:
                     votes[member.council_type.value] = vote
                 except Exception as e:
                     logger.error(f"Council member '{member.council_type.value}' failed: {e}")
-
 
         # 2. Compute Consensus Score
         individual_scores = {}
@@ -106,9 +105,7 @@ class HiringCouncil:
                 weighted_score_sum += score * w
                 total_weight += w
 
-        consensus_score = (
-            weighted_score_sum / total_weight if total_weight > 0 else 0.5
-        )
+        consensus_score = weighted_score_sum / total_weight if total_weight > 0 else 0.5
         avg_confidence = (
             sum(individual_confidences.values()) / len(individual_confidences)
             if individual_confidences

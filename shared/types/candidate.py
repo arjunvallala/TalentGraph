@@ -7,6 +7,7 @@ engineered features, evidence, and the multidimensional genome.
 These models flow through the entire pipeline:
     CSV Row → CandidateProfile → CandidateFeatures → CandidateGenome → CandidateResult
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -17,8 +18,10 @@ from pydantic import BaseModel, Field, field_validator
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
+
 class AvailabilityStatus(str, Enum):
     """Candidate's current job-seeking status."""
+
     IMMEDIATELY_AVAILABLE = "immediately_available"
     NOTICE_PERIOD = "notice_period"
     NOT_LOOKING = "not_looking"
@@ -28,6 +31,7 @@ class AvailabilityStatus(str, Enum):
 
 class EducationLevel(str, Enum):
     """Standardised education qualification levels."""
+
     HIGH_SCHOOL = "high_school"
     DIPLOMA = "diploma"
     BACHELORS = "bachelors"
@@ -39,6 +43,7 @@ class EducationLevel(str, Enum):
 
 
 # ── Sub-Models ────────────────────────────────────────────────────────────────
+
 
 class EducationEntry(BaseModel):
     """
@@ -54,6 +59,7 @@ class EducationEntry(BaseModel):
         gpa: Grade point average, if available.
         is_current: True if this is an ongoing qualification.
     """
+
     institution: str = ""
     degree: str = ""
     field_of_study: str | None = None
@@ -89,6 +95,7 @@ class WorkExperience(BaseModel):
         company_size: Company size descriptor (startup, mid-size, enterprise).
         industry: Industry sector.
     """
+
     company: str = ""
     title: str = ""
     start_date: str | None = None
@@ -130,6 +137,7 @@ class RedrobSignals(BaseModel):
         interview_declined_count: Number of scheduled interviews declined.
         offer_declined_count: Number of job offers declined.
     """
+
     profile_views: int = Field(default=0, ge=0)
     application_count: int = Field(default=0, ge=0)
     response_rate: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -144,6 +152,7 @@ class RedrobSignals(BaseModel):
 
 
 # ── Core Models ───────────────────────────────────────────────────────────────
+
 
 class CandidateProfile(BaseModel):
     """
@@ -174,6 +183,7 @@ class CandidateProfile(BaseModel):
         raw_data: Original row as a dict (for debugging/audit).
         created_at: Timestamp when this profile was parsed.
     """
+
     candidate_id: str
     name: str | None = None
     email: str | None = None
@@ -276,6 +286,7 @@ class CandidateFeatures(BaseModel):
         education_level_score: Numeric education level [0, 1].
         computed_at: Timestamp of feature computation.
     """
+
     candidate_id: str
 
     # ── Core Precomputed Features ─────────────────────────────────────────────
@@ -354,6 +365,7 @@ class CandidateEvidence(BaseModel):
         behavior_evidence: Evidence strings from Redrob signals.
         evidence_strength: Overall evidence quality score [0, 1].
     """
+
     candidate_id: str
     skill_evidence: dict[str, list[str]] = Field(default_factory=dict)
     experience_evidence: list[str] = Field(default_factory=list)
@@ -410,6 +422,7 @@ class CandidateGenome(BaseModel):
         embedding_id: FAISS vector ID for semantic retrieval.
         computed_at: Timestamp of genome construction.
     """
+
     candidate_id: str
     features: CandidateFeatures
     evidence: CandidateEvidence

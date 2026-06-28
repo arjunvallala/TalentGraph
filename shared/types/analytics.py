@@ -4,6 +4,7 @@ TalentGraph AI — Analytics Data Models
 Defines models for dashboard analytics, hiring funnel statistics,
 feature importance, candidate distributions, and risk breakdowns.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -27,6 +28,7 @@ class HiringFunnelStats(BaseModel):
         stage2_retention_rate: Fraction retained after Stage 2.
         stage3_retention_rate: Fraction retained after Stage 3.
     """
+
     total_candidates: int = 0
     stage1_output: int = 0
     stage2_output: int = 0
@@ -50,6 +52,7 @@ class FeatureImportance(BaseModel):
         label: Human-readable feature label.
         description: Brief description of the feature.
     """
+
     feature_name: str
     importance_score: float = Field(default=0.0, ge=0.0, le=1.0)
     avg_score_top10: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -70,6 +73,7 @@ class CandidateDistribution(BaseModel):
         location_distribution: Count by top locations.
         availability_distribution: Count by availability status.
     """
+
     score_histogram: dict[str, int] = Field(default_factory=dict)
     experience_distribution: dict[str, int] = Field(default_factory=dict)
     education_distribution: dict[str, int] = Field(default_factory=dict)
@@ -89,6 +93,7 @@ class RiskBreakdown(BaseModel):
         critical_risk_candidates: Count of candidates with critical risk.
         top_risk_flags: Most common risk flags encountered.
     """
+
     risk_level_distribution: dict[str, int] = Field(default_factory=dict)
     avg_job_hop_risk: float = 0.0
     avg_gap_risk: float = 0.0
@@ -99,6 +104,7 @@ class RiskBreakdown(BaseModel):
 
 class ConfidenceDistribution(BaseModel):
     """Distribution of confidence levels in the ranked output."""
+
     high_confidence: int = 0
     medium_confidence: int = 0
     low_confidence: int = 0
@@ -124,16 +130,13 @@ class AnalyticsSummary(BaseModel):
         skill_gap_analysis: Skills most missing in the candidate pool.
         generated_at: When this summary was produced.
     """
+
     job_id: str
     funnel: HiringFunnelStats = Field(default_factory=HiringFunnelStats)
     feature_importance: list[FeatureImportance] = Field(default_factory=list)
-    candidate_distribution: CandidateDistribution = Field(
-        default_factory=CandidateDistribution
-    )
+    candidate_distribution: CandidateDistribution = Field(default_factory=CandidateDistribution)
     risk_breakdown: RiskBreakdown = Field(default_factory=RiskBreakdown)
-    confidence_distribution: ConfidenceDistribution = Field(
-        default_factory=ConfidenceDistribution
-    )
+    confidence_distribution: ConfidenceDistribution = Field(default_factory=ConfidenceDistribution)
     recommendation_distribution: dict[str, int] = Field(default_factory=dict)
     top_skills: list[str] = Field(default_factory=list)
     skill_gap_analysis: list[str] = Field(default_factory=list)

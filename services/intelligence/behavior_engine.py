@@ -4,6 +4,7 @@ TalentGraph AI — Behavior Engine
 Analyzes Redrob platform interaction signals (response rates, declination rates,
 profile activity, notice period) to assess candidate engagement and hiring readiness.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -82,9 +83,7 @@ class BehaviorEngine:
 
         # Composite readiness score [0.0, 1.0]
         readiness_score = (
-            response_rate * 0.4 +
-            active_score * 0.3 +
-            notice_score * 0.3
+            response_rate * 0.4 + active_score * 0.3 + notice_score * 0.3
         ) * avail_mult
 
         return {

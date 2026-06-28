@@ -4,6 +4,7 @@ TalentGraph AI — Candidate Intelligence Engine
 Maps candidate feature vectors and profiles to a multidimensional CandidateGenome,
 aggregating low-level metrics into recruiter-understandable dimension scores.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -50,50 +51,32 @@ class CandidateIntelligenceEngine:
         # Composite aggregate formulas for 8 radar chart dimensions:
 
         # 1. Technical Capability: skill coverage + certifications
-        tech_cap = (
-            features.skill_coverage * 0.6 +
-            features.certifications_score * 0.4
-        )
+        tech_cap = features.skill_coverage * 0.6 + features.certifications_score * 0.4
 
         # 2. Career Progression: velocity + overall experience score
-        career_prog = (
-            features.career_velocity * 0.5 +
-            features.experience_score * 0.5
-        )
+        career_prog = features.career_velocity * 0.5 + features.experience_score * 0.5
 
         # 3. Domain Expertise: domain match + consistency of skills
-        domain_exp = (
-            features.domain_match * 0.7 +
-            features.skill_consistency * 0.3
-        )
+        domain_exp = features.domain_match * 0.7 + features.skill_consistency * 0.3
 
         # 4. Leadership Impact: leadership score direct
         leader_impact = features.leadership_score
 
         # 5. Learning Agility: education + research + certifications
         learning_agil = (
-            features.education_score * 0.3 +
-            features.research_score * 0.3 +
-            features.learning_score * 0.4
+            features.education_score * 0.3
+            + features.research_score * 0.3
+            + features.learning_score * 0.4
         )
 
         # 6. Work Stability: stability score penalty-subtracted by job-hopping
-        stability = (
-            features.stability_score * 0.7 +
-            (1.0 - features.job_hop_risk) * 0.3
-        )
+        stability = features.stability_score * 0.7 + (1.0 - features.job_hop_risk) * 0.3
 
         # 7. Behavioral Signals: platform behavioral score + email/activity completeness
-        behavior = (
-            features.behavior_score * 0.8 +
-            features.profile_completeness * 0.2
-        )
+        behavior = features.behavior_score * 0.8 + features.profile_completeness * 0.2
 
         # 8. Hiring Readiness: notice availability - gap risk
-        readiness = (
-            features.availability_score * 0.8 -
-            features.gap_risk * 0.2
-        )
+        readiness = features.availability_score * 0.8 - features.gap_risk * 0.2
 
         # Apply clips to ensure bounds [0.0, 1.0]
         return CandidateGenome(

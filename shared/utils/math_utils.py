@@ -7,6 +7,7 @@ used throughout the scoring and ranking pipeline.
 All functions are deterministic, numerically stable, and produce
 scores in [0.0, 1.0] unless explicitly documented otherwise.
 """
+
 from __future__ import annotations
 
 import math

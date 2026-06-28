@@ -5,6 +5,7 @@ Coordinates the end-to-end data preprocessing flow: loading, cleaning,
 parsing, feature extraction, feature store insertion, embedding generation,
 and vector/keyword index building.
 """
+
 from __future__ import annotations
 
 import time
@@ -31,7 +32,15 @@ logger = get_logger(__name__)
 
 class StageResult:
     """Represents the execution outcome of a single pipeline stage."""
-    def __init__(self, stage_name: str, input_count: int, output_count: int, duration_seconds: float, success: bool) -> None:
+
+    def __init__(
+        self,
+        stage_name: str,
+        input_count: int,
+        output_count: int,
+        duration_seconds: float,
+        success: bool,
+    ) -> None:
         self.stage_name = stage_name
         self.input_count = input_count
         self.output_count = output_count
@@ -41,6 +50,7 @@ class StageResult:
 
 class PipelineResult:
     """Contains the overall outcome and stats of a pipeline run."""
+
     def __init__(self, total_processed: int, stage_results: list[StageResult]) -> None:
         self.total_processed = total_processed
         self.stage_results = stage_results
@@ -182,7 +192,13 @@ class PreprocessingPipeline:
 
         duration = time.perf_counter() - start_time
         stage_results.append(
-            StageResult("Parsing & Feature Extraction", total_candidates, len(processed_candidates_state), duration, True)
+            StageResult(
+                "Parsing & Feature Extraction",
+                total_candidates,
+                len(processed_candidates_state),
+                duration,
+                True,
+            )
         )
 
         # ── STAGE 4: EMBEDDING GENERATION ──
@@ -200,7 +216,10 @@ class PreprocessingPipeline:
             if prof:
                 all_profiles.append(prof)
                 # Build textual representation for BM25 and embeddings
-                text = prof.raw_text or f"{prof.name} {prof.current_title} {prof.current_company} {','.join(prof.skills or [])}"
+                text = (
+                    prof.raw_text
+                    or f"{prof.name} {prof.current_title} {prof.current_company} {','.join(prof.skills or [])}"
+                )
                 corpus_texts.append(text)
 
         # Vector Embeddings
@@ -216,7 +235,9 @@ class PreprocessingPipeline:
                     prof.embedding_id = i
                     self.db.save_candidate_profile(prof)
             except Exception as e:
-                logger.error(f"Failed to generate embeddings: {e}. Falling back to default search indexes.")
+                logger.error(
+                    f"Failed to generate embeddings: {e}. Falling back to default search indexes."
+                )
 
         # FAISS Index
         if len(embeddings) > 0:
@@ -238,7 +259,9 @@ class PreprocessingPipeline:
 
         duration = time.perf_counter() - start_time
         stage_results.append(
-            StageResult("Dense & Sparse Indexing", len(all_profiles), len(all_profiles), duration, True)
+            StageResult(
+                "Dense & Sparse Indexing", len(all_profiles), len(all_profiles), duration, True
+            )
         )
         self.checkpoint.save("indexing", {"complete": True, "processed_count": len(all_profiles)})
 
@@ -258,7 +281,9 @@ class PreprocessingPipeline:
 
         duration = time.perf_counter() - start_time
         stage_results.append(
-            StageResult("Quality Assurance Report", len(df_features), len(df_features), duration, True)
+            StageResult(
+                "Quality Assurance Report", len(df_features), len(df_features), duration, True
+            )
         )
 
         self.db.close()

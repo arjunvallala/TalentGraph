@@ -3,6 +3,7 @@ TalentGraph AI — Jobs API Router
 
 Endpoints for job description analysis and ideal candidate persona generation.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -20,8 +21,10 @@ router = APIRouter()
 
 # ── Request / Response Schemas ────────────────────────────────────────────────
 
+
 class AnalyzeJobRequest(BaseModel):
     """Request body for job description analysis."""
+
     job_id: str = Field(default="job_001", description="Unique job identifier")
     title: str = Field(..., min_length=2, max_length=200, description="Job title")
     description: str = Field(..., min_length=50, description="Full job description text")
@@ -31,6 +34,7 @@ class AnalyzeJobRequest(BaseModel):
 
 class AnalyzeJobResponse(BaseModel):
     """Response containing full job intelligence analysis."""
+
     job_id: str
     job_profile: dict[str, Any]
     ideal_persona: dict[str, Any]
@@ -39,6 +43,7 @@ class AnalyzeJobResponse(BaseModel):
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+
 
 @router.post(
     "/jobs/analyze",
@@ -72,6 +77,7 @@ async def analyze_job(request: AnalyzeJobRequest) -> ORJSONResponse:
         503: If the embedding model is not loaded.
     """
     import time
+
     start = time.perf_counter()
 
     logger.info(f"Analyzing job: {request.job_id} — '{request.title}'")
@@ -143,6 +149,7 @@ async def get_job(job_id: str) -> ORJSONResponse:
     """
     try:
         from services.preprocessing.feature_store import FeatureStore
+
         store = FeatureStore(settings.duckdb_path)
         job_profile = store.get_job_profile(job_id)
         if not job_profile:
@@ -176,6 +183,7 @@ async def list_jobs() -> ORJSONResponse:
     """
     try:
         from services.preprocessing.feature_store import FeatureStore
+
         store = FeatureStore(settings.duckdb_path)
         jobs = store.list_jobs()
         return ORJSONResponse(content={"jobs": jobs, "count": len(jobs)})

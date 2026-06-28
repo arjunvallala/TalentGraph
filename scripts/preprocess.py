@@ -9,6 +9,7 @@ Usage:
     python -m scripts.preprocess --input data/raw/candidates.csv --reset
     python -m scripts.preprocess --status
 """
+
 from __future__ import annotations
 
 import sys
@@ -40,7 +41,8 @@ app = typer.Typer(
 def run(
     input: Path = typer.Option(
         ...,
-        "--input", "-i",
+        "--input",
+        "-i",
         help="Path to the raw candidates CSV file",
         exists=True,
         readable=True,
@@ -82,13 +84,15 @@ def run(
     """
     configure_logging()
 
-    console.print(Panel.fit(
-        "[bold blue]TalentGraph AI[/bold blue] — Preprocessing Pipeline\n"
-        f"Input: [yellow]{input}[/yellow]\n"
-        f"Resume: [green]{resume}[/green] | Reset: [red]{reset}[/red]",
-        title="🚀 Starting Preprocessing",
-        border_style="blue",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold blue]TalentGraph AI[/bold blue] — Preprocessing Pipeline\n"
+            f"Input: [yellow]{input}[/yellow]\n"
+            f"Resume: [green]{resume}[/green] | Reset: [red]{reset}[/red]",
+            title="🚀 Starting Preprocessing",
+            border_style="blue",
+        )
+    )
 
     start_time = time.perf_counter()
 
@@ -137,15 +141,17 @@ def run(
             )
 
         console.print(table)
-        console.print(Panel.fit(
-            f"✅ Pipeline complete!\n"
-            f"Processed: [bold green]{result.total_processed:,}[/bold green] candidates\n"
-            f"Total time: [bold]{total_time:.1f}s[/bold]\n"
-            f"FAISS index: [yellow]{settings.faiss_index_path}[/yellow]\n"
-            f"Feature store: [yellow]{settings.duckdb_path}[/yellow]",
-            title="✨ Success",
-            border_style="green",
-        ))
+        console.print(
+            Panel.fit(
+                f"✅ Pipeline complete!\n"
+                f"Processed: [bold green]{result.total_processed:,}[/bold green] candidates\n"
+                f"Total time: [bold]{total_time:.1f}s[/bold]\n"
+                f"FAISS index: [yellow]{settings.faiss_index_path}[/yellow]\n"
+                f"Feature store: [yellow]{settings.duckdb_path}[/yellow]",
+                title="✨ Success",
+                border_style="green",
+            )
+        )
 
     except KeyboardInterrupt:
         console.print("\n⚠️  [yellow]Pipeline interrupted. Run with --resume to continue.[/yellow]")
@@ -162,6 +168,7 @@ def status() -> None:
     configure_logging()
 
     from services.preprocessing.checkpoint import CheckpointManager
+
     manager = CheckpointManager(settings.preprocessing_checkpoint_path)
     status_data = manager.get_all_status()
 

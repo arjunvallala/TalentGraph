@@ -6,6 +6,7 @@ using SentenceTransformers. Supports batch encoding for efficiency.
 
 Embeddings power Stage 1 semantic retrieval via FAISS index search.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -75,8 +76,7 @@ class EmbeddingGenerator:
                 return
             except Exception as exc:
                 logger.warning(
-                    "Failed to load local model from %s: %s. Trying download.",
-                    local_path, exc
+                    "Failed to load local model from %s: %s. Trying download.", local_path, exc
                 )
 
         # Download from HuggingFace
@@ -127,10 +127,7 @@ class EmbeddingGenerator:
             return np.zeros((0, self._dimension), dtype=np.float32)
 
         # Replace empty/None texts with placeholder
-        clean_texts = [
-            t if t and t.strip() else "unknown candidate profile"
-            for t in texts
-        ]
+        clean_texts = [t if t and t.strip() else "unknown candidate profile" for t in texts]
 
         logger.info("Encoding %d texts in batches of %d", len(clean_texts), batch_size)
 
@@ -214,6 +211,7 @@ class EmbeddingGenerator:
             path: Destination file path (e.g., "data/processed/embeddings.npy").
         """
         from pathlib import Path
+
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
         np.save(str(p), embeddings)
@@ -233,6 +231,7 @@ class EmbeddingGenerator:
             FileNotFoundError: If the file does not exist.
         """
         from pathlib import Path
+
         p = Path(path)
         if not p.exists():
             raise FileNotFoundError(f"Embeddings file not found: {p}")

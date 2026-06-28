@@ -4,6 +4,7 @@ TalentGraph AI — API Error Handlers
 Registers global exception handlers that convert TalentGraph exceptions
 and FastAPI validation errors into consistent JSON error responses.
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, Request, status
@@ -30,9 +31,7 @@ def register_error_handlers(app: FastAPI) -> None:
     """
 
     @app.exception_handler(TalentGraphError)
-    async def talentgraph_error_handler(
-        request: Request, exc: TalentGraphError
-    ) -> ORJSONResponse:
+    async def talentgraph_error_handler(request: Request, exc: TalentGraphError) -> ORJSONResponse:
         """Handle all TalentGraph domain errors."""
         # Determine status code
         if isinstance(exc, APIError):
@@ -74,9 +73,7 @@ def register_error_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def generic_error_handler(
-        request: Request, exc: Exception
-    ) -> ORJSONResponse:
+    async def generic_error_handler(request: Request, exc: Exception) -> ORJSONResponse:
         """Catch-all handler for unexpected exceptions."""
         logger.exception(
             "Unexpected error",

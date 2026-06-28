@@ -8,6 +8,7 @@ Orchestrates the entire multi-stage ranking pipeline:
 4. Stage 3: Hiring Committee Council consensus
 5. Stage 4: Explainability narrative generation
 """
+
 from __future__ import annotations
 
 import time
@@ -62,9 +63,7 @@ class RankingPipeline:
         """Alias for run_pipeline to match scripts/rank.py execution."""
         return self.run_pipeline(raw_job, limit)
 
-    def run_pipeline(
-        self, raw_job: JobRaw, limit: int = FINAL_TOP_K
-    ) -> RankedList:
+    def run_pipeline(self, raw_job: JobRaw, limit: int = FINAL_TOP_K) -> RankedList:
         """
         Execute the end-to-end ranking pipeline on raw job details.
 
@@ -84,6 +83,7 @@ class RankingPipeline:
 
         # Generate query vector embedding for retrieval
         from services.preprocessing.embedding_generator import EmbeddingGenerator
+
         emb_generator = EmbeddingGenerator(self.settings.embedding_model_name)
         emb_generator.load_model()
         logger.info("Generating dense vector embedding for query...")
@@ -158,11 +158,14 @@ class RankingPipeline:
             profile = self.db.get_candidate_profile(cid)
             evidence_obj = None
             conn = self.db.connect()
-            ev_res = conn.execute("SELECT evidence FROM candidate_evidence WHERE candidate_id = ?", [cid]).fetchone()
+            ev_res = conn.execute(
+                "SELECT evidence FROM candidate_evidence WHERE candidate_id = ?", [cid]
+            ).fetchone()
             if ev_res:
                 import json
 
                 from shared.types.candidate import CandidateEvidence
+
                 ev_data = json.loads(ev_res[0])
                 evidence_obj = CandidateEvidence(
                     candidate_id=cid,
@@ -178,6 +181,7 @@ class RankingPipeline:
 
             if not evidence_obj:
                 from services.preprocessing.feature_extractor import FeatureExtractor
+
                 extractor = FeatureExtractor()
                 evidence_obj = extractor.build_evidence(profile, features)
 
@@ -264,19 +268,21 @@ class RankingPipeline:
         # Persist rankings to DB for dashboard read-out
         rankings_payload = []
         for c in final_list:
-            rankings_payload.append({
-                "candidate_id": c.candidate_id,
-                "rank": c.rank,
-                "overall_score": c.overall_score,
-                "confidence_level": c.confidence_level.value,
-                "hiring_recommendation": c.hiring_recommendation.value,
-                "explanation": c.explanation.model_dump() if c.explanation else {},
-                "stage_scores": {
-                    "stage1_score": c.stage1_score,
-                    "stage2_score": c.stage2_score,
-                    "stage3_score": c.stage3_score,
-                },
-            })
+            rankings_payload.append(
+                {
+                    "candidate_id": c.candidate_id,
+                    "rank": c.rank,
+                    "overall_score": c.overall_score,
+                    "confidence_level": c.confidence_level.value,
+                    "hiring_recommendation": c.hiring_recommendation.value,
+                    "explanation": c.explanation.model_dump() if c.explanation else {},
+                    "stage_scores": {
+                        "stage1_score": c.stage1_score,
+                        "stage2_score": c.stage2_score,
+                        "stage3_score": c.stage3_score,
+                    },
+                }
+            )
         self.db.save_rankings(raw_job.job_id, rankings_payload)
 
         self.db.close()

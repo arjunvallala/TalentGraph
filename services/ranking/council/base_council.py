@@ -3,6 +3,7 @@ TalentGraph AI — Base Council Evaluator
 
 Defines the abstract base class for all council members.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

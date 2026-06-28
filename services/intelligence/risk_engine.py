@@ -4,6 +4,7 @@ TalentGraph AI — Risk Assessment Engine
 Detects potential hiring risk indicators such as high job-hopping frequency,
 extended unexplained employment gaps, or platform decline patterns.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -58,10 +59,14 @@ class RiskEngine:
             avg_tenure = sum(tenures) / len(tenures)
             if avg_tenure < 12.0 and len(experience) >= 3:
                 job_hop_score = 0.8
-                risk_flags.append(f"Frequent job-hopping: average tenure is {avg_tenure:.1f} months.")
+                risk_flags.append(
+                    f"Frequent job-hopping: average tenure is {avg_tenure:.1f} months."
+                )
             elif avg_tenure < 18.0 and len(experience) >= 2:
                 job_hop_score = 0.4
-                risk_flags.append(f"Short tenure warning: average tenure is {avg_tenure:.1f} months.")
+                risk_flags.append(
+                    f"Short tenure warning: average tenure is {avg_tenure:.1f} months."
+                )
 
         # 2. Employment Gap analysis
         # Check gaps between chronological end and start dates

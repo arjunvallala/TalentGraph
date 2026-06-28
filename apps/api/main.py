@@ -13,6 +13,7 @@ Configures the FastAPI application with:
 Usage:
     uvicorn apps.api.main:app --reload --port 8000
 """
+
 from __future__ import annotations
 
 import time
@@ -41,6 +42,7 @@ logger = get_logger(__name__)
 
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -72,6 +74,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 # ── Application Factory ───────────────────────────────────────────────────────
+
 
 def create_application() -> FastAPI:
     """
@@ -139,6 +142,7 @@ def create_application() -> FastAPI:
     @app.get("/", include_in_schema=False)
     async def root_redirect():
         from fastapi.responses import RedirectResponse
+
         return RedirectResponse(url="/docs")
 
     return app

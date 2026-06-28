@@ -17,6 +17,7 @@ creating authentic disagreement with TechnicalCouncil.
 
 This council does NOT consider skills, career trajectory, or research output.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -48,22 +49,22 @@ class BehaviorCouncil(BaseCouncil):
         """
         f = candidate.features
 
-        behavior     = f.behavior_score
+        behavior = f.behavior_score
         availability = (
-            f.hiring_availability
-            if hasattr(f, 'hiring_availability')
-            else f.availability_score
+            f.hiring_availability if hasattr(f, "hiring_availability") else f.availability_score
         )
 
         # Attempt to extract raw Redrob signals for finer-grained evidence
         redrob = None
-        if candidate.profile and hasattr(candidate.profile, 'redrob_signals'):
+        if candidate.profile and hasattr(candidate.profile, "redrob_signals"):
             redrob = candidate.profile.redrob_signals
 
         response_rate = redrob.response_rate if redrob else 0.5
-        last_active   = redrob.last_active_days if (redrob and redrob.last_active_days is not None) else 45
-        declined_int  = redrob.interview_declined_count if redrob else 0
-        declined_off  = redrob.offer_declined_count if redrob else 0
+        last_active = (
+            redrob.last_active_days if (redrob and redrob.last_active_days is not None) else 45
+        )
+        declined_int = redrob.interview_declined_count if redrob else 0
+        declined_off = redrob.offer_declined_count if redrob else 0
 
         # Activity score: raw computation (mirrors feature extractor logic)
         if last_active <= 7:
@@ -83,8 +84,8 @@ class BehaviorCouncil(BaseCouncil):
 
         # Behavior council score — purely operational/recruiter signals
         score = (
-            0.35 * behavior       # Overall platform engagement composite
-            + 0.30 * availability # Can they join quickly?
+            0.35 * behavior  # Overall platform engagement composite
+            + 0.30 * availability  # Can they join quickly?
             + 0.20 * response_rate  # Will they reply to recruiters?
             + 0.15 * reliability  # Have they honoured past commitments?
         )
@@ -110,9 +111,7 @@ class BehaviorCouncil(BaseCouncil):
         elif last_active <= 30:
             strengths.append(f"Active {last_active} days ago — recently engaged.")
         elif last_active > 90:
-            concerns.append(
-                f"Last active {last_active} days ago — engagement may have lapsed."
-            )
+            concerns.append(f"Last active {last_active} days ago — engagement may have lapsed.")
 
         if availability >= 0.80:
             strengths.append(

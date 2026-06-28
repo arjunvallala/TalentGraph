@@ -7,6 +7,7 @@ the Ideal Candidate Persona, and the Job Genome.
 Pipeline flow:
     Raw JD Text → JobRaw → JobProfile → IdealCandidatePersona + JobGenome
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,6 +16,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
+
 
 class ExperienceLevel(str, Enum):
     """
@@ -28,6 +30,7 @@ class ExperienceLevel(str, Enum):
         principal: 12–20 years
         executive: 20+ years
     """
+
     ENTRY = "entry"
     JUNIOR = "junior"
     MID = "mid"
@@ -38,6 +41,7 @@ class ExperienceLevel(str, Enum):
 
 class JobType(str, Enum):
     """Employment type for the role."""
+
     FULL_TIME = "full_time"
     PART_TIME = "part_time"
     CONTRACT = "contract"
@@ -46,6 +50,7 @@ class JobType(str, Enum):
 
 
 # ── Sub-Models ────────────────────────────────────────────────────────────────
+
 
 class SkillRequirement(BaseModel):
     """
@@ -58,6 +63,7 @@ class SkillRequirement(BaseModel):
         is_mandatory: True if the skill is explicitly required (not preferred).
         category: Skill category (e.g., 'programming', 'domain', 'soft').
     """
+
     skill: str
     importance: float = Field(default=1.0, ge=0.0, le=1.0)
     min_years: float | None = Field(default=None, ge=0.0)
@@ -66,6 +72,7 @@ class SkillRequirement(BaseModel):
 
 
 # ── Core Models ───────────────────────────────────────────────────────────────
+
 
 class JobRaw(BaseModel):
     """
@@ -83,6 +90,7 @@ class JobRaw(BaseModel):
         raw_text: Full text used for embedding (title + description merged).
         created_at: When this JD was submitted.
     """
+
     job_id: str
     title: str
     description: str
@@ -95,9 +103,7 @@ class JobRaw(BaseModel):
     def model_post_init(self, __context) -> None:
         """Auto-populate raw_text from title + description if not set."""
         if not self.raw_text:
-            object.__setattr__(
-                self, "raw_text", f"{self.title}\n\n{self.description}"
-            )
+            object.__setattr__(self, "raw_text", f"{self.title}\n\n{self.description}")
 
 
 class JobProfile(BaseModel):
@@ -126,6 +132,7 @@ class JobProfile(BaseModel):
         travel_required: Whether significant travel is required.
         analyzed_at: Timestamp of analysis.
     """
+
     job_id: str
     title: str
     seniority_level: ExperienceLevel = ExperienceLevel.MID
@@ -181,6 +188,7 @@ class IdealCandidatePersona(BaseModel):
         feature_weights: Custom feature weights for this role's ranking.
         created_at: When this persona was generated.
     """
+
     job_id: str
     must_have_skills: list[str] = Field(default_factory=list)
     nice_to_have_skills: list[str] = Field(default_factory=list)
@@ -213,6 +221,7 @@ class JobGenome(BaseModel):
         key_terms: BM25 index terms extracted from the JD.
         created_at: When this genome was generated.
     """
+
     job_id: str
 
     # ── Target Feature Scores [0, 1] ──────────────────────────────────────────
@@ -228,7 +237,7 @@ class JobGenome(BaseModel):
     weights: dict[str, float] = Field(default_factory=dict)
 
     # ── Retrieval Artifacts ───────────────────────────────────────────────────
-    embedding: list[float] | None = None      # dense vector for FAISS
+    embedding: list[float] | None = None  # dense vector for FAISS
     key_terms: list[str] = Field(default_factory=list)  # BM25 terms
 
     created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -14,6 +14,7 @@ Those belong to other councils. Career council represents a trajectory-focused H
 When a technically brilliant candidate has a chaotic career history, this council
 will be the primary voice of dissent — driving a genuine consensus disagreement.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -49,30 +50,34 @@ class CareerCouncil(BaseCouncil):
         """
         f = candidate.features
 
-        career_vel  = f.career_velocity if hasattr(f, 'career_velocity') else 0.0
-        promotion   = f.promotion_score
-        stability   = f.career_stability if hasattr(f, 'career_stability') else f.stability_score
-        total_cos   = f.total_companies
-        avg_tenure  = f.avg_tenure_months  # in months
+        career_vel = f.career_velocity if hasattr(f, "career_velocity") else 0.0
+        promotion = f.promotion_score
+        stability = f.career_stability if hasattr(f, "career_stability") else f.stability_score
+        total_cos = f.total_companies
+        avg_tenure = f.avg_tenure_months  # in months
 
         # Normalise avg_tenure: 24 months (2 years) = 1.0, capped
         avg_tenure_norm = min(1.0, avg_tenure / 24.0) if avg_tenure > 0 else 0.0
 
         # Career score: weighted combination of trajectory signals
         score = (
-            0.35 * career_vel        # Primary: how fast they advanced
-            + 0.25 * promotion       # Confirmed title progression events
-            + 0.25 * stability       # Consistency of tenure lengths
-            + 0.15 * avg_tenure_norm # Average role duration
+            0.35 * career_vel  # Primary: how fast they advanced
+            + 0.25 * promotion  # Confirmed title progression events
+            + 0.25 * stability  # Consistency of tenure lengths
+            + 0.15 * avg_tenure_norm  # Average role duration
         )
         score = float(min(1.0, max(0.0, score)))
 
         # Confidence depends on evidence richness of career data
-        evidence_signals = sum(1 for v in [career_vel, promotion, stability, avg_tenure_norm] if v > 0.01)
+        evidence_signals = sum(
+            1 for v in [career_vel, promotion, stability, avg_tenure_norm] if v > 0.01
+        )
         # Extra confidence penalty if only 1 company (hard to assess trajectory)
         confidence = 0.55 + (evidence_signals / 4.0) * 0.35
         if total_cos <= 1:
-            confidence = max(0.3, confidence - 0.15)  # Hard to judge trajectory from single employer
+            confidence = max(
+                0.3, confidence - 0.15
+            )  # Hard to judge trajectory from single employer
 
         strengths = []
         concerns = []
@@ -84,7 +89,9 @@ class CareerCouncil(BaseCouncil):
                 f"faster than the cohort average."
             )
         elif career_vel >= 0.45:
-            strengths.append(f"Career advancement is on a standard upward track (velocity: {career_vel:.2f}).")
+            strengths.append(
+                f"Career advancement is on a standard upward track (velocity: {career_vel:.2f})."
+            )
         else:
             concerns.append(
                 f"Career velocity is low ({career_vel:.2f}) — seniority growth appears slow "

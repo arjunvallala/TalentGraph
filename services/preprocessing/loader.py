@@ -6,6 +6,7 @@ validating schema, and providing basic dataset statistics.
 
 Handles missing optional columns gracefully — only candidate_id is required.
 """
+
 from __future__ import annotations
 
 import polars as pl
@@ -19,12 +20,27 @@ REQUIRED_COLUMNS: list[str] = ["candidate_id"]
 
 # Optional columns — loaded if present, defaults used if absent
 OPTIONAL_COLUMNS: list[str] = [
-    "name", "email", "phone", "current_title", "current_company",
-    "years_of_experience", "skills", "education", "work_history",
-    "certifications", "languages", "summary", "location",
-    "profile_views", "application_count", "response_rate",
-    "last_active_days", "notice_period_days", "availability_status",
-    "expected_salary", "open_to_remote",
+    "name",
+    "email",
+    "phone",
+    "current_title",
+    "current_company",
+    "years_of_experience",
+    "skills",
+    "education",
+    "work_history",
+    "certifications",
+    "languages",
+    "summary",
+    "location",
+    "profile_views",
+    "application_count",
+    "response_rate",
+    "last_active_days",
+    "notice_period_days",
+    "availability_status",
+    "expected_salary",
+    "open_to_remote",
 ]
 
 # Column default values for graceful filling
@@ -90,6 +106,7 @@ class CandidateLoader:
             ValueError: If the CSV is empty or malformed.
         """
         import os
+
         if not os.path.exists(path):
             raise FileNotFoundError(f"CSV file not found: {path}")
 
@@ -122,29 +139,28 @@ class CandidateLoader:
 
         # Ensure candidate_id is string type
         if "candidate_id" in df.columns:
-            df = df.with_columns(
-                pl.col("candidate_id").cast(pl.Utf8).fill_null("UNKNOWN")
-            )
+            df = df.with_columns(pl.col("candidate_id").cast(pl.Utf8).fill_null("UNKNOWN"))
 
         # Cast numeric columns safely
         numeric_float_cols = ["years_of_experience", "response_rate", "expected_salary"]
-        numeric_int_cols = ["profile_views", "application_count", "last_active_days", "notice_period_days"]
+        numeric_int_cols = [
+            "profile_views",
+            "application_count",
+            "last_active_days",
+            "notice_period_days",
+        ]
 
         for col in numeric_float_cols:
             if col in df.columns:
                 try:
-                    df = df.with_columns(
-                        pl.col(col).cast(pl.Float64, strict=False).fill_null(0.0)
-                    )
+                    df = df.with_columns(pl.col(col).cast(pl.Float64, strict=False).fill_null(0.0))
                 except Exception:
                     df = df.with_columns(pl.lit(0.0).alias(col))
 
         for col in numeric_int_cols:
             if col in df.columns:
                 try:
-                    df = df.with_columns(
-                        pl.col(col).cast(pl.Int64, strict=False)
-                    )
+                    df = df.with_columns(pl.col(col).cast(pl.Int64, strict=False))
                 except Exception:
                     df = df.with_columns(pl.lit(None).cast(pl.Int64).alias(col))
 
@@ -249,8 +265,7 @@ class CandidateLoader:
                     .sort("count", descending=True)
                 )
                 stats["availability_distribution"] = {
-                    row["availability_status"]: row["count"]
-                    for row in status_dist.to_dicts()
+                    row["availability_status"]: row["count"] for row in status_dist.to_dicts()
                 }
             except Exception:
                 pass

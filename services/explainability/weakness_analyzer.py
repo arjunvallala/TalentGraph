@@ -4,6 +4,7 @@ TalentGraph AI — Weakness Analyzer
 Identifies a candidate's top 3 weaknesses or gaps compared to job requirements
 based on feature score differentials.
 """
+
 from __future__ import annotations
 
 from shared.types.candidate import CandidateFeatures
@@ -20,9 +21,7 @@ class WeaknessAnalyzer:
         """Initialize weakness analyzer."""
         pass
 
-    def analyze(
-        self, features: CandidateFeatures, job: JobGenome
-    ) -> list[ExplanationWeakness]:
+    def analyze(self, features: CandidateFeatures, job: JobGenome) -> list[ExplanationWeakness]:
         """
         Identify top 3 weaknesses/gaps for the candidate.
 

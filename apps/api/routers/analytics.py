@@ -4,6 +4,7 @@ TalentGraph AI — Analytics API Router
 Endpoints for dashboard analytics: hiring funnel, feature importance,
 candidate distributions, and risk breakdowns.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query, status

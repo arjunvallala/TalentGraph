@@ -3,6 +3,7 @@ TalentGraph AI — Risk Council Evaluator
 
 Evaluates hiring risks (gap risk, job-hopping, responsiveness) and assigns risk classifications.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -42,7 +43,9 @@ class RiskCouncil(BaseCouncil):
             rec = "Consider"
             rat = "Presents standard candidate transition profiles."
         else:
-            concerns.append("Elevated risk profile: significant job-hopping or long unexplained gaps.")
+            concerns.append(
+                "Elevated risk profile: significant job-hopping or long unexplained gaps."
+            )
             rec = "Reject"
             rat = "High career instability flags present."
 

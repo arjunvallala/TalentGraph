@@ -7,6 +7,7 @@ Provides shared fixtures for all test suites including:
 - Mock feature store
 - Test settings
 """
+
 from __future__ import annotations
 
 import os
@@ -33,6 +34,7 @@ import numpy as np
 class MockSentenceTransformer:
     def __init__(self, model_name_or_path, *args, **kwargs):
         self.model_name_or_path = model_name_or_path
+
     def encode(self, sentences, *args, **kwargs):
         count = len(sentences) if isinstance(sentences, list) else 1
         # generate repeatable mock embeddings
@@ -41,8 +43,10 @@ class MockSentenceTransformer:
         norms = np.linalg.norm(emb, axis=1, keepdims=True)
         emb = emb / (norms + 1e-8)
         return emb.astype(np.float32) if isinstance(sentences, list) else emb[0].astype(np.float32)
+
     def save(self, *args, **kwargs):
         pass
+
 
 mock_st_module = MagicMock()
 mock_st_module.SentenceTransformer = MockSentenceTransformer
@@ -62,6 +66,7 @@ from shared.types.job import ExperienceLevel, JobProfile, JobRaw, SkillRequireme
 
 # ── Test Settings ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def test_settings():
     """Return test-specific settings."""
@@ -71,6 +76,7 @@ def test_settings():
 
 
 # ── Sample Candidate Profiles ─────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_work_experience():
@@ -150,8 +156,18 @@ def sample_candidate_profile(sample_work_experience, sample_education, sample_re
         current_title="Senior Software Engineer",
         current_company="Google",
         years_of_experience=8.0,
-        skills=["Python", "TensorFlow", "PyTorch", "Kubernetes", "GCP", "SQL",
-                "Machine Learning", "Deep Learning", "Spark", "Kafka"],
+        skills=[
+            "Python",
+            "TensorFlow",
+            "PyTorch",
+            "Kubernetes",
+            "GCP",
+            "SQL",
+            "Machine Learning",
+            "Deep Learning",
+            "Spark",
+            "Kafka",
+        ],
         education=sample_education,
         work_experience=sample_work_experience,
         certifications=["Google Cloud Professional ML Engineer", "AWS Solutions Architect"],
@@ -181,8 +197,8 @@ def sample_candidate_features():
         profile_completeness=0.95,
         career_velocity=0.72,
         skill_consistency=0.80,
-        skill_coverage=0.0,     # computed at ranking time
-        domain_match=0.0,       # computed at ranking time
+        skill_coverage=0.0,  # computed at ranking time
+        domain_match=0.0,  # computed at ranking time
         job_hop_risk=0.15,
         gap_risk=0.05,
         total_companies=3,
@@ -196,6 +212,7 @@ def sample_candidate_features():
 
 
 # ── Sample Job Description ─────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_job_raw():
@@ -244,10 +261,12 @@ def sample_job_profile():
 
 # ── HTTP Client ───────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def api_client(test_settings):
     """Return an async HTTP test client for the FastAPI app."""
     from httpx import ASGITransport, AsyncClient
 
     from apps.api.main import app
+
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://test")

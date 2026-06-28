@@ -4,6 +4,7 @@ TalentGraph AI — BM25 Retrieval Engine
 Performs Stage 1 lexical keyword search using BM25 to retrieve candidates
 who match exact job description terms, skills, or job titles.
 """
+
 from __future__ import annotations
 
 from services.preprocessing.bm25_builder import BM25IndexBuilder

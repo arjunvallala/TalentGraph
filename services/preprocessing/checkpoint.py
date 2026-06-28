@@ -4,6 +4,7 @@ TalentGraph AI — Preprocessing Pipeline Checkpoints
 Provides utility to save and load pipeline state for crash recovery
 and resuming long-running operations.
 """
+
 from __future__ import annotations
 
 import json

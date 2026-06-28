@@ -7,6 +7,7 @@ submission rows, and stage-by-stage pipeline results.
 Pipeline flow:
     CandidateGenome + CouncilDecision → CandidateResult → RankedList → SubmissionRow
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -16,8 +17,10 @@ from pydantic import BaseModel, Field
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
+
 class ConfidenceLevel(str, Enum):
     """Overall confidence in a hiring recommendation."""
+
     HIGH = "High"
     MEDIUM = "Medium"
     LOW = "Low"
@@ -34,6 +37,7 @@ class HiringRecommendation(str, Enum):
         Pass:        score ≥ 0.38
         Reject:      score < 0.38
     """
+
     STRONG_HIRE = "Strong Hire"
     HIRE = "Hire"
     CONSIDER = "Consider"
@@ -43,6 +47,7 @@ class HiringRecommendation(str, Enum):
 
 class RiskLevel(str, Enum):
     """Overall hiring risk classification."""
+
     CRITICAL = "Critical"
     HIGH = "High"
     MEDIUM = "Medium"
@@ -52,6 +57,7 @@ class RiskLevel(str, Enum):
 
 class ScoreBand(str, Enum):
     """Score band label for UI display."""
+
     EXCEPTIONAL = "Exceptional Match"
     STRONG = "Strong Match"
     GOOD = "Good Match"
@@ -61,8 +67,10 @@ class ScoreBand(str, Enum):
 
 # ── Explanation Models ────────────────────────────────────────────────────────
 
+
 class ExplanationStrength(BaseModel):
     """A single identified strength for a candidate."""
+
     title: str
     description: str
     evidence: list[str] = Field(default_factory=list)
@@ -71,6 +79,7 @@ class ExplanationStrength(BaseModel):
 
 class ExplanationWeakness(BaseModel):
     """A single identified gap or weakness for a candidate."""
+
     title: str
     description: str
     missing_requirement: str | None = None
@@ -84,6 +93,7 @@ class CounterfactualExplanation(BaseModel):
     For rejected candidates: what they need to improve.
     For hired candidates: what risks the committee noted.
     """
+
     candidate_id: str
     current_recommendation: HiringRecommendation
     next_recommendation: HiringRecommendation | None = None
@@ -111,6 +121,7 @@ class CandidateExplanation(BaseModel):
         evidence_count: Total pieces of evidence found.
         generated_at: When this explanation was produced.
     """
+
     candidate_id: str
     summary: str = ""
     strengths: list[ExplanationStrength] = Field(default_factory=list)
@@ -124,6 +135,7 @@ class CandidateExplanation(BaseModel):
 
 
 # ── Risk Assessment ───────────────────────────────────────────────────────────
+
 
 class RiskAssessment(BaseModel):
     """
@@ -142,6 +154,7 @@ class RiskAssessment(BaseModel):
         risk_explanations: Human-readable risk explanations.
         notice_period_days: Candidate's notice period.
     """
+
     candidate_id: str
     risk_level: RiskLevel = RiskLevel.MINIMAL
     overall_risk_score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -157,6 +170,7 @@ class RiskAssessment(BaseModel):
 
 # ── Stage Results ─────────────────────────────────────────────────────────────
 
+
 class RankingStageResult(BaseModel):
     """
     Result from a single stage of the ranking pipeline.
@@ -170,6 +184,7 @@ class RankingStageResult(BaseModel):
         candidate_ids: IDs of candidates that passed this stage.
         scores: Map of candidate_id → stage score.
     """
+
     stage: int
     stage_name: str
     input_count: int
@@ -180,6 +195,7 @@ class RankingStageResult(BaseModel):
 
 
 # ── Core Result Model ─────────────────────────────────────────────────────────
+
 
 class CandidateResult(BaseModel):
     """
@@ -205,6 +221,7 @@ class CandidateResult(BaseModel):
         feature_scores: Individual feature scores against this JD.
         ranked_at: Timestamp of final ranking.
     """
+
     candidate_id: str
     rank: int = Field(default=0, ge=0)
     overall_score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -238,6 +255,7 @@ class RankedList(BaseModel):
         ranking_duration_seconds: End-to-end pipeline time.
         ranked_at: When ranking completed.
     """
+
     job_id: str
     candidates: list[CandidateResult] = Field(default_factory=list)
     total_processed: int = 0
@@ -257,6 +275,7 @@ class SubmissionRow(BaseModel):
         confidence_level: Confidence classification string.
         hiring_recommendation: Final recommendation string.
     """
+
     candidate_id: str
     rank: int
     overall_score: float

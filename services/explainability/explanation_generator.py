@@ -10,6 +10,7 @@ emitted unless the underlying feature value actually supports the claim.
 Validation rule: before including a claim, the evidence gate is checked.
 If the gate fails (feature below threshold), the claim is NOT included.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -28,15 +29,15 @@ from shared.types.ranking import (
 # ── Evidence Thresholds ─────────────────────────────────────────────────────
 # A claim is only made when the supporting feature exceeds this threshold.
 _THRESHOLDS = {
-    "exceptional_technical":  0.80,  # skill_coverage + domain_match
-    "solid_technical":        0.60,
-    "strong_career":          0.75,  # career_velocity + promotion
-    "strong_leadership":      0.70,
-    "strong_learning":        0.70,
-    "high_availability":      0.70,
-    "low_risk":               0.75,  # 1 - max(job_hop_risk, gap_risk)
-    "rich_profile":           0.70,  # profile_completeness
-    "unanimous_council":      0.85,  # agreement_score
+    "exceptional_technical": 0.80,  # skill_coverage + domain_match
+    "solid_technical": 0.60,
+    "strong_career": 0.75,  # career_velocity + promotion
+    "strong_leadership": 0.70,
+    "strong_learning": 0.70,
+    "high_availability": 0.70,
+    "low_risk": 0.75,  # 1 - max(job_hop_risk, gap_risk)
+    "rich_profile": 0.70,  # profile_completeness
+    "unanimous_council": 0.85,  # agreement_score
 }
 
 
@@ -92,11 +93,11 @@ class ExplanationGenerator:
         # ── Safety accessors with fallbacks ──────────────────────────────────
         skill_cov = features.skill_coverage
         domain_m = features.domain_match
-        career_vel = features.career_velocity if hasattr(features, 'career_velocity') else 0.0
+        career_vel = features.career_velocity if hasattr(features, "career_velocity") else 0.0
         leadership = features.leadership_score
         availability = (
             features.hiring_availability
-            if hasattr(features, 'hiring_availability')
+            if hasattr(features, "hiring_availability")
             else features.availability_score
         )
         job_hop = features.job_hop_risk
@@ -108,12 +109,12 @@ class ExplanationGenerator:
         tech_score = (skill_cov + domain_m) / 2.0
 
         is_exceptional_technical = tech_score >= _THRESHOLDS["exceptional_technical"]
-        is_solid_technical       = tech_score >= _THRESHOLDS["solid_technical"]
-        is_strong_career         = career_vel >= _THRESHOLDS["strong_career"]
-        is_strong_leadership     = leadership >= _THRESHOLDS["strong_leadership"]
-        is_available             = availability >= _THRESHOLDS["high_availability"]
-        is_rich_profile          = completeness >= _THRESHOLDS["rich_profile"]
-        is_council_unanimous     = agreement >= _THRESHOLDS["unanimous_council"]
+        is_solid_technical = tech_score >= _THRESHOLDS["solid_technical"]
+        is_strong_career = career_vel >= _THRESHOLDS["strong_career"]
+        is_strong_leadership = leadership >= _THRESHOLDS["strong_leadership"]
+        is_available = availability >= _THRESHOLDS["high_availability"]
+        is_rich_profile = completeness >= _THRESHOLDS["rich_profile"]
+        is_council_unanimous = agreement >= _THRESHOLDS["unanimous_council"]
 
         # ── Build Evidence-Backed Summary ─────────────────────────────────────
         summary_parts: list[str] = []
@@ -122,9 +123,7 @@ class ExplanationGenerator:
                 f"exceptional skill-to-JD alignment ({tech_score * 100:.0f}% coverage)"
             )
         elif is_solid_technical:
-            summary_parts.append(
-                f"solid technical alignment ({tech_score * 100:.0f}% coverage)"
-            )
+            summary_parts.append(f"solid technical alignment ({tech_score * 100:.0f}% coverage)")
         if is_strong_career:
             summary_parts.append(f"strong career velocity ({career_vel:.2f})")
         if is_strong_leadership:
@@ -132,10 +131,7 @@ class ExplanationGenerator:
         if not summary_parts:
             summary_parts.append("standard qualifications across the evaluated dimensions")
 
-        summary = (
-            f"Ranked at {score_pct:.1f}% based on: "
-            + "; ".join(summary_parts) + "."
-        )
+        summary = f"Ranked at {score_pct:.1f}% based on: " + "; ".join(summary_parts) + "."
 
         # ── Build Risk Summary (evidence-gated) ───────────────────────────────
         risk_parts: list[str] = []
@@ -149,9 +145,7 @@ class ExplanationGenerator:
             risk_summary = "Risk flags noted: " + "; ".join(risk_parts) + "."
 
         # ── Build Hiring Narrative (evidence-gated) ───────────────────────────
-        narrative_parts: list[str] = [
-            f"Composite pipeline score: {score_pct:.1f}%."
-        ]
+        narrative_parts: list[str] = [f"Composite pipeline score: {score_pct:.1f}%."]
 
         if is_exceptional_technical:
             narrative_parts.append(
@@ -211,7 +205,9 @@ class ExplanationGenerator:
             conf_reasons.append(f"low council agreement ({agreement:.2f})")
         confidence_reason = (
             f"Confidence is {confidence_label.lower()}. "
-            + "Based on: " + "; ".join(conf_reasons) + "."
+            + "Based on: "
+            + "; ".join(conf_reasons)
+            + "."
         )
 
         # ── Evidence Count ─────────────────────────────────────────────────────

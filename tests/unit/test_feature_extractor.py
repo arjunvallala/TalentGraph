@@ -4,6 +4,7 @@ TalentGraph AI — Feature Engineering Unit Tests
 Tests all 15 engineered features to ensure correct computation,
 normalization bounds [0,1], and edge case handling.
 """
+
 from __future__ import annotations
 
 from shared.types.candidate import (
@@ -19,18 +20,21 @@ class TestExperienceScore:
 
     def test_zero_experience(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         score = extractor.compute_experience_score(0.0)
         assert score == 0.0
 
     def test_ten_years_experience(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         score = extractor.compute_experience_score(10.0)
         assert 0.69 <= score <= 1.0
 
     def test_score_within_bounds(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         for years in [0, 1, 5, 10, 20, 30, 50]:
             score = extractor.compute_experience_score(float(years))
@@ -39,6 +43,7 @@ class TestExperienceScore:
     def test_monotonically_increasing(self):
         """More experience should always produce higher or equal score."""
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         scores = [extractor.compute_experience_score(float(y)) for y in [0, 2, 5, 10, 20]]
         assert scores == sorted(scores)
@@ -49,6 +54,7 @@ class TestCareerStability:
 
     def test_single_company(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         experiences = [
             WorkExperience(company="Google", title="SWE", duration_months=60, is_current=True),
@@ -59,10 +65,10 @@ class TestCareerStability:
     def test_job_hopper(self):
         """Multiple short tenures should produce lower stability."""
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         experiences = [
-            WorkExperience(company=f"Co{i}", title="Dev", duration_months=6)
-            for i in range(5)
+            WorkExperience(company=f"Co{i}", title="Dev", duration_months=6) for i in range(5)
         ]
         score = extractor.compute_career_stability(experiences)
         assert score < 0.5, f"Expected low stability, got {score}"
@@ -70,6 +76,7 @@ class TestCareerStability:
     def test_stable_career(self):
         """Long tenures should produce high stability."""
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         experiences = [
             WorkExperience(company="Google", title="SWE", duration_months=60),
@@ -80,6 +87,7 @@ class TestCareerStability:
 
     def test_empty_experience(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         score = extractor.compute_career_stability([])
         assert score == 0.0
@@ -91,6 +99,7 @@ class TestSkillCoverage:
     def test_full_coverage(self):
         """Candidate with all required skills should score ~1.0."""
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         candidate_skills = ["Python", "TensorFlow", "Kubernetes", "SQL"]
         jd_skills = ["Python", "TensorFlow", "Kubernetes"]
@@ -99,12 +108,14 @@ class TestSkillCoverage:
 
     def test_zero_coverage(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         coverage = extractor.compute_skill_coverage_static(["Java", "Spring"], ["Python", "ML"])
         assert coverage < 0.2
 
     def test_partial_coverage(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         candidate_skills = ["Python", "SQL"]
         jd_skills = ["Python", "TensorFlow", "Kubernetes", "SQL"]
@@ -113,6 +124,7 @@ class TestSkillCoverage:
 
     def test_empty_jd_skills(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         coverage = extractor.compute_skill_coverage_static(["Python"], [])
         assert coverage == 0.0
@@ -123,12 +135,14 @@ class TestProfileCompleteness:
 
     def test_complete_profile(self, sample_candidate_profile):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         score = extractor.compute_profile_completeness(sample_candidate_profile)
         assert score >= 0.8
 
     def test_minimal_profile(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         profile = CandidateProfile(candidate_id="minimal_001")
         score = extractor.compute_profile_completeness(profile)
@@ -136,6 +150,7 @@ class TestProfileCompleteness:
 
     def test_score_bounds(self, sample_candidate_profile):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         score = extractor.compute_profile_completeness(sample_candidate_profile)
         assert 0.0 <= score <= 1.0
@@ -146,6 +161,7 @@ class TestJobHopRisk:
 
     def test_stable_career_low_risk(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         experiences = [
             WorkExperience(company="Google", title="SWE", duration_months=48),
@@ -156,19 +172,21 @@ class TestJobHopRisk:
 
     def test_job_hopper_high_risk(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         experiences = [
-            WorkExperience(company=f"Co{i}", title="Dev", duration_months=5)
-            for i in range(5)
+            WorkExperience(company=f"Co{i}", title="Dev", duration_months=5) for i in range(5)
         ]
         risk = extractor.compute_job_hop_risk(experiences)
         assert risk >= 0.5
 
     def test_risk_bounds(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
-        experiences = [WorkExperience(company="Co", title="Dev", duration_months=m)
-                       for m in [3, 6, 12, 24, 48]]
+        experiences = [
+            WorkExperience(company="Co", title="Dev", duration_months=m) for m in [3, 6, 12, 24, 48]
+        ]
         risk = extractor.compute_job_hop_risk(experiences)
         assert 0.0 <= risk <= 1.0
 
@@ -178,6 +196,7 @@ class TestBehaviorScore:
 
     def test_high_engagement(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         signals = RedrobSignals(
             response_rate=0.95,
@@ -191,6 +210,7 @@ class TestBehaviorScore:
 
     def test_low_engagement(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         signals = RedrobSignals(
             response_rate=0.1,
@@ -202,6 +222,7 @@ class TestBehaviorScore:
 
     def test_score_bounds(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         for rate in [0.0, 0.25, 0.5, 0.75, 1.0]:
             signals = RedrobSignals(response_rate=rate)
@@ -214,6 +235,7 @@ class TestLeadershipScore:
 
     def test_manager_high_score(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         profile = CandidateProfile(
             candidate_id="mgr_001",
@@ -233,6 +255,7 @@ class TestLeadershipScore:
 
     def test_ic_lower_score(self):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         profile = CandidateProfile(
             candidate_id="ic_001",
@@ -256,6 +279,7 @@ class TestAllFeaturesExtraction:
 
     def test_extract_all_produces_15_features(self, sample_candidate_profile):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         features = extractor.extract_all(sample_candidate_profile)
 
@@ -281,6 +305,7 @@ class TestAllFeaturesExtraction:
 
     def test_candidate_id_preserved(self, sample_candidate_profile):
         from services.preprocessing.feature_extractor import FeatureExtractor
+
         extractor = FeatureExtractor()
         features = extractor.extract_all(sample_candidate_profile)
         assert features.candidate_id == sample_candidate_profile.candidate_id

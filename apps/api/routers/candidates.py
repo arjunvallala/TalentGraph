@@ -3,6 +3,7 @@ TalentGraph AI — Candidates API Router
 
 Endpoints for retrieving ranked candidate lists and individual profiles.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -58,6 +59,7 @@ async def get_ranked_candidates(
     """
     try:
         from services.preprocessing.feature_store import FeatureStore
+
         store = FeatureStore(settings.duckdb_path)
         results = store.get_ranking_results(job_id)
 
@@ -78,7 +80,8 @@ async def get_ranked_candidates(
             results = [r for r in results if r.confidence_level.value == confidence]
         if risk_level and results:
             results = [
-                r for r in results
+                r
+                for r in results
                 if r.risk_assessment and r.risk_assessment.risk_level.value == risk_level
             ]
 
@@ -141,6 +144,7 @@ async def get_candidate_detail(
     """
     try:
         from services.preprocessing.feature_store import FeatureStore
+
         store = FeatureStore(settings.duckdb_path)
         profile = store.get_candidate_profile(candidate_id)
 
@@ -155,9 +159,7 @@ async def get_candidate_detail(
         # If a job context is provided, try to get the ranked result
         if job_id:
             results = store.get_ranking_results(job_id)
-            candidate_result = next(
-                (r for r in results if r.candidate_id == candidate_id), None
-            )
+            candidate_result = next((r for r in results if r.candidate_id == candidate_id), None)
             if candidate_result:
                 return ORJSONResponse(content=candidate_result.model_dump())
 
@@ -213,6 +215,7 @@ async def run_ranking(
         503: If required indexes are not ready.
     """
     import time
+
     start = time.perf_counter()
 
     try:
@@ -232,6 +235,7 @@ async def run_ranking(
 
         # Build a minimal JobRaw from stored profile
         from shared.types.job import JobRaw
+
         job_raw = JobRaw(
             job_id=job_id,
             title=job_profile.title,

@@ -8,6 +8,7 @@ Usage:
     python -m scripts.rank --jd-text "We are looking for..." --title "Data Scientist"
     python -m scripts.rank --job-id job_001  (if already analyzed)
 """
+
 from __future__ import annotations
 
 import sys
@@ -47,7 +48,8 @@ def run(
     ),
     title: str = typer.Option(
         "Software Engineer",
-        "--title", "-t",
+        "--title",
+        "-t",
         help="Job title",
     ),
     job_id: str | None = typer.Option(
@@ -57,7 +59,8 @@ def run(
     ),
     output: Path | None = typer.Option(
         None,
-        "--output", "-o",
+        "--output",
+        "-o",
         help="Output path for submission.csv",
     ),
     top_k: int = typer.Option(
@@ -85,13 +88,15 @@ def run(
         console.print("❌ [red]Provide --jd, --jd-text, or --job-id[/red]")
         raise typer.Exit(1)
 
-    console.print(Panel.fit(
-        f"[bold blue]TalentGraph AI[/bold blue] — Ranking Pipeline\n"
-        f"Job: [yellow]{title}[/yellow]\n"
-        f"Top K: [green]{top_k}[/green]",
-        title="🏆 Starting Ranking",
-        border_style="blue",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold blue]TalentGraph AI[/bold blue] — Ranking Pipeline\n"
+            f"Job: [yellow]{title}[/yellow]\n"
+            f"Top K: [green]{top_k}[/green]",
+            title="🏆 Starting Ranking",
+            border_style="blue",
+        )
+    )
 
     start_time = time.perf_counter()
 
@@ -162,7 +167,9 @@ def run(
         top_table.add_column("Recommendation", justify="center")
 
         for c in ranked_list.candidates[:10]:
-            score_color = "green" if c.overall_score >= 0.7 else "yellow" if c.overall_score >= 0.5 else "red"
+            score_color = (
+                "green" if c.overall_score >= 0.7 else "yellow" if c.overall_score >= 0.5 else "red"
+            )
             top_table.add_row(
                 str(c.rank),
                 c.candidate_id,
@@ -179,17 +186,19 @@ def run(
         generator.generate(ranked_list.candidates, output_path)
         valid, errors = generator.validate(output_path)
 
-        console.print(Panel.fit(
-            f"✅ Ranking complete!\n"
-            f"Total candidates: [bold]{ranked_list.total_processed:,}[/bold]\n"
-            f"Shortlisted: [bold green]{len(ranked_list.candidates)}[/bold green]\n"
-            f"Total time: [bold]{total_time:.1f}s[/bold] "
-            f"({'< 5 min ✓' if total_time < 300 else '⚠ > 5 min'})\n"
-            f"Submission: [yellow]{output_path}[/yellow] "
-            f"({'✓ valid' if valid else '✗ invalid'})",
-            title="✨ Pipeline Complete",
-            border_style="green",
-        ))
+        console.print(
+            Panel.fit(
+                f"✅ Ranking complete!\n"
+                f"Total candidates: [bold]{ranked_list.total_processed:,}[/bold]\n"
+                f"Shortlisted: [bold green]{len(ranked_list.candidates)}[/bold green]\n"
+                f"Total time: [bold]{total_time:.1f}s[/bold] "
+                f"({'< 5 min ✓' if total_time < 300 else '⚠ > 5 min'})\n"
+                f"Submission: [yellow]{output_path}[/yellow] "
+                f"({'✓ valid' if valid else '✗ invalid'})",
+                title="✨ Pipeline Complete",
+                border_style="green",
+            )
+        )
 
         if not valid and errors:
             console.print("⚠️  Validation errors:")

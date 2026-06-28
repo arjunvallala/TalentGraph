@@ -4,6 +4,7 @@ TalentGraph AI — Strength Analyzer
 Identifies a candidate's top 3 strengths compared to job description requirements
 based on feature score differentials.
 """
+
 from __future__ import annotations
 
 from shared.types.candidate import CandidateFeatures
@@ -20,9 +21,7 @@ class StrengthAnalyzer:
         """Initialize strength analyzer."""
         pass
 
-    def analyze(
-        self, features: CandidateFeatures, job: JobGenome
-    ) -> list[ExplanationStrength]:
+    def analyze(self, features: CandidateFeatures, job: JobGenome) -> list[ExplanationStrength]:
         """
         Identify top 3 strengths for the candidate.
 
@@ -41,7 +40,9 @@ class StrengthAnalyzer:
                 ExplanationStrength(
                     title="High Skill Coverage",
                     description=f"Matches {(features.skill_coverage * 100):.0f}% of the required technical skills.",
-                    evidence=["Candidate profile skills intersect significantly with requirements."],
+                    evidence=[
+                        "Candidate profile skills intersect significantly with requirements."
+                    ],
                     score_contribution=0.25,
                 )
             )

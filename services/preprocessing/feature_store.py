@@ -4,6 +4,7 @@ TalentGraph AI — DuckDB Feature Store
 Responsible for writing, updating, and reading candidate profiles,
 feature vectors, and evidence tables in DuckDB.
 """
+
 from __future__ import annotations
 
 import json
@@ -50,7 +51,6 @@ def safe_json_dumps(obj: Any) -> str:
     return json.dumps(obj, default=default_serializer)
 
 
-
 class FeatureStore:
     """
     Manages DuckDB interactions for persistent storage of candidates,
@@ -82,7 +82,8 @@ class FeatureStore:
         """Create database tables if they do not exist."""
         conn = self.conn
         # Candidate Profiles table
-        conn.execute(f"""
+        conn.execute(
+            f"""
             CREATE TABLE IF NOT EXISTS {DUCKDB_CANDIDATE_TABLE} (
                 candidate_id VARCHAR PRIMARY KEY,
                 name VARCHAR,
@@ -100,10 +101,12 @@ class FeatureStore:
                 raw_text VARCHAR,
                 embedding_id INTEGER
             )
-        """)
+        """
+        )
 
         # Candidate Features table
-        conn.execute(f"""
+        conn.execute(
+            f"""
             CREATE TABLE IF NOT EXISTS {DUCKDB_FEATURES_TABLE} (
                 candidate_id VARCHAR PRIMARY KEY,
                 experience_score DOUBLE,
@@ -124,19 +127,23 @@ class FeatureStore:
                 job_hop_risk DOUBLE,
                 skill_consistency DOUBLE
             )
-        """)
+        """
+        )
 
         # Candidate Evidence table
-        conn.execute(f"""
+        conn.execute(
+            f"""
             CREATE TABLE IF NOT EXISTS {DUCKDB_EVIDENCE_TABLE} (
                 candidate_id VARCHAR PRIMARY KEY,
                 evidence JSON,
                 timeline JSON
             )
-        """)
+        """
+        )
 
         # Jobs table
-        conn.execute(f"""
+        conn.execute(
+            f"""
             CREATE TABLE IF NOT EXISTS {DUCKDB_JOBS_TABLE} (
                 job_id VARCHAR PRIMARY KEY,
                 title VARCHAR,
@@ -146,10 +153,12 @@ class FeatureStore:
                 genome JSON,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
         # Rankings table
-        conn.execute(f"""
+        conn.execute(
+            f"""
             CREATE TABLE IF NOT EXISTS {DUCKDB_RANKINGS_TABLE} (
                 job_id VARCHAR,
                 candidate_id VARCHAR,
@@ -161,7 +170,8 @@ class FeatureStore:
                 stage_scores JSON,
                 PRIMARY KEY (job_id, candidate_id)
             )
-        """)
+        """
+        )
         logger.debug("DuckDB tables verified/created")
 
     def save_candidate_profile(self, profile: CandidateProfile) -> None:
@@ -234,9 +244,7 @@ class FeatureStore:
             ],
         )
 
-    def save_candidate_evidence(
-        self, candidate_id: str, evidence: CandidateEvidence
-    ) -> None:
+    def save_candidate_evidence(self, candidate_id: str, evidence: CandidateEvidence) -> None:
         """Save a candidate's evidence to DuckDB."""
         conn = self.connect()
         evidence_json = safe_json_dumps(evidence.evidence or {})
@@ -318,7 +326,15 @@ class FeatureStore:
             skill_consistency=res[17],
         )
 
-    def save_job(self, job_id: str, title: str, description: str, profile: JobProfile, weights: dict[str, float], genome: dict[str, Any]) -> None:
+    def save_job(
+        self,
+        job_id: str,
+        title: str,
+        description: str,
+        profile: JobProfile,
+        weights: dict[str, float],
+        genome: dict[str, Any],
+    ) -> None:
         """Save a job description and parsed details to DuckDB."""
         conn = self.connect()
         reqs_json = safe_json_dumps(profile)
@@ -403,18 +419,20 @@ class FeatureStore:
 
         out = []
         for row in res:
-            out.append({
-                "candidate_id": row[0],
-                "rank": row[1],
-                "overall_score": row[2],
-                "confidence_level": row[3],
-                "hiring_recommendation": row[4],
-                "explanation": json.loads(row[5]) if row[5] else {},
-                "stage_scores": json.loads(row[6]) if row[6] else {},
-                "name": row[7],
-                "current_title": row[8],
-                "current_company": row[9],
-            })
+            out.append(
+                {
+                    "candidate_id": row[0],
+                    "rank": row[1],
+                    "overall_score": row[2],
+                    "confidence_level": row[3],
+                    "hiring_recommendation": row[4],
+                    "explanation": json.loads(row[5]) if row[5] else {},
+                    "stage_scores": json.loads(row[6]) if row[6] else {},
+                    "name": row[7],
+                    "current_title": row[8],
+                    "current_company": row[9],
+                }
+            )
         return out
 
     def get_features_dataframe(self, candidate_ids: list[str]) -> pl.DataFrame:
@@ -437,8 +455,7 @@ class FeatureStore:
         """Retrieve structured JobProfile from database."""
         conn = self.connect()
         res = conn.execute(
-            f"SELECT requirements FROM {DUCKDB_JOBS_TABLE} WHERE job_id = ?",
-            [job_id]
+            f"SELECT requirements FROM {DUCKDB_JOBS_TABLE} WHERE job_id = ?", [job_id]
         ).fetchone()
         if not res:
             return None
@@ -457,7 +474,7 @@ class FeatureStore:
         res = conn.execute(
             f"SELECT candidate_id, rank, overall_score, confidence_level, hiring_recommendation, explanation, stage_scores "
             f"FROM {DUCKDB_RANKINGS_TABLE} WHERE job_id = ? ORDER BY rank ASC",
-            [job_id]
+            [job_id],
         ).fetchall()
 
         results = []
@@ -487,4 +504,3 @@ class FeatureStore:
                 )
             )
         return results
-

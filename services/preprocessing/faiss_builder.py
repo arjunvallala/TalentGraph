@@ -7,6 +7,7 @@ which is equivalent to cosine similarity search.
 
 For large corpora (>100k candidates), switches to IVF for efficiency.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -70,9 +71,7 @@ class FAISSIndexBuilder:
             raise ValueError("Embeddings array is empty — cannot build FAISS index")
 
         if embeddings.ndim != 2:
-            raise ValueError(
-                f"Embeddings must be 2D array, got shape: {embeddings.shape}"
-            )
+            raise ValueError(f"Embeddings must be 2D array, got shape: {embeddings.shape}")
 
         embeddings = embeddings.astype(np.float32)
         n, dim = embeddings.shape
@@ -94,8 +93,12 @@ class FAISSIndexBuilder:
             index.train(embeddings)
             index.add(embeddings)
             index.nprobe = _IVF_NPROBE
-            logger.info("Built IndexIVFFlat: %d vectors, nlist=%d, nprobe=%d",
-                        index.ntotal, nlist, _IVF_NPROBE)
+            logger.info(
+                "Built IndexIVFFlat: %d vectors, nlist=%d, nprobe=%d",
+                index.ntotal,
+                nlist,
+                _IVF_NPROBE,
+            )
 
         return index
 

@@ -4,6 +4,7 @@ TalentGraph AI — Career Engine
 Evaluates career progression trajectories, promotion histories, work stability,
 and candidate tenure growth patterns.
 """
+
 from __future__ import annotations
 
 from typing import Any

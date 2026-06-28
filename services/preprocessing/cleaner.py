@@ -7,6 +7,7 @@ deduplication, skill normalisation, null filling, and candidate ID validation.
 All operations are non-destructive in the sense that they return new
 Polars DataFrames — the original is never modified in-place.
 """
+
 from __future__ import annotations
 
 import re
@@ -215,21 +216,15 @@ class DataCleaner:
         expressions = []
         for col, default in str_defaults.items():
             if col in df.columns:
-                expressions.append(
-                    pl.col(col).cast(pl.Utf8).fill_null(default)
-                )
+                expressions.append(pl.col(col).cast(pl.Utf8).fill_null(default))
 
         for col, default in float_defaults.items():
             if col in df.columns:
-                expressions.append(
-                    pl.col(col).cast(pl.Float64, strict=False).fill_null(default)
-                )
+                expressions.append(pl.col(col).cast(pl.Float64, strict=False).fill_null(default))
 
         for col, default in int_defaults.items():
             if col in df.columns:
-                expressions.append(
-                    pl.col(col).cast(pl.Int64, strict=False).fill_null(default)
-                )
+                expressions.append(pl.col(col).cast(pl.Int64, strict=False).fill_null(default))
 
         if expressions:
             df = df.with_columns(expressions)
@@ -261,9 +256,9 @@ class DataCleaner:
 
         original_count = df.height
         df = df.filter(
-            pl.col("candidate_id").is_not_null() &
-            (pl.col("candidate_id") != "") &
-            (pl.col("candidate_id") != "UNKNOWN")
+            pl.col("candidate_id").is_not_null()
+            & (pl.col("candidate_id") != "")
+            & (pl.col("candidate_id") != "UNKNOWN")
         )
         dropped = original_count - df.height
         if dropped > 0:
@@ -273,35 +268,29 @@ class DataCleaner:
 
     def _trim_string_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Strip leading/trailing whitespace from all string columns."""
-        str_cols = [
-            col for col in df.columns
-            if df[col].dtype in (pl.Utf8, pl.String)
-        ]
+        str_cols = [col for col in df.columns if df[col].dtype in (pl.Utf8, pl.String)]
         if not str_cols:
             return df
-        return df.with_columns(
-            [pl.col(c).str.strip_chars() for c in str_cols]
-        )
+        return df.with_columns([pl.col(c).str.strip_chars() for c in str_cols])
 
     def _clamp_numeric_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Clamp numeric columns to valid ranges."""
         expressions = []
 
         if "years_of_experience" in df.columns:
-            expressions.append(
-                pl.col("years_of_experience").clip(0.0, 50.0)
-            )
+            expressions.append(pl.col("years_of_experience").clip(0.0, 50.0))
         if "response_rate" in df.columns:
-            expressions.append(
-                pl.col("response_rate").clip(0.0, 1.0)
-            )
+            expressions.append(pl.col("response_rate").clip(0.0, 1.0))
         if "profile_views" in df.columns:
             expressions.append(
                 pl.col("profile_views").cast(pl.Int64, strict=False).fill_null(0).clip(0, 100_000)
             )
         if "application_count" in df.columns:
             expressions.append(
-                pl.col("application_count").cast(pl.Int64, strict=False).fill_null(0).clip(0, 10_000)
+                pl.col("application_count")
+                .cast(pl.Int64, strict=False)
+                .fill_null(0)
+                .clip(0, 10_000)
             )
         if "notice_period_days" in df.columns:
             expressions.append(

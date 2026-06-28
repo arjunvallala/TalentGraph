@@ -3,6 +3,7 @@ TalentGraph AI — Funnel Analytics
 
 Computes candidate retention and drop-off stats across all pipeline stages.
 """
+
 from __future__ import annotations
 
 from shared.types.analytics import HiringFunnelStats

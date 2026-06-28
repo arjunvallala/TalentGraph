@@ -8,11 +8,13 @@ Usage:
     from shared.exceptions import CandidateNotFoundError, PipelineError
     raise CandidateNotFoundError(candidate_id="c123", message="Not in feature store")
 """
+
 from __future__ import annotations
 
 from typing import Any
 
 # ── Base ──────────────────────────────────────────────────────────────────────
+
 
 class TalentGraphError(Exception):
     """Base exception for all TalentGraph AI errors."""
@@ -39,6 +41,7 @@ class TalentGraphError(Exception):
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
+
 class ConfigurationError(TalentGraphError):
     """Raised when required configuration is missing or invalid."""
 
@@ -52,8 +55,10 @@ class ConfigurationError(TalentGraphError):
 
 # ── Data Layer ────────────────────────────────────────────────────────────────
 
+
 class DataError(TalentGraphError):
     """Base class for data-related errors."""
+
     pass
 
 
@@ -103,8 +108,10 @@ class DuplicateCandidateError(DataError):
 
 # ── Preprocessing ─────────────────────────────────────────────────────────────
 
+
 class PreprocessingError(TalentGraphError):
     """Base class for preprocessing pipeline errors."""
+
     pass
 
 
@@ -154,8 +161,10 @@ class CheckpointError(PreprocessingError):
 
 # ── Intelligence ──────────────────────────────────────────────────────────────
 
+
 class IntelligenceError(TalentGraphError):
     """Base class for intelligence engine errors."""
+
     pass
 
 
@@ -183,8 +192,10 @@ class CandidateIntelligenceError(IntelligenceError):
 
 # ── Ranking ───────────────────────────────────────────────────────────────────
 
+
 class RankingError(TalentGraphError):
     """Base class for ranking pipeline errors."""
+
     pass
 
 
@@ -227,6 +238,7 @@ class PipelineError(RankingError):
 
 # ── Feature Store ─────────────────────────────────────────────────────────────
 
+
 class FeatureStoreError(TalentGraphError):
     """Raised when feature store read/write fails."""
 
@@ -240,6 +252,7 @@ class FeatureStoreError(TalentGraphError):
 
 # ── Submission ────────────────────────────────────────────────────────────────
 
+
 class SubmissionError(TalentGraphError):
     """Raised when submission generation or validation fails."""
 
@@ -252,6 +265,7 @@ class SubmissionError(TalentGraphError):
 
 
 # ── HTTP / API ────────────────────────────────────────────────────────────────
+
 
 class APIError(TalentGraphError):
     """Base class for API-level errors."""

@@ -4,6 +4,7 @@ TalentGraph AI — Hiring Council Package
 Defines the individual evaluators (technical, career, growth, behavior, risk)
 and the parallel HiringCouncil consensus engine.
 """
+
 from services.ranking.council.base_council import BaseCouncil
 from services.ranking.council.behavior_council import BehaviorCouncil
 from services.ranking.council.career_council import CareerCouncil

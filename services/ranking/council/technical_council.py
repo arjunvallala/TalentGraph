@@ -11,6 +11,7 @@ Evidence used EXCLUSIVELY by this council:
 This council does NOT look at leadership, stability, or career velocity.
 Those signals belong to other councils, ensuring genuine independence.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -50,18 +51,22 @@ class TechnicalCouncil(BaseCouncil):
 
         # Technical score is a weighted composite of 5 distinct technical signals
         # These signals do NOT appear in Career or Behavior councils
-        skill_cov  = f.skill_coverage
-        domain_m   = f.domain_match
-        research   = f.research_score
-        edu        = f.education_score if hasattr(f, 'education_score') else f.education_level_score
-        cert       = f.certifications_score if hasattr(f, 'certifications_score') else (f.certification_count / 5.0)
+        skill_cov = f.skill_coverage
+        domain_m = f.domain_match
+        research = f.research_score
+        edu = f.education_score if hasattr(f, "education_score") else f.education_level_score
+        cert = (
+            f.certifications_score
+            if hasattr(f, "certifications_score")
+            else (f.certification_count / 5.0)
+        )
 
         score = (
-            0.40 * skill_cov   # Primary: JD skill fit
+            0.40 * skill_cov  # Primary: JD skill fit
             + 0.25 * domain_m  # Secondary: semantic domain fit
-            + 0.15 * edu       # Education supports technical credibility
+            + 0.15 * edu  # Education supports technical credibility
             + 0.12 * research  # Research/innovation bonus
-            + 0.08 * cert      # Certification validation
+            + 0.08 * cert  # Certification validation
         )
         score = float(min(1.0, max(0.0, score)))
 

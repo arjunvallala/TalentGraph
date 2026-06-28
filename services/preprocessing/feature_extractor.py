@@ -9,6 +9,7 @@ for Stage 2 (Feature Ranking) scoring.
 
 All computations are deterministic — no randomness, no LLMs.
 """
+
 from __future__ import annotations
 
 import math
@@ -110,11 +111,12 @@ class FeatureExtractor:
             years = profile.years_of_experience
 
             # Career metadata
-            total_companies = len({e.company.strip().lower() for e in experiences if e.company.strip()})
+            total_companies = len(
+                {e.company.strip().lower() for e in experiences if e.company.strip()}
+            )
             avg_tenure = self._career_parser.compute_avg_tenure(experiences)
             max_tenure = max(
-                (e.duration_months for e in experiences if e.duration_months),
-                default=0
+                (e.duration_months for e in experiences if e.duration_months), default=0
             )
             career_gap_months_list = self._career_parser.find_career_gaps(experiences)
             max_gap = career_gap_months_list[0][2] if career_gap_months_list else 0
@@ -165,8 +167,7 @@ class FeatureExtractor:
 
         except Exception as exc:
             logger.error(
-                "Feature extraction failed for %s: %s",
-                profile.candidate_id, exc, exc_info=True
+                "Feature extraction failed for %s: %s", profile.candidate_id, exc, exc_info=True
             )
             # Return zero-features rather than crash the pipeline
             return CandidateFeatures(candidate_id=profile.candidate_id)
@@ -221,7 +222,8 @@ class FeatureExtractor:
             Stability score in [0.0, 1.0].
         """
         tenures = [
-            e.duration_months for e in experiences
+            e.duration_months
+            for e in experiences
             if e.duration_months is not None and e.duration_months > 0
         ]
 
@@ -247,9 +249,7 @@ class FeatureExtractor:
         tenure_penalty = clip(mean_tenure / 24.0)
         return clip(stability * tenure_penalty)
 
-    def compute_promotion_score(
-        self, experiences: list[WorkExperience], years: float
-    ) -> float:
+    def compute_promotion_score(self, experiences: list[WorkExperience], years: float) -> float:
         """
         Compute promotion score based on detected title progression.
 
@@ -297,12 +297,8 @@ class FeatureExtractor:
 
         combined = " ".join(text_sources)
 
-        strong_hits = sum(
-            1 for kw in LEADERSHIP_STRONG_KEYWORDS if kw.lower() in combined
-        )
-        moderate_hits = sum(
-            1 for kw in LEADERSHIP_MODERATE_KEYWORDS if kw.lower() in combined
-        )
+        strong_hits = sum(1 for kw in LEADERSHIP_STRONG_KEYWORDS if kw.lower() in combined)
+        moderate_hits = sum(1 for kw in LEADERSHIP_MODERATE_KEYWORDS if kw.lower() in combined)
 
         # Normalize: 5 strong hits or 10 moderate hits → 1.0
         score = clip(strong_hits / 5.0 + moderate_hits / 20.0)
@@ -485,14 +481,19 @@ class FeatureExtractor:
             val = getattr(profile, field, None)
             if val is None:
                 continue
-            if isinstance(val, str) and val.strip() or isinstance(val, list) and len(val) > 0 or isinstance(val, int | float) and val > 0:
+            if (
+                isinstance(val, str)
+                and val.strip()
+                or isinstance(val, list)
+                and len(val) > 0
+                or isinstance(val, int | float)
+                and val > 0
+            ):
                 score += weight
 
         return clip(score / sum(_COMPLETENESS_FIELD_WEIGHTS.values()))
 
-    def compute_career_velocity(
-        self, experiences: list[WorkExperience], years: float
-    ) -> float:
+    def compute_career_velocity(self, experiences: list[WorkExperience], years: float) -> float:
         """
         Compute career velocity: how fast the candidate has advanced.
 
@@ -515,9 +516,7 @@ class FeatureExtractor:
             return 0.0
 
         # Current (most recent) seniority
-        current_titles = [
-            e.title for e in experiences[:2] if e.title
-        ]
+        current_titles = [e.title for e in experiences[:2] if e.title]
         if not current_titles:
             return 0.0
 
@@ -550,10 +549,7 @@ class FeatureExtractor:
             Consistency score in [0.0, 1.0].
         """
         # Collect skills from each experience
-        exp_skills = [
-            set(e.skills_used) for e in experiences
-            if e.skills_used
-        ]
+        exp_skills = [set(e.skills_used) for e in experiences if e.skills_used]
 
         if len(exp_skills) < 2:
             return 0.6  # Not enough data → neutral
@@ -590,10 +586,7 @@ class FeatureExtractor:
         if not experiences:
             return 0.0
 
-        tenures = [
-            e.duration_months for e in experiences
-            if e.duration_months is not None
-        ]
+        tenures = [e.duration_months for e in experiences if e.duration_months is not None]
 
         if not tenures:
             return 0.2  # Unknown → low default risk
@@ -603,7 +596,8 @@ class FeatureExtractor:
 
         # Apply extra penalty for very recent job-hopping (last 2 roles)
         recent_short = sum(
-            1 for e in experiences[:2]
+            1
+            for e in experiences[:2]
             if e.duration_months is not None and e.duration_months < MIN_TENURE_MONTHS_STABLE
         )
         extra_penalty = recent_short * 0.1
@@ -643,9 +637,7 @@ class FeatureExtractor:
         else:
             return 0.9
 
-    def compute_education_level_score(
-        self, education: list
-    ) -> float:
+    def compute_education_level_score(self, education: list) -> float:
         """
         Compute a score based on the highest education level achieved.
 
@@ -672,5 +664,6 @@ class FeatureExtractor:
     def build_evidence(self, profile: CandidateProfile, features: CandidateFeatures):
         """Compatibility wrapper to compile evidence ledger using EvidenceEngine."""
         from services.intelligence.evidence_engine import EvidenceEngine
+
         engine = EvidenceEngine()
         return engine.build_ledger(profile, features)

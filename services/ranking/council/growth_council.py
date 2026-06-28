@@ -15,6 +15,7 @@ A candidate with many certifications and research output will score high here
 even if their total experience is short. This ensures disagreement with
 CareerCouncil on early-career research candidates.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -48,19 +49,19 @@ class GrowthCouncil(BaseCouncil):
         """
         f = candidate.features
 
-        learning    = f.learning_score
-        research    = f.research_score
-        edu         = f.education_score if hasattr(f, 'education_score') else f.education_level_score
-        skill_cons  = f.skill_consistency if hasattr(f, 'skill_consistency') else 0.5
-        cert_count  = f.certification_count if hasattr(f, 'certification_count') else 0
-        cert_norm   = min(1.0, cert_count / 5.0)  # 5+ certs = 1.0
+        learning = f.learning_score
+        research = f.research_score
+        edu = f.education_score if hasattr(f, "education_score") else f.education_level_score
+        skill_cons = f.skill_consistency if hasattr(f, "skill_consistency") else 0.5
+        cert_count = f.certification_count if hasattr(f, "certification_count") else 0
+        cert_norm = min(1.0, cert_count / 5.0)  # 5+ certs = 1.0
 
         # Growth score: future-potential focused
         score = (
-            0.35 * learning    # Primary: breadth of learning signals
+            0.35 * learning  # Primary: breadth of learning signals
             + 0.25 * research  # Research shows deep intellectual curiosity
-            + 0.20 * edu       # Academic foundation
-            + 0.12 * cert_norm # Certification pursuit = active learning
+            + 0.20 * edu  # Academic foundation
+            + 0.12 * cert_norm  # Certification pursuit = active learning
             + 0.08 * skill_cons  # Consistent skill application = mastery
         )
         score = float(min(1.0, max(0.0, score)))
@@ -97,10 +98,14 @@ class GrowthCouncil(BaseCouncil):
         elif edu >= 0.65:
             strengths.append(f"Bachelor's or equivalent education base (score: {edu:.2f}).")
         elif edu < 0.35:
-            concerns.append(f"Education signal is weak ({edu:.2f}) — may indicate limited formal training.")
+            concerns.append(
+                f"Education signal is weak ({edu:.2f}) — may indicate limited formal training."
+            )
 
         if cert_count >= 3:
-            strengths.append(f"{cert_count} professional certification(s) confirmed — active learner.")
+            strengths.append(
+                f"{cert_count} professional certification(s) confirmed — active learner."
+            )
         elif cert_count == 0:
             concerns.append("No professional certifications found in profile.")
 

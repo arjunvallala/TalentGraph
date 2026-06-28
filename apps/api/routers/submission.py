@@ -3,6 +3,7 @@ TalentGraph AI — Submission API Router
 
 Endpoints for generating and validating the submission.csv file.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -98,6 +99,7 @@ async def validate_submission(
     """
     try:
         from services.analytics.submission_generator import SubmissionGenerator
+
         generator = SubmissionGenerator()
         valid, errors = generator.validate(settings.submission_output_path)
 
@@ -106,7 +108,9 @@ async def validate_submission(
                 "valid": valid,
                 "errors": errors,
                 "file_path": settings.submission_output_path,
-                "message": "Submission is valid ✓" if valid else f"Found {len(errors)} validation error(s)",
+                "message": (
+                    "Submission is valid ✓" if valid else f"Found {len(errors)} validation error(s)"
+                ),
             }
         )
     except FileNotFoundError:
@@ -135,6 +139,7 @@ async def download_submission() -> FileResponse:
         CSV file as a downloadable response.
     """
     import os
+
     if not os.path.exists(settings.submission_output_path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

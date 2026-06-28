@@ -4,6 +4,7 @@ TalentGraph AI — Evidence Ledger Engine
 Extracts explicit evidence (skills mentioned, specific companies, dates, degrees)
 from a candidate's profile and links them to the computed feature scores.
 """
+
 from __future__ import annotations
 
 from shared.logging_setup import get_logger
@@ -44,7 +45,7 @@ class EvidenceEngine:
 
         experience_evidence = [
             f"Candidate has {profile.years_of_experience:.1f} years of total professional experience.",
-            f"Current title is '{profile.current_title or 'Not specified'}' at '{profile.current_company or 'Not specified'}'."
+            f"Current title is '{profile.current_title or 'Not specified'}' at '{profile.current_company or 'Not specified'}'.",
         ]
 
         edu_list = profile.education or []
@@ -61,8 +62,12 @@ class EvidenceEngine:
 
         stability_evidence = []
         if profile.work_experience:
-            stability_evidence.append(f"Worked at {len(profile.work_experience)} distinct companies.")
-            tenures = [exp.duration_months for exp in profile.work_experience if exp.duration_months]
+            stability_evidence.append(
+                f"Worked at {len(profile.work_experience)} distinct companies."
+            )
+            tenures = [
+                exp.duration_months for exp in profile.work_experience if exp.duration_months
+            ]
             if tenures:
                 avg = sum(tenures) / len(tenures)
                 stability_evidence.append(f"Average employment tenure is {avg:.1f} months.")
@@ -71,19 +76,23 @@ class EvidenceEngine:
 
         leader_evidence = []
         if features.leadership_score > 0.6:
-            leader_evidence.append("Strong leadership indicators: title contains 'lead', 'manager', or 'head'.")
+            leader_evidence.append(
+                "Strong leadership indicators: title contains 'lead', 'manager', or 'head'."
+            )
         elif features.leadership_score > 0.3:
-            leader_evidence.append("Moderate leadership signals: profile contains mentoring or coordination keywords.")
+            leader_evidence.append(
+                "Moderate leadership signals: profile contains mentoring or coordination keywords."
+            )
         else:
             leader_evidence.append("Mainly individual contributor technical focus.")
 
         sig = profile.redrob_signals
-        behavior_evidence = [
-            f"Hiring status: '{sig.availability_status.value}'."
-        ]
+        behavior_evidence = [f"Hiring status: '{sig.availability_status.value}'."]
         if sig.notice_period_days is not None:
             behavior_evidence.append(f"Notice period: {sig.notice_period_days} days.")
-        behavior_evidence.append(f"Platform interaction: {sig.profile_views} profile views, {sig.application_count} applications.")
+        behavior_evidence.append(
+            f"Platform interaction: {sig.profile_views} profile views, {sig.application_count} applications."
+        )
 
         risk_evidence = []
         if features.job_hop_risk > 0.6:

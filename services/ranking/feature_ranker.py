@@ -5,6 +5,7 @@ Performs Stage 2 feature-based ranking. Filters Stage 1 hybrid retrieval output
 from 2,000 to 200 candidates by combining precomputed feature vectors and
 JD-dependent scores.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -81,7 +82,9 @@ class FeatureRanker:
             # A. Skill Coverage
             candidate_skills = set(profile.skills or [])
             if job_all_skills:
-                skill_coverage = len(candidate_skills.intersection(job_all_skills)) / len(job_all_skills)
+                skill_coverage = len(candidate_skills.intersection(job_all_skills)) / len(
+                    job_all_skills
+                )
             else:
                 skill_coverage = 0.5
 
@@ -92,8 +95,14 @@ class FeatureRanker:
                 # If candidate has primary domain skills, score domain match higher
                 domain_skills = set(job_profile.all_required_skill_names)
                 if domain_skills:
-                    domain_overlap = len(candidate_skills.intersection(domain_skills)) / len(domain_skills)
-                    domain_match = domain_overlap * 0.7 + (0.3 if job_profile.primary_domain in [s.lower() for s in profile.skills] else 0.0)
+                    domain_overlap = len(candidate_skills.intersection(domain_skills)) / len(
+                        domain_skills
+                    )
+                    domain_match = domain_overlap * 0.7 + (
+                        0.3
+                        if job_profile.primary_domain in [s.lower() for s in profile.skills]
+                        else 0.0
+                    )
                 else:
                     domain_match = 0.5
             else:
@@ -111,7 +120,9 @@ class FeatureRanker:
                 learning_score=row.get("learning_score", 0.0),
                 research_score=row.get("research_score", 0.0),
                 behavior_score=row.get("behavior_score", 0.0),
-                hiring_availability=row.get("availability_score", row.get("hiring_availability", 0.0)),
+                hiring_availability=row.get(
+                    "availability_score", row.get("hiring_availability", 0.0)
+                ),
                 profile_completeness=row.get("profile_completeness", 0.0),
                 career_velocity=row.get("career_velocity", 0.0),
                 skill_consistency=row.get("skill_consistency", 0.0),
@@ -155,8 +166,8 @@ class FeatureRanker:
 
         # Pseudo-Relevance Feedback: Self-calibrate default fallback weights if JD is double-vague
         is_fallback = job_genome.weights is None or (
-            abs(job_genome.weights.get("experience_score", 0.0) - 0.15) < 0.01 and
-            abs(job_genome.weights.get("skill_coverage", 0.0) - 0.20) < 0.01
+            abs(job_genome.weights.get("experience_score", 0.0) - 0.15) < 0.01
+            and abs(job_genome.weights.get("skill_coverage", 0.0) - 0.20) < 0.01
         )
         if is_fallback and candidate_ids:
             feedback_sample = candidate_ids[:30]
@@ -166,7 +177,7 @@ class FeatureRanker:
                 avg_lead = float(np.mean([f.get("leadership_score", 0.0) for f in sample_feats]))
                 avg_stab = float(np.mean([f.get("stability_score", 0.0) for f in sample_feats]))
                 weights_dict["experience_score"] = 0.15 * (1.0 + avg_exp)
-                weights_dict["skill_coverage"] = 0.20 * (1.0 - avg_lead) # Inverse manager check
+                weights_dict["skill_coverage"] = 0.20 * (1.0 - avg_lead)  # Inverse manager check
                 weights_dict["leadership_score"] = 0.08 * (1.0 + avg_lead)
                 weights_dict["stability_score"] = 0.08 * (1.0 + avg_stab)
 
@@ -181,7 +192,7 @@ class FeatureRanker:
         matrix = np.array(matrix)
 
         # Vector normalization
-        sq_sums = np.sqrt(np.sum(matrix ** 2, axis=0))
+        sq_sums = np.sqrt(np.sum(matrix**2, axis=0))
         # Prevent division by zero
         sq_sums[sq_sums == 0] = 1e-8
         matrix_norm = matrix / sq_sums
@@ -211,5 +222,7 @@ class FeatureRanker:
         final_ranked.sort(key=lambda x: x[1], reverse=True)
         truncated = final_ranked[:top_k]
 
-        logger.info(f"Feature Ranker complete: ranked {len(scored_candidates)} candidates using TOPSIS engine down to {len(truncated)}")
+        logger.info(
+            f"Feature Ranker complete: ranked {len(scored_candidates)} candidates using TOPSIS engine down to {len(truncated)}"
+        )
         return truncated

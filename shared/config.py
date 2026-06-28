@@ -9,6 +9,7 @@ Usage:
     print(settings.api_port)
     print(settings.embedding_model_name)
 """
+
 from __future__ import annotations
 
 from functools import lru_cache

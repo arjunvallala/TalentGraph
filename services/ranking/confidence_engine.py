@@ -12,6 +12,7 @@ Confidence is NOT derived from the final score. It is computed independently fro
 
 Each factor contributes a genuine signal and can independently lower confidence.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -71,11 +72,19 @@ class ConfidenceEngine:
         # is harder to predict — lower confidence. Measured as 1 - normalised_std of key features.
         key_feature_values = [
             features.experience_score,
-            features.career_stability if hasattr(features, 'career_stability') else features.stability_score,
+            (
+                features.career_stability
+                if hasattr(features, "career_stability")
+                else features.stability_score
+            ),
             features.leadership_score,
             features.learning_score,
             features.behavior_score,
-            features.hiring_availability if hasattr(features, 'hiring_availability') else features.availability_score,
+            (
+                features.hiring_availability
+                if hasattr(features, "hiring_availability")
+                else features.availability_score
+            ),
         ]
         # Only include non-zero values (zeros indicate missing data, handled separately)
         non_zero_vals = [v for v in key_feature_values if v > 0.01]
@@ -96,20 +105,22 @@ class ConfidenceEngine:
             features.research_score,
             features.behavior_score,
             features.profile_completeness,
-            features.career_velocity if hasattr(features, 'career_velocity') else 0.0,
-            features.skill_consistency if hasattr(features, 'skill_consistency') else 0.0,
+            features.career_velocity if hasattr(features, "career_velocity") else 0.0,
+            features.skill_consistency if hasattr(features, "skill_consistency") else 0.0,
         ]
         zero_count = sum(1 for v in all_features if v < 0.01)
         zero_fraction = zero_count / max(1, len(all_features))
-        data_richness = float(max(0.0, 1.0 - zero_fraction * 1.5))  # Heavy penalty for sparse features
+        data_richness = float(
+            max(0.0, 1.0 - zero_fraction * 1.5)
+        )  # Heavy penalty for sparse features
 
         # ── Weighted Combination ──────────────────────────────────────────────
         confidence_score = (
-            completeness_score  * 0.25
-            + agreement_score   * 0.25
-            + evidence_quality  * 0.20
+            completeness_score * 0.25
+            + agreement_score * 0.25
+            + evidence_quality * 0.20
             + feature_consistency * 0.20
-            + data_richness     * 0.10
+            + data_richness * 0.10
         )
         confidence_score = float(max(0.0, min(1.0, confidence_score)))
 

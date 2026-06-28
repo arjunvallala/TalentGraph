@@ -4,6 +4,7 @@ TalentGraph AI — Submission Generator
 Formats final shortlisted candidates into the standardized submission.csv format
 and performs schema and rule-based validation checks.
 """
+
 from __future__ import annotations
 
 import csv
@@ -44,31 +45,40 @@ class SubmissionGenerator:
 
                 # Write rows
                 for c in candidates:
-                    writer.writerow([
-                        c.candidate_id,
-                        c.rank,
-                        f"{c.overall_score:.6f}",
-                        c.confidence_level.value,
-                        c.hiring_recommendation.value,
-                    ])
-            logger.info(f"Successfully generated submission file: {output_path} ({len(candidates)} rows)")
+                    writer.writerow(
+                        [
+                            c.candidate_id,
+                            c.rank,
+                            f"{c.overall_score:.6f}",
+                            c.confidence_level.value,
+                            c.hiring_recommendation.value,
+                        ]
+                    )
+            logger.info(
+                f"Successfully generated submission file: {output_path} ({len(candidates)} rows)"
+            )
 
             # Automatically generate XLSX file as well
             try:
                 import pandas as pd
+
                 xlsx_path = p.with_suffix(".xlsx")
                 data = []
                 for c in candidates:
-                    data.append({
-                        "candidate_id": c.candidate_id,
-                        "rank": c.rank,
-                        "overall_score": float(f"{c.overall_score:.6f}"),
-                        "confidence_level": c.confidence_level.value,
-                        "hiring_recommendation": c.hiring_recommendation.value,
-                    })
+                    data.append(
+                        {
+                            "candidate_id": c.candidate_id,
+                            "rank": c.rank,
+                            "overall_score": float(f"{c.overall_score:.6f}"),
+                            "confidence_level": c.confidence_level.value,
+                            "hiring_recommendation": c.hiring_recommendation.value,
+                        }
+                    )
                 df = pd.DataFrame(data, columns=SUBMISSION_COLUMNS)
                 df.to_excel(str(xlsx_path), index=False)
-                logger.info(f"Successfully generated submission Excel file: {xlsx_path} ({len(candidates)} rows)")
+                logger.info(
+                    f"Successfully generated submission Excel file: {xlsx_path} ({len(candidates)} rows)"
+                )
             except Exception as ex:
                 logger.warning(f"Could not automatically generate submission XLSX: {ex}")
 
@@ -108,7 +118,9 @@ class SubmissionGenerator:
                 # 2. Row by Row Validation
                 for idx, row in enumerate(reader, start=1):
                     if len(row) != len(SUBMISSION_COLUMNS):
-                        errors.append(f"Row {idx}: Expected {len(SUBMISSION_COLUMNS)} values, got {len(row)}")
+                        errors.append(
+                            f"Row {idx}: Expected {len(SUBMISSION_COLUMNS)} values, got {len(row)}"
+                        )
                         continue
 
                     cid, rank_str, score_str, conf, rec = row
@@ -124,7 +136,9 @@ class SubmissionGenerator:
                     try:
                         rank = int(rank_str)
                         if rank != last_rank + 1:
-                            errors.append(f"Row {idx}: Non-sequential rank. Expected {last_rank + 1}, got {rank}")
+                            errors.append(
+                                f"Row {idx}: Non-sequential rank. Expected {last_rank + 1}, got {rank}"
+                            )
                         last_rank = rank
                     except ValueError:
                         errors.append(f"Row {idx}: Invalid rank integer '{rank_str}'")

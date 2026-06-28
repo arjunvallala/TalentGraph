@@ -7,6 +7,7 @@ tenure, gaps, promotions, career age, and average tenure.
 
 All date parsing handles multiple formats gracefully.
 """
+
 from __future__ import annotations
 
 import json
@@ -34,21 +35,49 @@ _DATE_FORMATS: list[str] = [
 
 # Keywords indicating a current role
 _CURRENT_KEYWORDS: set[str] = {
-    "present", "current", "now", "ongoing", "till date", "till now",
-    "to date", "today", "currently", "—", "-",
+    "present",
+    "current",
+    "now",
+    "ongoing",
+    "till date",
+    "till now",
+    "to date",
+    "today",
+    "currently",
+    "—",
+    "-",
 }
 
 # Promotion indicators: lower title → higher title
 _SENIORITY_ORDER: dict[str, int] = {
-    "intern": 0, "trainee": 0, "fresher": 0,
-    "junior": 1, "jr": 1, "associate": 1,
-    "engineer": 2, "developer": 2, "analyst": 2, "consultant": 2,
-    "specialist": 2, "programmer": 2,
-    "senior": 3, "sr": 3, "lead": 3,
-    "staff": 4, "principal": 4,
-    "architect": 5, "manager": 5, "head": 5,
-    "director": 6, "vp": 7, "vice president": 7,
-    "cto": 8, "ceo": 8, "coo": 8, "chief": 8, "president": 8,
+    "intern": 0,
+    "trainee": 0,
+    "fresher": 0,
+    "junior": 1,
+    "jr": 1,
+    "associate": 1,
+    "engineer": 2,
+    "developer": 2,
+    "analyst": 2,
+    "consultant": 2,
+    "specialist": 2,
+    "programmer": 2,
+    "senior": 3,
+    "sr": 3,
+    "lead": 3,
+    "staff": 4,
+    "principal": 4,
+    "architect": 5,
+    "manager": 5,
+    "head": 5,
+    "director": 6,
+    "vp": 7,
+    "vice president": 7,
+    "cto": 8,
+    "ceo": 8,
+    "coo": 8,
+    "chief": 8,
+    "president": 8,
 }
 
 
@@ -232,18 +261,18 @@ class CareerParser:
             return 0
 
         # Sort oldest-first for promotion detection
-        sorted_exp = sorted(
-            experiences,
-            key=lambda e: _parse_date(e.start_date or "") or date.min
-        )
+        sorted_exp = sorted(experiences, key=lambda e: _parse_date(e.start_date or "") or date.min)
 
         promotions = 0
         for i in range(1, len(sorted_exp)):
             prev = sorted_exp[i - 1]
             curr = sorted_exp[i]
             # Same company promotion
-            if (prev.company and curr.company and
-                    prev.company.lower().strip() == curr.company.lower().strip()):
+            if (
+                prev.company
+                and curr.company
+                and prev.company.lower().strip() == curr.company.lower().strip()
+            ):
                 prev_score = _get_seniority_score(prev.title or "")
                 curr_score = _get_seniority_score(curr.title or "")
                 if curr_score > prev_score:
@@ -251,9 +280,7 @@ class CareerParser:
 
         return promotions
 
-    def find_career_gaps(
-        self, experiences: list[WorkExperience]
-    ) -> list[tuple[str, str, int]]:
+    def find_career_gaps(self, experiences: list[WorkExperience]) -> list[tuple[str, str, int]]:
         """
         Find significant employment gaps between consecutive roles.
 
@@ -286,16 +313,17 @@ class CareerParser:
             curr_start = _parse_date(curr.start_date or "")
 
             if prev_end and curr_start and curr_start > prev_end:
-                gap_months = (
-                    (curr_start.year - prev_end.year) * 12
-                    + (curr_start.month - prev_end.month)
+                gap_months = (curr_start.year - prev_end.year) * 12 + (
+                    curr_start.month - prev_end.month
                 )
                 if gap_months >= 3:  # Only report gaps ≥ 3 months
-                    gaps.append((
-                        prev_end.isoformat(),
-                        curr_start.isoformat(),
-                        gap_months,
-                    ))
+                    gaps.append(
+                        (
+                            prev_end.isoformat(),
+                            curr_start.isoformat(),
+                            gap_months,
+                        )
+                    )
 
         return sorted(gaps, key=lambda g: g[2], reverse=True)
 
@@ -312,11 +340,7 @@ class CareerParser:
         if not experiences:
             return 0
 
-        start_dates = [
-            _parse_date(e.start_date or "")
-            for e in experiences
-            if e.start_date
-        ]
+        start_dates = [_parse_date(e.start_date or "") for e in experiences if e.start_date]
         start_dates = [d for d in start_dates if d is not None]
 
         if not start_dates:
@@ -341,7 +365,8 @@ class CareerParser:
             return 0.0
 
         tenures = [
-            e.duration_months for e in experiences
+            e.duration_months
+            for e in experiences
             if e.duration_months is not None and e.duration_months > 0
         ]
 
@@ -353,24 +378,43 @@ class CareerParser:
     def _parse_experience_dict(self, data: dict[str, Any]) -> WorkExperience | None:
         """Parse a single work experience dict."""
         try:
-            company = str(data.get("company", data.get("employer", data.get("organization", "")))).strip()
-            title = str(data.get("title", data.get("position", data.get("designation", data.get("role", "")))).strip()
-                        if data.get("title") or data.get("position") or data.get("designation") or data.get("role")
-                        else "")
-            start_date = str(data.get("start_date", data.get("start", data.get("from", "")))).strip()
+            company = str(
+                data.get("company", data.get("employer", data.get("organization", "")))
+            ).strip()
+            title = str(
+                data.get(
+                    "title", data.get("position", data.get("designation", data.get("role", "")))
+                ).strip()
+                if data.get("title")
+                or data.get("position")
+                or data.get("designation")
+                or data.get("role")
+                else ""
+            )
+            start_date = str(
+                data.get("start_date", data.get("start", data.get("from", "")))
+            ).strip()
             end_date_raw = data.get("end_date", data.get("end", data.get("to", "")))
             end_date = str(end_date_raw).strip() if end_date_raw is not None else ""
 
             is_current = self.is_current_role(end_date)
             duration = self.compute_tenure_months(start_date, end_date)
 
-            description = str(data.get("description", data.get("responsibilities", data.get("summary", "")))).strip()
-            description = description if description and description.lower() not in ("none", "null", "") else None
+            description = str(
+                data.get("description", data.get("responsibilities", data.get("summary", "")))
+            ).strip()
+            description = (
+                description
+                if description and description.lower() not in ("none", "null", "")
+                else None
+            )
 
             # Parse skills_used from the experience
             skills_raw = data.get("skills", data.get("skills_used", data.get("technologies", [])))
             if isinstance(skills_raw, str):
-                skills_used = [s.strip().lower() for s in re.split(r"[,;|]+", skills_raw) if s.strip()]
+                skills_used = [
+                    s.strip().lower() for s in re.split(r"[,;|]+", skills_raw) if s.strip()
+                ]
             elif isinstance(skills_raw, list):
                 skills_used = [str(s).strip().lower() for s in skills_raw if s]
             else:
@@ -427,6 +471,7 @@ class CareerParser:
 
     def _sort_experiences(self, experiences: list[WorkExperience]) -> list[WorkExperience]:
         """Sort experiences newest-first by start_date."""
+
         def sort_key(e: WorkExperience) -> date:
             if e.is_current:
                 return date.today()

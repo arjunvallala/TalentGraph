@@ -7,6 +7,7 @@ Uses rank_bm25's BM25Okapi implementation with TF-IDF-like scoring.
 BM25 retrieval complements semantic search in the hybrid retrieval stage
 by capturing exact keyword matches (skill names, job titles, certifications).
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -64,13 +65,11 @@ class BM25IndexBuilder:
         logger.info("Building BM25 index for %d documents", len(corpus))
 
         from shared.utils.text_utils import tokenize_for_bm25
+
         tokenized = [tokenize_for_bm25(doc) for doc in corpus]
 
         # Replace empty token lists with placeholder to avoid BM25 edge cases
-        tokenized = [
-            tokens if tokens else ["unknown"]
-            for tokens in tokenized
-        ]
+        tokenized = [tokens if tokens else ["unknown"] for tokens in tokenized]
 
         index = BM25Okapi(tokenized)
         logger.info("BM25 index built successfully: %d documents", len(corpus))
@@ -137,11 +136,7 @@ class BM25IndexBuilder:
 
         # Get top-k indices by score
         top_indices = np.argsort(normalized)[::-1][:top_k]
-        results = [
-            (int(idx), float(normalized[idx]))
-            for idx in top_indices
-            if normalized[idx] > 0
-        ]
+        results = [(int(idx), float(normalized[idx])) for idx in top_indices if normalized[idx] > 0]
 
         return results
 

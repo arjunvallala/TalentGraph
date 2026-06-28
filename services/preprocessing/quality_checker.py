@@ -4,6 +4,7 @@ TalentGraph AI — Data Quality Checker
 Performs range checks, missing data analysis, and schema validation
 on processed candidate features, generating a structured QA report.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -59,9 +60,7 @@ class QualityChecker:
             errors.append(f"Found {null_dict['candidate_id']} null candidate IDs.")
 
         # 2. Bound Checks [0.0, 1.0] for features
-        feature_cols = [
-            c for c in df.columns if c != "candidate_id"
-        ]
+        feature_cols = [c for c in df.columns if c != "candidate_id"]
 
         out_of_bounds = {}
         for col in feature_cols:

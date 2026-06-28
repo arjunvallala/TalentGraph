@@ -4,6 +4,7 @@ TalentGraph AI — Counterfactual Explanation Engine
 Generates counterfactual explanations specifying what changes or improvements
 would shift the candidate into the next higher hiring recommendation tier.
 """
+
 from __future__ import annotations
 
 from shared.types.candidate import CandidateFeatures
@@ -55,22 +56,32 @@ class CounterfactualEngine:
         if current_rec == HiringRecommendation.REJECT:
             next_rec = HiringRecommendation.PASS
             score_gap = max(0.01, 0.38 - final_score)
-            improvements.append("Increase skill coverage: acquire core required technical competencies.")
-            improvements.append("Add relevant certifications to substantiate skill competency claims.")
+            improvements.append(
+                "Increase skill coverage: acquire core required technical competencies."
+            )
+            improvements.append(
+                "Add relevant certifications to substantiate skill competency claims."
+            )
 
         elif current_rec == HiringRecommendation.PASS:
             next_rec = HiringRecommendation.CONSIDER
             score_gap = max(0.01, 0.52 - final_score)
             improvements.append("Verify availability: clarify immediate availability status.")
             if features.job_hop_risk > 0.4:
-                improvements.append("Establish stability: demonstrate commitment to future employer.")
+                improvements.append(
+                    "Establish stability: demonstrate commitment to future employer."
+                )
 
         elif current_rec == HiringRecommendation.CONSIDER:
             next_rec = HiringRecommendation.HIRE
             score_gap = max(0.01, 0.68 - final_score)
-            improvements.append("Upskill technical domains: gain hands-on experience with secondary domains.")
+            improvements.append(
+                "Upskill technical domains: gain hands-on experience with secondary domains."
+            )
             if features.experience_score < 0.6:
-                improvements.append("Obtain leadership experience: seek team mentoring opportunities.")
+                improvements.append(
+                    "Obtain leadership experience: seek team mentoring opportunities."
+                )
 
         elif current_rec == HiringRecommendation.HIRE:
             next_rec = HiringRecommendation.STRONG_HIRE
@@ -78,10 +89,12 @@ class CounterfactualEngine:
             improvements.append("Demonstrate technical mastery or leadership credentials.")
             improvements.append("Add evidence of publications or open-source contributions.")
 
-        else: # Strong Hire
+        else:  # Strong Hire
             next_rec = None
             score_gap = 0.0
-            improvements = ["Candidate is already ranked as a Strong Hire. Maintain current expertise."]
+            improvements = [
+                "Candidate is already ranked as a Strong Hire. Maintain current expertise."
+            ]
 
         return CounterfactualExplanation(
             candidate_id=candidate_id,

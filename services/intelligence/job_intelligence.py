@@ -4,6 +4,7 @@ TalentGraph AI — Job Intelligence Engine
 Extracts job requirements, seniority level, and domains from a raw job description
 to construct the structured JobProfile, IdealCandidatePersona, and JobGenome.
 """
+
 from __future__ import annotations
 
 from shared.logging_setup import get_logger
@@ -28,28 +29,75 @@ logger = get_logger(__name__)
 # Domain keyword maps
 DOMAINS = {
     "machine learning": [
-        "machine learning", "ml", "deep learning", "nlp", "computer vision",
-        "pytorch", "tensorflow", "scikit-learn", "transformers", "llm"
+        "machine learning",
+        "ml",
+        "deep learning",
+        "nlp",
+        "computer vision",
+        "pytorch",
+        "tensorflow",
+        "scikit-learn",
+        "transformers",
+        "llm",
     ],
     "data science": [
-        "data science", "data scientist", "pandas", "numpy", "statistics",
-        "analytics", "regression", "clustering"
+        "data science",
+        "data scientist",
+        "pandas",
+        "numpy",
+        "statistics",
+        "analytics",
+        "regression",
+        "clustering",
     ],
     "backend": [
-        "backend", "django", "flask", "fastapi", "spring boot", "express",
-        "node", "apis", "databases", "postgresql", "mysql"
+        "backend",
+        "django",
+        "flask",
+        "fastapi",
+        "spring boot",
+        "express",
+        "node",
+        "apis",
+        "databases",
+        "postgresql",
+        "mysql",
     ],
     "frontend": [
-        "frontend", "react", "angular", "vue", "typescript", "javascript",
-        "html", "css", "tailwind", "next.js"
+        "frontend",
+        "react",
+        "angular",
+        "vue",
+        "typescript",
+        "javascript",
+        "html",
+        "css",
+        "tailwind",
+        "next.js",
     ],
     "devops": [
-        "devops", "docker", "kubernetes", "k8s", "aws", "gcp", "azure",
-        "ci/cd", "jenkins", "terraform", "ansible"
+        "devops",
+        "docker",
+        "kubernetes",
+        "k8s",
+        "aws",
+        "gcp",
+        "azure",
+        "ci/cd",
+        "jenkins",
+        "terraform",
+        "ansible",
     ],
     "data engineering": [
-        "data engineering", "spark", "hadoop", "kafka", "etl", "airflow",
-        "snowflake", "redshift", "bigquery"
+        "data engineering",
+        "spark",
+        "hadoop",
+        "kafka",
+        "etl",
+        "airflow",
+        "snowflake",
+        "redshift",
+        "bigquery",
     ],
 }
 
@@ -64,9 +112,7 @@ class JobIntelligenceEngine:
         """Initialize the job intelligence engine."""
         logger.info("JobIntelligenceEngine initialised")
 
-    def analyze_job(
-        self, raw_job: JobRaw
-    ) -> tuple[JobProfile, IdealCandidatePersona, JobGenome]:
+    def analyze_job(self, raw_job: JobRaw) -> tuple[JobProfile, IdealCandidatePersona, JobGenome]:
         """
         Analyze a raw job description and construct matching structures.
 
@@ -143,9 +189,7 @@ class JobIntelligenceEngine:
         leadership_required = any(
             w in norm_text for w in ["lead", "manage", "director", "mentor", "leadership"]
         )
-        remote_friendly = any(
-            w in norm_text for w in ["remote", "work from home", "wfh", "hybrid"]
-        )
+        remote_friendly = any(w in norm_text for w in ["remote", "work from home", "wfh", "hybrid"])
 
         # Build JobProfile
         profile = JobProfile(
@@ -168,7 +212,24 @@ class JobIntelligenceEngine:
         # Resolve vague cold-starts by matching against structured archetype distributions
         archetypes = {
             "technical": {
-                "keywords": ["developer", "engineer", "programmer", "coding", "software", "backend", "frontend", "fullstack", "architect", "sysadmin", "database", "infrastructure", "pytorch", "tensorflow", "fastapi", "django"],
+                "keywords": [
+                    "developer",
+                    "engineer",
+                    "programmer",
+                    "coding",
+                    "software",
+                    "backend",
+                    "frontend",
+                    "fullstack",
+                    "architect",
+                    "sysadmin",
+                    "database",
+                    "infrastructure",
+                    "pytorch",
+                    "tensorflow",
+                    "fastapi",
+                    "django",
+                ],
                 "weights": {
                     "experience_score": 0.12,
                     "skill_coverage": 0.35,
@@ -180,10 +241,29 @@ class JobIntelligenceEngine:
                     "stability_score": 0.06,
                     "certifications_score": 0.04,
                     "availability_score": 0.03,
-                }
+                },
             },
             "leadership": {
-                "keywords": ["lead", "manager", "director", "head", "executive", "vp", "president", "chief", "cto", "cio", "cfo", "coo", "manage", "leadership", "teams", "scrum", "agile", "supervise"],
+                "keywords": [
+                    "lead",
+                    "manager",
+                    "director",
+                    "head",
+                    "executive",
+                    "vp",
+                    "president",
+                    "chief",
+                    "cto",
+                    "cio",
+                    "cfo",
+                    "coo",
+                    "manage",
+                    "leadership",
+                    "teams",
+                    "scrum",
+                    "agile",
+                    "supervise",
+                ],
                 "weights": {
                     "experience_score": 0.15,
                     "skill_coverage": 0.10,
@@ -195,10 +275,25 @@ class JobIntelligenceEngine:
                     "stability_score": 0.10,
                     "certifications_score": 0.02,
                     "availability_score": 0.03,
-                }
+                },
             },
             "research": {
-                "keywords": ["researcher", "scientist", "phd", "academic", "publications", "journals", "statistics", "math", "mathematical", "postdoc", "fellow", "lab", "novel", "papers"],
+                "keywords": [
+                    "researcher",
+                    "scientist",
+                    "phd",
+                    "academic",
+                    "publications",
+                    "journals",
+                    "statistics",
+                    "math",
+                    "mathematical",
+                    "postdoc",
+                    "fellow",
+                    "lab",
+                    "novel",
+                    "papers",
+                ],
                 "weights": {
                     "experience_score": 0.10,
                     "skill_coverage": 0.15,
@@ -210,8 +305,8 @@ class JobIntelligenceEngine:
                     "stability_score": 0.05,
                     "certifications_score": 0.02,
                     "availability_score": 0.05,
-                }
-            }
+                },
+            },
         }
 
         # Count occurrences of archetype keywords in JD text
@@ -226,13 +321,59 @@ class JobIntelligenceEngine:
         # Resolve zero-vocabulary descriptions by analyzing standard title terms
         if total_matches == 0:
             title_lower = raw_job.title.lower()
-            if any(w in title_lower for w in ["lead", "manager", "director", "head", "vp", "president", "chief", "cto", "cio", "coo", "officer", "scrum", "agile", "supervise"]):
+            if any(
+                w in title_lower
+                for w in [
+                    "lead",
+                    "manager",
+                    "director",
+                    "head",
+                    "vp",
+                    "president",
+                    "chief",
+                    "cto",
+                    "cio",
+                    "coo",
+                    "officer",
+                    "scrum",
+                    "agile",
+                    "supervise",
+                ]
+            ):
                 match_scores = {"technical": 1, "leadership": 4, "research": 0}
                 total_matches = 5
-            elif any(w in title_lower for w in ["researcher", "scientist", "phd", "academic", "postdoc", "fellow", "professor", "lab"]):
+            elif any(
+                w in title_lower
+                for w in [
+                    "researcher",
+                    "scientist",
+                    "phd",
+                    "academic",
+                    "postdoc",
+                    "fellow",
+                    "professor",
+                    "lab",
+                ]
+            ):
                 match_scores = {"technical": 2, "leadership": 0, "research": 4}
                 total_matches = 6
-            elif any(w in title_lower for w in ["developer", "engineer", "programmer", "coding", "software", "backend", "frontend", "fullstack", "architect", "sysadmin", "analyst", "devops"]):
+            elif any(
+                w in title_lower
+                for w in [
+                    "developer",
+                    "engineer",
+                    "programmer",
+                    "coding",
+                    "software",
+                    "backend",
+                    "frontend",
+                    "fullstack",
+                    "architect",
+                    "sysadmin",
+                    "analyst",
+                    "devops",
+                ]
+            ):
                 match_scores = {"technical": 5, "leadership": 1, "research": 1}
                 total_matches = 7
 
@@ -289,7 +430,11 @@ class JobIntelligenceEngine:
             ideal_experience_years=ideal_yoe,
             expected_seniority=seniority,
             domain_weight=0.8,
-            technical_weight=0.9 if primary_domain in ["machine learning", "backend", "data engineering"] else 0.7,
+            technical_weight=(
+                0.9
+                if primary_domain in ["machine learning", "backend", "data engineering"]
+                else 0.7
+            ),
             leadership_weight=0.8 if leadership_required else 0.4,
             feature_weights=feature_weights,
             implicit_expectations=[

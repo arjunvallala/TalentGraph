@@ -9,6 +9,7 @@ Usage:
     logger = get_logger(__name__)
     logger.info("Processing candidate", candidate_id="c123", score=0.87)
 """
+
 from __future__ import annotations
 
 import sys
@@ -70,7 +71,7 @@ def configure_logging() -> None:
         backtrace=True,
         diagnose=False,  # Never put sensitive data in file logs
         serialize=False,
-        enqueue=True,    # Thread-safe async logging
+        enqueue=True,  # Thread-safe async logging
     )
 
     _logger.info(
@@ -125,6 +126,7 @@ def log_execution_time(operation: str | None = None) -> Callable[[F], F]:
         @log_execution_time("embedding generation")
         def generate_embeddings(batch): ...
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
