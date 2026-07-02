@@ -5,6 +5,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { RecommendationBadge } from '../components/ui/RecommendationBadge';
 import { generateDemoData } from '../lib/demo';
+import { api } from '../lib/api';
 
 // Derive confidence label from score
 function getConfidenceLevel(score: number): string {
@@ -14,19 +15,37 @@ function getConfidenceLevel(score: number): string {
 }
 
 export const RankingsPage: React.FC = () => {
-  const { demoData, setDemoData, setCurrentJobId, setCurrentJobTitle } = useAppStore();
+  const {
+    demoData,
+    setDemoData,
+    currentJobId,
+    setCurrentJobId,
+    setCurrentJobTitle,
+    isDemoMode,
+    loadJobData
+  } = useAppStore();
   const [exporting, setExporting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
 
   // Auto-init demo data
   useEffect(() => {
     if (!demoData) {
-      const data = generateDemoData();
-      setDemoData(data);
-      setCurrentJobId(data.jobProfile.job_id);
-      setCurrentJobTitle(data.jobProfile.title);
+      if (!isDemoMode && currentJobId) {
+        loadJobData(currentJobId).catch((err) => {
+          console.error("Failed to restore active job from backend:", err);
+          const data = generateDemoData();
+          setDemoData(data);
+          setCurrentJobId(data.jobProfile.job_id);
+          setCurrentJobTitle(data.jobProfile.title);
+        });
+      } else {
+        const data = generateDemoData();
+        setDemoData(data);
+        setCurrentJobId(data.jobProfile.job_id);
+        setCurrentJobTitle(data.jobProfile.title);
+      }
     }
-  }, [demoData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
+  }, [demoData, isDemoMode, currentJobId, loadJobData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
 
   const candidates = demoData?.rankedList.candidates || [];
 
@@ -72,7 +91,17 @@ export const RankingsPage: React.FC = () => {
   };
 
   // ── CSV Export ───────────────────────────────────────────────────────────────
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
+    // Generate on backend first
+    if (demoData?.jobProfile.job_id) {
+      try {
+        await api.generateSubmission(demoData.jobProfile.job_id);
+        console.log("Backend submission.csv generated successfully.");
+      } catch (err) {
+        console.error("Failed to generate submission.csv on backend:", err);
+      }
+    }
+
     const headers = ['candidate_id', 'rank', 'overall_score', 'confidence_level', 'hiring_recommendation'];
     const csvContent = [
       headers.join(','),

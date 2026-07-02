@@ -9,17 +9,35 @@ import { ScoreDistribution } from '../components/charts/ScoreDistribution';
 import { generateDemoData } from '../lib/demo';
 
 export const AnalyticsPage: React.FC = () => {
-  const { demoData, setDemoData, setCurrentJobId, setCurrentJobTitle } = useAppStore();
+  const {
+    demoData,
+    setDemoData,
+    currentJobId,
+    setCurrentJobId,
+    setCurrentJobTitle,
+    isDemoMode,
+    loadJobData
+  } = useAppStore();
 
   // Auto-init demo data so Analytics always shows
   useEffect(() => {
     if (!demoData) {
-      const data = generateDemoData();
-      setDemoData(data);
-      setCurrentJobId(data.jobProfile.job_id);
-      setCurrentJobTitle(data.jobProfile.title);
+      if (!isDemoMode && currentJobId) {
+        loadJobData(currentJobId).catch((err) => {
+          console.error("Failed to restore active job from backend:", err);
+          const data = generateDemoData();
+          setDemoData(data);
+          setCurrentJobId(data.jobProfile.job_id);
+          setCurrentJobTitle(data.jobProfile.title);
+        });
+      } else {
+        const data = generateDemoData();
+        setDemoData(data);
+        setCurrentJobId(data.jobProfile.job_id);
+        setCurrentJobTitle(data.jobProfile.title);
+      }
     }
-  }, [demoData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
+  }, [demoData, isDemoMode, currentJobId, loadJobData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
 
   const analytics = demoData?.analytics;
 

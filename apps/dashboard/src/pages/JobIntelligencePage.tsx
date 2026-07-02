@@ -1,17 +1,46 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sliders, Award, BrainCircuit, Globe, Landmark } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { GlassCard } from '../components/ui/GlassCard';
+import { generateDemoData } from '../lib/demo';
 
 export const JobIntelligencePage: React.FC = () => {
-  const { demoData } = useAppStore();
+  const {
+    demoData,
+    setDemoData,
+    currentJobId,
+    setCurrentJobId,
+    setCurrentJobTitle,
+    isDemoMode,
+    loadJobData
+  } = useAppStore();
+
+  // Auto-init demo data
+  useEffect(() => {
+    if (!demoData) {
+      if (!isDemoMode && currentJobId) {
+        loadJobData(currentJobId).catch((err) => {
+          console.error("Failed to restore active job from backend:", err);
+          const data = generateDemoData();
+          setDemoData(data);
+          setCurrentJobId(data.jobProfile.job_id);
+          setCurrentJobTitle(data.jobProfile.title);
+        });
+      } else {
+        const data = generateDemoData();
+        setDemoData(data);
+        setCurrentJobId(data.jobProfile.job_id);
+        setCurrentJobTitle(data.jobProfile.title);
+      }
+    }
+  }, [demoData, isDemoMode, currentJobId, loadJobData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
 
   const profile = demoData?.jobProfile;
 
   if (!profile) {
     return (
       <div className="p-12 text-center text-muted-foreground">
-        No active job description loaded. Load a job on the Dashboard page to analyze.
+        Loading job intelligence...
       </div>
     );
   }

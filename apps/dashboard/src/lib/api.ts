@@ -83,7 +83,7 @@ export interface ExplanationData {
   strengths?: Array<{ title: string; description?: string; evidence?: string[] }>;
   top_concerns?: string[];
   weaknesses?: Array<{ title: string; description?: string }>;
-  counterfactual?: string;
+  counterfactual?: string | { required_improvements?: string[] } | any;
   evidence?: Record<string, string[]>;
   feature_contributions?: Record<string, number>;
   risk_summary?: string;
@@ -188,38 +188,76 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  analyzeJob: (description: string, title: string): Promise<JobProfile> =>
+  analyzeJob: (
+    description: string,
+    title: string,
+    jobId?: string
+  ): Promise<{
+    job_id: string;
+    job_profile: JobProfile;
+    ideal_persona: any;
+    job_genome: any;
+    analysis_duration_ms: number;
+  }> =>
     request('/jobs/analyze', {
       method: 'POST',
-      body: JSON.stringify({ description, title }),
+      body: JSON.stringify({
+        job_id: jobId || `job_${Date.now()}`,
+        title,
+        description,
+      }),
+    }),
+
+  getJob: (jobId: string): Promise<JobProfile> =>
+    request(`/jobs/${jobId}`),
+
+  runRanking: (
+    jobId: string
+  ): Promise<{
+    job_id: string;
+    total_candidates: number;
+    shortlisted: number;
+    duration_ms: number;
+    candidates: any[];
+    message: string;
+  }> =>
+    request(`/candidates/rank?job_id=${jobId}`, {
+      method: 'POST',
     }),
 
   getRankedCandidates: (
     jobId: string,
     page = 1,
     pageSize = 20
-  ): Promise<RankedList> =>
-    request(`/jobs/${jobId}/rankings?page=${page}&page_size=${pageSize}`),
+  ): Promise<{
+    job_id: string;
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    candidates: CandidateResult[];
+  }> =>
+    request(`/candidates/ranked?job_id=${jobId}&page=${page}&page_size=${pageSize}`),
 
   getCandidateDetail: (
     jobId: string,
     candidateId: string
   ): Promise<CandidateResult> =>
-    request(`/jobs/${jobId}/candidates/${candidateId}`),
+    request(`/candidates/${candidateId}?job_id=${jobId}`),
 
-  getAnalytics: (jobId: string): Promise<AnalyticsSummary> =>
-    request(`/jobs/${jobId}/analytics`),
+  getAnalytics: (jobId: string): Promise<any> =>
+    request(`/analytics/summary?job_id=${jobId}`),
 
   getHealth: (): Promise<{ status: string; version: string }> =>
     request('/health'),
 
   generateSubmission: (
     jobId: string
-  ): Promise<{ path: string; row_count: number }> =>
-    request(`/jobs/${jobId}/submission/generate`, { method: 'POST' }),
+  ): Promise<{ success: boolean; output_path: string; row_count: number; message: string }> =>
+    request(`/submission/generate?job_id=${jobId}`, { method: 'POST' }),
 
   validateSubmission: (
     jobId: string
-  ): Promise<{ valid: boolean; errors: string[] }> =>
-    request(`/jobs/${jobId}/submission/validate`),
+  ): Promise<{ valid: boolean; errors: string[]; file_path: string; message: string }> =>
+    request(`/submission/validate?job_id=${jobId}`),
 };

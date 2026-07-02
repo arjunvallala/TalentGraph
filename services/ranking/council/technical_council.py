@@ -141,7 +141,7 @@ class TechnicalCouncil(BaseCouncil):
             },
             strengths=strengths,
             concerns=concerns,
-            evidence=candidate.evidence.skill_evidence,
+            evidence=[item for sublist in candidate.evidence.skill_evidence.values() for item in sublist] if isinstance(candidate.evidence.skill_evidence, dict) else (candidate.evidence.skill_evidence or []),
             rationale=rat,
             evaluated_at=datetime.utcnow(),
         )

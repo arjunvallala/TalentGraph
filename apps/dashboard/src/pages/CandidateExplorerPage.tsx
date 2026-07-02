@@ -10,7 +10,16 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { generateDemoData } from '../lib/demo';
 
 export const CandidateExplorerPage: React.FC = () => {
-  const { demoData, setDemoData, setCurrentJobId, setCurrentJobTitle, setSelectedCandidateId } = useAppStore();
+  const {
+    demoData,
+    setDemoData,
+    currentJobId,
+    setCurrentJobId,
+    setCurrentJobTitle,
+    isDemoMode,
+    loadJobData,
+    setSelectedCandidateId
+  } = useAppStore();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,12 +29,22 @@ export const CandidateExplorerPage: React.FC = () => {
   // Auto-init demo data if not loaded
   useEffect(() => {
     if (!demoData) {
-      const data = generateDemoData();
-      setDemoData(data);
-      setCurrentJobId(data.jobProfile.job_id);
-      setCurrentJobTitle(data.jobProfile.title);
+      if (!isDemoMode && currentJobId) {
+        loadJobData(currentJobId).catch((err) => {
+          console.error("Failed to restore active job from backend:", err);
+          const data = generateDemoData();
+          setDemoData(data);
+          setCurrentJobId(data.jobProfile.job_id);
+          setCurrentJobTitle(data.jobProfile.title);
+        });
+      } else {
+        const data = generateDemoData();
+        setDemoData(data);
+        setCurrentJobId(data.jobProfile.job_id);
+        setCurrentJobTitle(data.jobProfile.title);
+      }
     }
-  }, [demoData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
+  }, [demoData, isDemoMode, currentJobId, loadJobData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
 
   const candidates = demoData?.rankedList.candidates || [];
 

@@ -162,7 +162,7 @@ export const CandidateDetailsPage: React.FC = () => {
               <GlassCard className="p-6 space-y-4">
                 <h3 className="text-base font-bold text-white">Decision Guidelines</h3>
                 <div className="text-xs text-muted-foreground space-y-3">
-                  <p><strong>Rationale:</strong> {candidate.explanation?.narrative || candidate.explanation?.counterfactual || '—'}</p>
+                  <p><strong>Rationale:</strong> {candidate.explanation?.narrative || (typeof candidate.explanation?.counterfactual === 'string' ? candidate.explanation.counterfactual : candidate.explanation?.counterfactual?.required_improvements?.join(', ') || '—')}</p>
                   <p><strong>Risk Summary:</strong> {candidate.risk_level || 'Low'}</p>
                   <p><strong>Confidence:</strong> {((candidate.confidence_score ?? 0.88) * 100).toFixed(0)}%</p>
                 </div>

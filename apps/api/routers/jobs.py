@@ -97,11 +97,19 @@ async def analyze_job(request: AnalyzeJobRequest) -> ORJSONResponse:
             job_type=JobType.FULL_TIME,
         )
 
-        embedding_gen = EmbeddingGenerator(settings.embedding_model_name)
-        embedding_gen.load_model()
+        engine = JobIntelligenceEngine()
+        job_profile, ideal_persona, job_genome = engine.analyze_job(job_raw)
 
-        engine = JobIntelligenceEngine(embedding_gen)
-        job_profile, ideal_persona, job_genome = engine.analyze(job_raw)
+        from services.preprocessing.feature_store import FeatureStore
+        store = FeatureStore(settings.duckdb_path)
+        store.save_job(
+            job_id=request.job_id,
+            title=request.title,
+            description=request.description,
+            profile=job_profile,
+            weights=ideal_persona.feature_weights,
+            genome=job_genome.model_dump(exclude={"embedding"}),
+        )
 
         duration_ms = (time.perf_counter() - start) * 1000
         logger.info(

@@ -33,24 +33,34 @@ const ACTIVITY = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { isDemoMode, currentJobId, setCurrentJobId, setCurrentJobTitle, demoData, setDemoData } = useAppStore();
+  const { isDemoMode, currentJobId, setCurrentJobId, setCurrentJobTitle, demoData, setDemoData, loadJobData } = useAppStore();
   const navigate = useNavigate();
   const [jdText, setJdText] = useState('');
   const [jdTitle, setJdTitle] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  // Initialize demo data
+  // Hydrate or initialize demo data
   useEffect(() => {
-    if (isDemoMode && !demoData) {
-      const data = generateDemoData();
-      setDemoData(data);
-      setCurrentJobId(data.jobProfile.job_id);
-      setCurrentJobTitle(data.jobProfile.title);
+    if (!demoData) {
+      if (!isDemoMode && currentJobId) {
+        loadJobData(currentJobId).catch((err) => {
+          console.error("Failed to restore active job from backend:", err);
+          const data = generateDemoData();
+          setDemoData(data);
+          setCurrentJobId(data.jobProfile.job_id);
+          setCurrentJobTitle(data.jobProfile.title);
+        });
+      } else {
+        const data = generateDemoData();
+        setDemoData(data);
+        setCurrentJobId(data.jobProfile.job_id);
+        setCurrentJobTitle(data.jobProfile.title);
+      }
     }
-  }, [isDemoMode, demoData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
+  }, [demoData, isDemoMode, currentJobId, loadJobData, setDemoData, setCurrentJobId, setCurrentJobTitle]);
 
-  const data = isDemoMode ? demoData : null;
+  const data = demoData;
   const candidates = data?.rankedList.candidates || [];
   const analytics = data?.analytics;
   const top5 = candidates.slice(0, 5);
@@ -59,12 +69,18 @@ export const DashboardPage: React.FC = () => {
     if (!jdText.trim() || !jdTitle.trim()) return;
     setUploading(true);
     try {
-      const job = await api.analyzeJob(jdText, jdTitle);
-      setCurrentJobId(job.job_id);
-      setCurrentJobTitle(job.title);
+      const jobId = `job_${Date.now()}`;
+      // 1. Analyze JD on backend and save it to DuckDB
+      await api.analyzeJob(jdText, jdTitle, jobId);
+      // 2. Run ranking pipeline on backend
+      await api.runRanking(jobId);
+      // 3. Load all ranking results and analytics into the Zustand store
+      await loadJobData(jobId);
+
       setUploadSuccess(true);
       setTimeout(() => navigate('/rankings'), 1500);
-    } catch {
+    } catch (err) {
+      console.error("Hiring pipeline run failed, falling back to demo mode:", err);
       // Fallback to demo
       const data = generateDemoData();
       setDemoData(data);

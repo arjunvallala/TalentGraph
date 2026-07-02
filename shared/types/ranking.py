@@ -15,6 +15,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from shared.types.candidate import CandidateProfile, CandidateFeatures
+
 # ── Enums ─────────────────────────────────────────────────────────────────────
 
 
@@ -230,6 +232,8 @@ class CandidateResult(BaseModel):
     hiring_recommendation: HiringRecommendation = HiringRecommendation.PASS
     risk_assessment: RiskAssessment | None = None
     explanation: CandidateExplanation | None = None
+    profile: CandidateProfile | None = None
+    features: CandidateFeatures | None = None
 
     # Stage-by-stage scores
     stage1_score: float = Field(default=0.0, ge=0.0, le=1.0)

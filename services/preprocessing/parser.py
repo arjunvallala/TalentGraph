@@ -22,6 +22,7 @@ from shared.types.candidate import (
     EducationLevel,
     RedrobSignals,
 )
+from services.preprocessing.career_parser import CareerParser
 from shared.utils.text_utils import extract_years_of_experience
 
 logger = get_logger(__name__)
@@ -168,7 +169,7 @@ class CandidateParser:
             years_of_experience=years_exp,
             skills=skills,
             education=education,
-            work_experience=[],  # Filled by CareerParser later
+            work_experience=CareerParser().parse_work_history(row.get("work_history", row.get("work_experience", ""))),
             certifications=certifications,
             languages=languages,
             summary=self._safe_str(row.get("summary")),
