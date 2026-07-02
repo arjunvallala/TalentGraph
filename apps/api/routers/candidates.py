@@ -223,9 +223,9 @@ async def run_ranking(
         from services.ranking.ranking_pipeline import RankingPipeline
 
         store = FeatureStore(settings.duckdb_path)
-        job_profile = store.get_job_profile(job_id)
+        job_data = store.get_job(job_id)
 
-        if not job_profile:
+        if not job_data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Job '{job_id}' not found. Analyze it first via POST /api/v1/jobs/analyze",
@@ -233,13 +233,13 @@ async def run_ranking(
 
         pipeline = RankingPipeline(config=settings, feature_store=store)
 
-        # Build a minimal JobRaw from stored profile
+        # Build a JobRaw from stored profile using original description and title
         from shared.types.job import JobRaw
 
         job_raw = JobRaw(
             job_id=job_id,
-            title=job_profile.title,
-            description=" ".join(job_profile.key_responsibilities),
+            title=job_data["title"],
+            description=job_data["description"],
         )
 
         ranked_list = pipeline.rank(job_raw)

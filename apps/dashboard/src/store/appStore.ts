@@ -81,11 +81,18 @@ export const useAppStore = create<AppState>()(
             }
           };
 
+          const mappedCandidates: CandidateResult[] = (rankedRes.candidates || []).map((c: any) => ({
+            ...c,
+            recommendation: c.hiring_recommendation || c.recommendation,
+            confidence_score: c.confidence_level === 'High' ? 0.95 : c.confidence_level === 'Medium' ? 0.75 : c.confidence_level === 'Low' ? 0.45 : (c.confidence_score ?? 0.88),
+            risk_level: c.risk_level || c.risk_assessment?.risk_level || 'Low',
+          }));
+
           const loadedData: DemoData = {
             jobProfile,
             rankedList: {
               job_id: jobId,
-              candidates: rankedRes.candidates,
+              candidates: mappedCandidates,
               total_processed: rankedRes.total,
               processing_time_seconds: 5.3
             },
